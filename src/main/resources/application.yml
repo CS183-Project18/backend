@@ -19,10 +19,10 @@ spring:
     password: ${fuzhou.mail.password}
     default-encoding: ${fuzhou.mail.default-encoding}
     port: 465
-    auth: true
     properties:
       mail:
         smtp:
+          auth: true
           ssl:
             enable: true
       imap:
