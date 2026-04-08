@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: unique-finds-backend
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    driver-class-name: ${fuzhou.datasource.driver-class-name}
+    url: jdbc:mysql://${fuzhou.datasource.host}:${fuzhou.datasource.port}/${fuzhou.datasource.database}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: ${fuzhou.datasource.username}
+    password: ${fuzhou.datasource.password}
+  mail:
+    host: ${fuzhou.mail.host}
+    username: ${fuzhou.mail.username}
+    password: ${fuzhou.mail.password}
+    default-encoding: ${fuzhou.mail.default-encoding}
+    port: 465
+    auth: true
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+      imap:
+        ssl:
+          socketFactory:
+            fallback: false
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.storefinds.uniquefindsbackend.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+fuzhou:
+  jwt:
+    user-secret-key: ${fuzhou.jwt.user-secret-key}
+    user-ttl: 7200
+    user-token-name: token
+    refresh-secret-key: ${fuzhou.jwt.refresh-secret-key}
+    refresh-ttl: 86400000
+
+app:
+  jwt:
+    secret: ${fuzhou.jwt.user-secret-key}
+    expire-seconds: ${fuzhou.jwt.user-ttl}
+  auth:
+    debug-code-response: true
+  mail:
+    mock: false

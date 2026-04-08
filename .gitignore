@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Environment / Secrets ###
+src/main/resources/application-dev.yml
+.env
+.env.*
+
+### Local Database Dumps ###
+*.sql
+!sql/unique_finds_full_schema.sql
+!sql/**/*.sql
+sql/*dump*.sql

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.VerificationCodeMapper">
+
+    <resultMap id="VerificationCodeResultMap" type="com.storefinds.uniquefindsbackend.entity.VerificationCode">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="target" column="target"/>
+        <result property="channel" column="channel"/>
+        <result property="purpose" column="purpose"/>
+        <result property="code" column="code"/>
+        <result property="expiresAt" column="expires_at"/>
+        <result property="usedAt" column="used_at"/>
+        <result property="attemptCount" column="attempt_count"/>
+        <result property="maxAttempts" column="max_attempts"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO verification_codes (
+            user_id, target, channel, purpose, code, expires_at, used_at,
+            attempt_count, max_attempts, status
+        ) VALUES (
+            #{userId}, #{target}, #{channel}, #{purpose}, #{code}, #{expiresAt}, #{usedAt},
+            #{attemptCount}, #{maxAttempts}, #{status}
+        )
+    </insert>
+
+    <select id="selectLatestLoginCodeByEmail" resultMap="VerificationCodeResultMap">
+        SELECT id, user_id, target, channel, purpose, code, expires_at,
+               used_at, attempt_count, max_attempts, status, created_at
+        FROM verification_codes
+        WHERE target = #{email}
+          AND purpose = 'LOGIN'
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectLatestPendingLoginCodeByEmail" resultMap="VerificationCodeResultMap">
+        SELECT id, user_id, target, channel, purpose, code, expires_at,
+               used_at, attempt_count, max_attempts, status, created_at
+        FROM verification_codes
+        WHERE target = #{email}
+          AND purpose = 'LOGIN'
+          AND status = 'PENDING'
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <update id="markAsUsed">
+        UPDATE verification_codes
+        SET status = 'USED', used_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="markAsExpired">
+        UPDATE verification_codes
+        SET status = 'EXPIRED'
+        WHERE id = #{id}
+    </update>
+
+    <update id="increaseAttemptAndLockIfNeeded">
+        UPDATE verification_codes
+        SET attempt_count = attempt_count + 1,
+            status = CASE
+                WHEN attempt_count + 1 >= max_attempts THEN 'LOCKED'
+                ELSE status
+            END
+        WHERE id = #{id}
+          AND status = 'PENDING'
+    </update>
+
+</mapper>
