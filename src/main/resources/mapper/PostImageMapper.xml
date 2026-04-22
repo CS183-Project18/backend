@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.PostImageMapper">
+
+    <resultMap id="PostImageResultMap" type="com.storefinds.uniquefindsbackend.entity.PostImage">
+        <id property="id" column="id"/>
+        <result property="postId" column="post_id"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="imageKey" column="image_key"/>
+        <result property="thumbnailUrl" column="thumbnail_url"/>
+        <result property="width" column="width"/>
+        <result property="height" column="height"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="mimeType" column="mime_type"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="isCover" column="is_cover"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="batchInsert">
+        INSERT INTO post_images (
+            post_id, image_url, image_key, thumbnail_url, width, height,
+            file_size, mime_type, sort_order, is_cover
+        ) VALUES
+        <foreach collection="images" item="image" separator=",">
+            (
+                #{image.postId}, #{image.imageUrl}, #{image.imageKey}, #{image.thumbnailUrl},
+                #{image.width}, #{image.height}, #{image.fileSize}, #{image.mimeType},
+                #{image.sortOrder}, #{image.isCover}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectByPostId" resultMap="PostImageResultMap">
+        SELECT id, post_id, image_url, image_key, thumbnail_url, width, height,
+               file_size, mime_type, sort_order, is_cover, created_at
+        FROM post_images
+        WHERE post_id = #{postId}
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+    <select id="selectByPostIds" resultMap="PostImageResultMap">
+        SELECT id, post_id, image_url, image_key, thumbnail_url, width, height,
+               file_size, mime_type, sort_order, is_cover, created_at
+        FROM post_images
+        WHERE post_id IN
+        <foreach collection="postIds" item="postId" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+        ORDER BY post_id ASC, sort_order ASC, id ASC
+    </select>
+
+    <delete id="deleteByPostId">
+        DELETE FROM post_images
+        WHERE post_id = #{postId}
+    </delete>
+
+</mapper>

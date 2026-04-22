@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.PostMapper">
+
+    <resultMap id="PostResultMap" type="com.storefinds.uniquefindsbackend.entity.Post">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="storeId" column="store_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="priceMin" column="price_min"/>
+        <result property="priceMax" column="price_max"/>
+        <result property="currency" column="currency"/>
+        <result property="locationText" column="location_text"/>
+        <result property="status" column="status"/>
+        <result property="moderationReason" column="moderation_reason"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="publishedAt" column="published_at"/>
+        <result property="deletedAt" column="deleted_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="authorUsername" column="author_username"/>
+    </resultMap>
+
+    <sql id="PostSelectColumns">
+        p.id, p.user_id, p.store_id, p.category_id, p.title, p.description,
+        p.price_min, p.price_max, p.currency, p.location_text, p.status,
+        p.moderation_reason, p.view_count, p.like_count, p.favorite_count,
+        p.comment_count, p.published_at, p.deleted_at, p.created_at, p.updated_at,
+        u.username AS author_username
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO posts (
+            user_id, store_id, category_id, title, description,
+            price_min, price_max, currency, location_text, status
+        ) VALUES (
+            #{userId}, #{storeId}, #{categoryId}, #{title}, #{description},
+            #{priceMin}, #{priceMax}, #{currency}, #{locationText}, #{status}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="selectPublishedPosts" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'PUBLISHED'
+        ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
+    </select>
+
+    <select id="selectByUserId" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.user_id = #{userId}
+          AND p.status != 'DELETED'
+        ORDER BY p.created_at DESC, p.id DESC
+    </select>
+
+    <update id="increaseViewCount">
+        UPDATE posts
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+          AND status = 'PUBLISHED'
+    </update>
+
+    <update id="updateById">
+        UPDATE posts
+        SET store_id = #{storeId},
+            category_id = #{categoryId},
+            title = #{title},
+            description = #{description},
+            price_min = #{priceMin},
+            price_max = #{priceMax},
+            currency = #{currency},
+            location_text = #{locationText}
+        WHERE id = #{id}
+          AND status != 'DELETED'
+    </update>
+
+    <update id="softDeleteById">
+        UPDATE posts
+        SET status = 'DELETED',
+            deleted_at = NOW()
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND status != 'DELETED'
+    </update>
+
+</mapper>
