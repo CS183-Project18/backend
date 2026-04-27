@@ -83,13 +83,15 @@ public class PostController {
      * Author: Kaijie Zhu
      * Date: 2026-04-20
      * Purpose: Query published posts for feed display.
-     * Params: None
+     * Params:
+     * - authentication: spring authentication object
      * Returns:
      * - Result<List<PostResponse>>: published post list
-     * Throws: None
+     * Throws:
+     * - BusinessException: when current request is unauthenticated
      */
-    public Result<List<PostResponse>> getPublishedPosts() {
-        return postService.getPublishedPosts();
+    public Result<List<PostResponse>> getPublishedPosts(Authentication authentication) {
+        return postService.getPublishedPosts(requireCurrentUser(authentication).userId());
     }
 
     @GetMapping("/mine")

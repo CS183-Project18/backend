@@ -9,7 +9,9 @@ import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.entity.PostImage;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
+import com.storefinds.uniquefindsbackend.mapper.PostFavoriteMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostImageMapper;
+import com.storefinds.uniquefindsbackend.mapper.PostLikeMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.service.PostService;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,18 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PostServiceImpl implements PostService {
 
     private final PostMapper postMapper;
     private final PostImageMapper postImageMapper;
+    private final PostLikeMapper postLikeMapper;
+    private final PostFavoriteMapper postFavoriteMapper;
 
     /**
      * Author: Kaijie Zhu
@@ -35,12 +41,19 @@ public class PostServiceImpl implements PostService {
      * Params:
      * - postMapper: post data access mapper
      * - postImageMapper: post image data access mapper
+     * - postLikeMapper: post like data access mapper
+     * - postFavoriteMapper: post favorite data access mapper
      * Returns: None
      * Throws: None
      */
-    public PostServiceImpl(PostMapper postMapper, PostImageMapper postImageMapper) {
+    public PostServiceImpl(PostMapper postMapper,
+                           PostImageMapper postImageMapper,
+                           PostLikeMapper postLikeMapper,
+                           PostFavoriteMapper postFavoriteMapper) {
         this.postMapper = postMapper;
         this.postImageMapper = postImageMapper;
+        this.postLikeMapper = postLikeMapper;
+        this.postFavoriteMapper = postFavoriteMapper;
     }
 
     @Override
@@ -75,7 +88,7 @@ public class PostServiceImpl implements PostService {
         replacePostImages(post.getId(), request.getImages());
 
         Post createdPost = postMapper.selectById(post.getId());
-        return Result.success("post created", toPostResponse(createdPost));
+        return Result.success("post created", buildPostResponseForUser(userId, createdPost));
     }
 
     @Override
@@ -97,7 +110,7 @@ public class PostServiceImpl implements PostService {
             postMapper.increaseViewCount(postId);
             post = postMapper.selectById(postId);
         }
-        return Result.success(toPostResponse(post));
+        return Result.success(buildPostResponseForUser(userId, post));
     }
 
     @Override
@@ -105,14 +118,15 @@ public class PostServiceImpl implements PostService {
      * Author: Kaijie Zhu
      * Date: 2026-04-20
      * Purpose: Query all published posts ordered by publish time.
-     * Params: None
+     * Params:
+     * - userId: current authenticated user id
      * Returns:
      * - Result<List<PostResponse>>: published post list
      * Throws: None
      */
-    public Result<List<PostResponse>> getPublishedPosts() {
+    public Result<List<PostResponse>> getPublishedPosts(Long userId) {
         List<Post> posts = postMapper.selectPublishedPosts();
-        return Result.success(toPostResponses(posts));
+        return Result.success(buildPostResponsesForUser(userId, posts));
     }
 
     @Override
@@ -127,7 +141,7 @@ public class PostServiceImpl implements PostService {
      * Throws: None
      */
     public Result<List<PostResponse>> getMyPosts(Long userId) {
-        return Result.success(toPostResponses(postMapper.selectByUserId(userId)));
+        return Result.success(buildPostResponsesForUser(userId, postMapper.selectByUserId(userId)));
     }
 
     @Override
@@ -161,7 +175,7 @@ public class PostServiceImpl implements PostService {
         replacePostImages(postId, request.getImages());
 
         Post updatedPost = postMapper.selectById(postId);
-        return Result.success("post updated", toPostResponse(updatedPost));
+        return Result.success("post updated", buildPostResponseForUser(userId, updatedPost));
     }
 
     @Override
@@ -370,15 +384,26 @@ public class PostServiceImpl implements PostService {
      * - List<PostResponse>: response list with images attached
      * Throws: None
      */
-    private List<PostResponse> toPostResponses(List<Post> posts) {
+    public List<PostResponse> buildPostResponsesForUser(Long userId, List<Post> posts) {
         if (posts == null || posts.isEmpty()) {
             return List.of();
         }
 
         List<Long> postIds = posts.stream().map(Post::getId).toList();
         Map<Long, List<PostImageResponse>> imageMap = groupImageResponsesByPostId(postIds);
+        Set<Long> likedPostIds = userId == null
+                ? Set.of()
+                : new LinkedHashSet<>(postLikeMapper.selectLikedPostIds(userId, postIds));
+        Set<Long> favoritedPostIds = userId == null
+                ? Set.of()
+                : new LinkedHashSet<>(postFavoriteMapper.selectFavoritedPostIds(userId, postIds));
         return posts.stream()
-                .map(post -> toPostResponse(post, imageMap.getOrDefault(post.getId(), List.of())))
+                .map(post -> toPostResponse(
+                        post,
+                        imageMap.getOrDefault(post.getId(), List.of()),
+                        likedPostIds.contains(post.getId()),
+                        favoritedPostIds.contains(post.getId())
+                ))
                 .toList();
     }
 
@@ -411,11 +436,14 @@ public class PostServiceImpl implements PostService {
      * - PostResponse: response payload object
      * Throws: None
      */
-    private PostResponse toPostResponse(Post post) {
+    private PostResponse buildPostResponseForUser(Long userId, Post post) {
+        boolean likedByCurrentUser = userId != null && postLikeMapper.countByUserIdAndPostId(userId, post.getId()) > 0;
+        boolean favoritedByCurrentUser = userId != null
+                && postFavoriteMapper.countByUserIdAndPostId(userId, post.getId()) > 0;
         return toPostResponse(post, postImageMapper.selectByPostId(post.getId())
                 .stream()
                 .map(this::toPostImageResponse)
-                .toList());
+                .toList(), likedByCurrentUser, favoritedByCurrentUser);
     }
 
     /**
@@ -425,11 +453,16 @@ public class PostServiceImpl implements PostService {
      * Params:
      * - post: source post entity
      * - images: prepared image response list
+     * - likedByCurrentUser: whether current user has liked the post
+     * - favoritedByCurrentUser: whether current user has favorited the post
      * Returns:
      * - PostResponse: response payload object
      * Throws: None
      */
-    private PostResponse toPostResponse(Post post, List<PostImageResponse> images) {
+    private PostResponse toPostResponse(Post post,
+                                        List<PostImageResponse> images,
+                                        boolean likedByCurrentUser,
+                                        boolean favoritedByCurrentUser) {
         PostResponse response = new PostResponse();
         response.setId(post.getId());
         response.setUserId(post.getUserId());
@@ -448,6 +481,8 @@ public class PostServiceImpl implements PostService {
         response.setLikeCount(post.getLikeCount());
         response.setFavoriteCount(post.getFavoriteCount());
         response.setCommentCount(post.getCommentCount());
+        response.setLikedByCurrentUser(likedByCurrentUser);
+        response.setFavoritedByCurrentUser(favoritedByCurrentUser);
         response.setPublishedAt(post.getPublishedAt());
         response.setCreatedAt(post.getCreatedAt());
         response.setUpdatedAt(post.getUpdatedAt());
