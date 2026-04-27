@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Curator | Social Discovery Platform</title>
+    <meta
+      name="description"
+      content="A social discovery platform prototype for posting, searching, saving, commenting on, and reposting unique store finds."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <section class="screen auth-screen" id="auth-screen">
+      <div class="auth-visual">
+        <div class="auth-visual-overlay"></div>
+        <div class="auth-copy">
+          <span class="capsule">✦ The Curator</span>
+          <h1>Design your digital legacy.</h1>
+          <p>
+            Join an elite circle of visionaries. The Curator is where aesthetic
+            discovery meets sophisticated networking. Experience a platform that
+            values depth over noise.
+          </p>
+
+          <div class="author-card">
+            <div class="avatar avatar-teal">ER</div>
+            <div>
+              <strong>Elena Rossi</strong>
+              <span>Lead Designer at Atelier</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-panel">
+        <div class="auth-panel-inner">
+          <h2>Create your account</h2>
+          <p>Enter your details to start your journey.</p>
+
+          <form id="auth-form" class="auth-form">
+            <label>
+              <span>Full name</span>
+              <input id="signup-name" type="text" placeholder="Julian Vane" required />
+            </label>
+            <label>
+              <span>Email address</span>
+              <input
+                id="signup-email"
+                type="email"
+                placeholder="curator@agency.com"
+                required
+              />
+            </label>
+            <label>
+              <span>Username</span>
+              <input id="signup-username" type="text" placeholder="the_architect" required />
+            </label>
+            <label>
+              <span>Password</span>
+              <div class="password-row">
+                <input
+                  id="signup-password"
+                  type="password"
+                  placeholder="••••••••"
+                  minlength="6"
+                  required
+                />
+                <button id="toggle-password" type="button" class="ghost-icon">
+                  Show
+                </button>
+              </div>
+            </label>
+
+            <label class="checkbox-row">
+              <input id="signup-agree" type="checkbox" required />
+              <span>I agree to the Terms of Service and Privacy Policy.</span>
+            </label>
+
+            <button class="primary-button auth-submit" type="submit">
+              Create Account
+            </button>
+          </form>
+
+          <div class="divider"><span>Or continue with</span></div>
+
+          <div class="oauth-row">
+            <button class="oauth-button" type="button">Google</button>
+            <button class="oauth-button" type="button">Apple</button>
+          </div>
+
+          <div class="auth-footer">
+            Already a curator?
+            <button id="demo-login" type="button" class="text-button">Log In</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen app-screen hidden" id="app-screen">
+      <aside class="sidebar">
+        <div class="brand">The Curator</div>
+
+        <div class="profile-mini">
+          <div class="avatar" id="sidebar-avatar">AR</div>
+          <div>
+            <strong id="sidebar-name">Alex Rivera</strong>
+            <span id="sidebar-role">Curator Gold</span>
+          </div>
+        </div>
+
+        <nav class="main-nav">
+          <button class="nav-link is-active" data-view="feed" type="button">Feed</button>
+          <button class="nav-link" data-view="explore" type="button">Explore</button>
+          <button class="nav-link" data-view="bookmarks" type="button">Bookmarks</button>
+          <button class="nav-link" data-view="analytics" type="button">Analytics</button>
+          <button class="nav-link" data-view="settings" type="button">Settings</button>
+        </nav>
+
+        <button class="primary-button create-button" id="open-create-post" type="button">
+          Create Post
+        </button>
+      </aside>
+
+      <main class="dashboard">
+        <header class="dashboard-topbar">
+          <div>
+            <h1 id="greeting-title">Good morning, Alex.</h1>
+            <p id="greeting-subtitle">
+              Discover what’s trending in your curation circles.
+            </p>
+          </div>
+
+          <div class="search-cluster">
+            <label class="search-shell">
+              <span>✦</span>
+              <input
+                id="global-search"
+                type="search"
+                placeholder="semantic & multi-modal search..."
+              />
+              <small>AI powered</small>
+            </label>
+          </div>
+        </header>
+
+        <section class="view is-visible" id="view-feed">
+          <div class="cards-grid" id="feed-grid"></div>
+          <section class="community-section panel">
+            <div class="panel-title-row">
+              <div>
+                <span class="micro-label">Curated stream</span>
+                <h2>Latest community finds</h2>
+              </div>
+              <div class="filter-row">
+                <button class="filter-chip is-active" data-feed="all" type="button">All</button>
+                <button class="filter-chip" data-feed="uploaded" type="button">Uploaded</button>
+                <button class="filter-chip" data-feed="reposted" type="button">Reposted</button>
+              </div>
+            </div>
+            <div class="community-list" id="community-list"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-explore">
+          <section class="panel">
+            <div class="panel-title-row">
+              <div>
+                <span class="micro-label">Explore</span>
+                <h2>Search and discover more collections</h2>
+              </div>
+            </div>
+            <div class="explore-grid" id="explore-grid"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-bookmarks">
+          <section class="panel">
+            <div class="panel-title-row">
+              <div>
+                <span class="micro-label">Bookmarks</span>
+                <h2>Your saved finds</h2>
+              </div>
+            </div>
+            <div class="bookmark-grid" id="bookmark-grid"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-analytics">
+          <section class="panel analytics-panel">
+            <div class="panel-title-row">
+              <div>
+                <span class="micro-label">Analytics</span>
+                <h2>Audience and content performance</h2>
+              </div>
+            </div>
+            <div class="analytics-grid" id="analytics-grid"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-settings">
+          <section class="panel settings-panel">
+            <div class="panel-title-row">
+              <div>
+                <span class="micro-label">Settings</span>
+                <h2>Profile and account preferences</h2>
+              </div>
+            </div>
+            <form class="settings-form" id="settings-form">
+              <label>
+                <span>Display name</span>
+                <input id="settings-name" type="text" />
+              </label>
+              <label>
+                <span>Username</span>
+                <input id="settings-username" type="text" />
+              </label>
+              <label>
+                <span>Email</span>
+                <input id="settings-email" type="email" />
+              </label>
+              <label>
+                <span>Bio</span>
+                <textarea id="settings-bio" rows="4"></textarea>
+              </label>
+              <div class="settings-actions">
+                <button class="primary-button" type="submit">Save Changes</button>
+                <button class="secondary-button" id="logout-button" type="button">
+                  Log Out
+                </button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </main>
+
+      <aside class="right-rail">
+        <section class="trending-card panel">
+          <div class="panel-title-row compact">
+            <h3>Trending</h3>
+            <span>✦</span>
+          </div>
+          <div class="trend-tabs">
+            <button class="trend-tab is-active" data-trend="daily" type="button">Daily</button>
+            <button class="trend-tab" data-trend="weekly" type="button">Weekly</button>
+            <button class="trend-tab" data-trend="monthly" type="button">Monthly</button>
+          </div>
+          <div id="trending-list" class="trending-list"></div>
+          <button class="outline-button" id="open-analytics" type="button">
+            View All Analytics
+          </button>
+        </section>
+
+        <section class="upgrade-card">
+          <span class="micro-label light">Curator Pro</span>
+          <h3>Unlock advanced audience insights.</h3>
+          <p>
+            Get detailed breakdowns of who is interacting with your curated
+            collections.
+          </p>
+          <button class="upgrade-button" type="button">Upgrade Now</button>
+        </section>
+      </aside>
+    </section>
+
+    <section class="screen detail-screen hidden" id="detail-screen">
+      <header class="detail-topbar">
+        <div class="detail-brand-row">
+          <div class="brand small">The Curator</div>
+          <label class="detail-search">
+            <span>⌕</span>
+            <input id="detail-search-input" type="search" placeholder="Search inspiration..." />
+          </label>
+        </div>
+        <div class="detail-actions">
+          <button class="icon-button" type="button">•</button>
+          <button class="icon-button" type="button">+</button>
+          <div class="avatar small" id="detail-user-avatar">AR</div>
+        </div>
+      </header>
+
+      <div class="detail-body">
+        <div class="back-row">
+          <button id="back-to-feed" class="back-button" type="button">← Back to Feed</button>
+        </div>
+
+        <div class="detail-layout">
+          <section class="gallery-panel">
+            <div class="detail-hero" id="detail-hero"></div>
+            <div class="thumbnail-row" id="thumbnail-row"></div>
+          </section>
+
+          <aside class="detail-info-card" id="detail-info-card"></aside>
+        </div>
+
+        <section class="comments-panel">
+          <div class="comments-title">
+            <h2>Thoughts & Feedback</h2>
+            <span id="comment-count">0</span>
+          </div>
+
+          <form id="comment-form" class="comment-input-row">
+            <div class="avatar small" id="comment-user-avatar">AR</div>
+            <input
+              id="comment-input"
+              type="text"
+              placeholder="Add to the conversation..."
+            />
+            <button class="send-button" type="submit">➜</button>
+          </form>
+
+          <div id="comment-list" class="comment-list"></div>
+
+          <button class="outline-button wide" id="load-more-comments" type="button">
+            Load more comments
+          </button>
+        </section>
+      </div>
+    </section>
+
+    <div class="modal hidden" id="create-modal">
+      <div class="modal-backdrop" id="close-modal-backdrop"></div>
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <span class="micro-label">Create post</span>
+            <h2>Upload a new curated find</h2>
+          </div>
+          <button class="ghost-icon" id="close-create-modal" type="button">Close</button>
+        </div>
+
+        <form id="create-post-form" class="create-form">
+          <div class="form-grid">
+            <label>
+              <span>Title</span>
+              <input id="post-title" type="text" placeholder="The Ethereal Pavilion: A Study in Light & Glass" required />
+            </label>
+            <label>
+              <span>Category</span>
+              <input id="post-category" type="text" placeholder="Interior Design" required />
+            </label>
+            <label>
+              <span>Price</span>
+              <input id="post-price" type="text" placeholder="$1,450 / hr" />
+            </label>
+            <label>
+              <span>Location</span>
+              <input id="post-location" type="text" placeholder="Zurich, CH" required />
+            </label>
+          </div>
+
+          <label>
+            <span>Description</span>
+            <textarea
+              id="post-description"
+              rows="4"
+              placeholder="Describe why this find is special, how it feels, and why other users should discover it."
+              required
+            ></textarea>
+          </label>
+
+          <label>
+            <span>Associated tags</span>
+            <input id="post-tags" type="text" placeholder="#minimalism, #glasshouse, #nature" />
+          </label>
+
+          <label class="upload-zone">
+            <span>Upload images</span>
+            <input id="post-images" type="file" accept="image/*" multiple />
+            <small>Choose up to 4 images. Uploaded images will appear in feed and detail view.</small>
+          </label>
+
+          <div class="upload-preview" id="upload-preview"></div>
+
+          <div class="form-actions">
+            <button class="secondary-button" id="cancel-create-post" type="button">
+              Cancel
+            </button>
+            <button class="primary-button" type="submit">Publish Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast hidden" id="toast"></div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
