@@ -1,3 +1,7 @@
+/* ================================
+   Global Root Variables
+   CSS variables：colors、radius、shadow、shell width management
+================================ */
 :root {
   --bg: #f7f3ff;
   --bg-strong: #efe9ff;
@@ -19,12 +23,16 @@
   --shell: min(1600px, calc(100vw - 30px));
 }
 
+/* ================================
+   Global Reset & Base Style
+================================ */
 * {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  /* Smooth page scroll */
 }
 
 body {
@@ -32,12 +40,14 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Avenir Next", sans-serif;
+  /* Multi-layer radial + linear gradient background */
   background:
     radial-gradient(circle at 8% 10%, rgba(164, 135, 255, 0.28), transparent 18%),
     radial-gradient(circle at 92% 14%, rgba(112, 96, 255, 0.18), transparent 16%),
     linear-gradient(180deg, #fcfbff 0%, var(--bg) 38%, #f6f2ff 100%);
 }
 
+/* Inherit font for form elements */
 button,
 input,
 textarea {
@@ -48,6 +58,7 @@ button {
   border: 0;
 }
 
+/* Ambient floating background blur element */
 .ambient {
   position: fixed;
   width: 26rem;
@@ -55,6 +66,7 @@ button {
   border-radius: 999px;
   filter: blur(90px);
   pointer-events: none;
+  /* Ignore mouse event */
   opacity: 0.3;
   z-index: 0;
 }
@@ -71,6 +83,7 @@ button {
   background: rgba(180, 124, 255, 0.24);
 }
 
+/* Basic screen layout control */
 .screen {
   position: relative;
   z-index: 1;
@@ -78,8 +91,10 @@ button {
 
 .hidden {
   display: none !important;
+  /* Hidden element */
 }
 
+/* Brand logo text style */
 .brand {
   font-weight: 800;
   color: var(--accent-deep);
@@ -90,6 +105,7 @@ button {
   font-size: 1.2rem;
 }
 
+/* Capsule & micro label tag */
 .capsule,
 .micro-label {
   display: inline-flex;
@@ -120,6 +136,9 @@ button {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* ================================
+   Universal Button Base Style
+================================ */
 .primary-button,
 .secondary-button,
 .outline-button,
@@ -140,6 +159,7 @@ button {
     color 180ms ease;
 }
 
+/* Button hover lift effect */
 .primary-button:hover,
 .secondary-button:hover,
 .outline-button:hover,
@@ -152,6 +172,7 @@ button {
   transform: translateY(-1px);
 }
 
+/* Primary gradient button */
 .primary-button,
 .upgrade-button,
 .send-button {
@@ -160,6 +181,7 @@ button {
   box-shadow: 0 14px 34px rgba(99, 91, 255, 0.25);
 }
 
+/* Secondary / outline button */
 .secondary-button,
 .outline-button,
 .oauth-button,
@@ -175,6 +197,7 @@ button {
   width: 100%;
 }
 
+/* Ghost & text transparent button */
 .ghost-icon,
 .text-button {
   color: var(--accent);
@@ -183,6 +206,7 @@ button {
   font-weight: 600;
 }
 
+/* Avatar user head portrait */
 .avatar {
   display: grid;
   place-items: center;
@@ -205,6 +229,7 @@ button {
   background: linear-gradient(135deg, #30cdb8, #2866d5);
 }
 
+/* Panel / card container */
 .panel,
 .detail-info-card,
 .auth-panel,
@@ -214,6 +239,12 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* ==============================================
+            【Chenqian Fu' s part starts】
+   register/login page、sidebar menu、navigation、Feed/Explore/Bookmarks/Analytics/Settings 主页面
+============================================== */
+
+/* Auth screen layout */
 .auth-screen {
   width: var(--shell);
   min-height: calc(100vh - 28px);
@@ -227,6 +258,7 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* Auth left visual banner */
 .auth-visual {
   position: relative;
   min-height: 100%;
@@ -256,6 +288,7 @@ button {
   background: linear-gradient(180deg, rgba(29, 21, 75, 0.08), rgba(29, 21, 75, 0.34));
 }
 
+/* Auth text content */
 .auth-copy {
   position: relative;
   z-index: 1;
@@ -278,6 +311,7 @@ button {
   color: rgba(255, 255, 255, 0.74);
 }
 
+/* Author info card */
 .author-card {
   display: flex;
   align-items: center;
@@ -303,6 +337,7 @@ button {
   font-size: 0.92rem;
 }
 
+/* Auth right form panel */
 .auth-panel {
   border-radius: 0;
   display: grid;
@@ -322,11 +357,12 @@ button {
   color: var(--text-dark);
 }
 
-.auth-panel-inner > p {
+.auth-panel-inner>p {
   margin: 12px 0 30px;
   color: var(--muted);
 }
 
+/* Form layout */
 .auth-form,
 .settings-form,
 .create-form {
@@ -351,6 +387,7 @@ button {
   color: var(--muted);
 }
 
+/* Form input & textarea */
 .auth-form input,
 .settings-form input,
 .settings-form textarea,
@@ -372,6 +409,7 @@ button {
   resize: vertical;
 }
 
+/* Input focus highlight */
 .auth-form input:focus,
 .settings-form input:focus,
 .settings-form textarea:focus,
@@ -406,6 +444,7 @@ button {
   margin-top: 6px;
 }
 
+/* Divider line */
 .divider {
   position: relative;
   margin: 24px 0;
@@ -441,6 +480,7 @@ button {
   color: var(--muted);
 }
 
+/* Main app layout */
 .app-screen {
   width: var(--shell);
   min-height: calc(100vh - 28px);
@@ -461,6 +501,7 @@ button {
   min-width: 0;
 }
 
+/* Left sidebar */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -512,6 +553,7 @@ button {
   margin-top: auto;
 }
 
+/* Middle dashboard */
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -578,6 +620,7 @@ button {
   font-weight: 700;
 }
 
+/* Page view switch */
 .view {
   display: none;
 }
@@ -586,12 +629,14 @@ button {
   display: block;
 }
 
+/* Feed card grid */
 .cards-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 22px;
 }
 
+/* Universal card style */
 .feed-card,
 .feature-card,
 .list-card,
@@ -608,6 +653,7 @@ button {
   cursor: pointer;
 }
 
+/* Card background artwork */
 .card-art,
 .detail-hero,
 .thumb,
@@ -622,10 +668,6 @@ button {
     linear-gradient(145deg, #cabaff, #7f6eea 58%, #4941b6);
 }
 
-.card-art {
-  height: 240px;
-}
-
 .card-art.image-cover,
 .detail-hero.image-cover,
 .thumb.image-cover,
@@ -636,6 +678,7 @@ button {
   background-position: center;
 }
 
+/* Preset artwork gradient */
 .art-swirl {
   background:
     radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent 30%),
@@ -864,12 +907,6 @@ button {
   gap: 10px;
 }
 
-.filter-chip {
-  min-height: 42px;
-  padding: 0 18px;
-  border-radius: 999px;
-}
-
 .filter-chip.is-active,
 .trend-tab.is-active {
   color: white;
@@ -976,6 +1013,7 @@ button {
   flex-wrap: wrap;
 }
 
+/* Right sidebar */
 .right-rail {
   display: grid;
   gap: 24px;
@@ -1060,6 +1098,16 @@ button {
   box-shadow: none;
 }
 
+/* ==============================================
+            【Chenqian Fu' s part ends】
+============================================== */
+
+/* ==============================================
+            【Xuehan Wang' s part starts】
+              detail screen layout
+============================================== */
+
+/* Post detail screen */
 .detail-screen {
   width: var(--shell);
   min-height: calc(100vh - 28px);
@@ -1072,6 +1120,7 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* Detail top navigation bar */
 .detail-topbar {
   display: flex;
   justify-content: space-between;
@@ -1114,6 +1163,7 @@ button {
   cursor: pointer;
 }
 
+/* Detail main layout */
 .detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.14fr) 340px;
@@ -1126,6 +1176,7 @@ button {
   min-width: 0;
 }
 
+/* Image gallery */
 .detail-hero {
   min-height: 680px;
   border-radius: 20px;
@@ -1151,6 +1202,7 @@ button {
   border-color: var(--accent);
 }
 
+/* Post info sidebar card */
 .detail-info-card {
   padding: 22px;
   border-radius: 24px;
@@ -1238,6 +1290,7 @@ button {
   letter-spacing: inherit;
 }
 
+/* Comment section */
 .comments-panel {
   max-width: 960px;
   margin-top: 28px;
@@ -1260,6 +1313,7 @@ button {
   font-size: 1.6rem;
 }
 
+/* Comment input bar */
 .comment-input-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1276,6 +1330,7 @@ button {
   padding: 0;
 }
 
+/* Comment list item */
 .comment-list {
   display: grid;
   gap: 18px;
@@ -1304,6 +1359,7 @@ button {
   font-size: 0.84rem;
 }
 
+/* Create post modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -1349,6 +1405,7 @@ button {
   gap: 16px;
 }
 
+/* Image upload zone */
 .upload-zone {
   padding: 18px;
   border-radius: 18px;
@@ -1375,6 +1432,7 @@ button {
   border: 1px solid var(--line);
 }
 
+/* Toast message */
 .toast {
   position: fixed;
   left: 50%;
@@ -1388,6 +1446,13 @@ button {
   z-index: 30;
 }
 
+/* ==============================================
+            【Xuehan Wang' s part ends】
+============================================== */
+
+/* ================================
+   Responsive Media Query suit for mobile devices
+================================ */
 @media (max-width: 1320px) {
   .app-screen {
     grid-template-columns: 240px minmax(0, 1fr);
@@ -1478,16 +1543,5 @@ button {
   .feature-visual,
   .detail-hero {
     min-height: 260px;
-  }
-
-  .detail-topbar,
-  .detail-body,
-  .modal-panel {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .thumbnail-row {
-    flex-wrap: wrap;
   }
 }

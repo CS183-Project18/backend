@@ -1,3 +1,4 @@
+// Storage & Constants
 const STORAGE_KEYS = {
   user: "curator_user",
   posts: "curator_posts_v2",
@@ -6,6 +7,7 @@ const STORAGE_KEYS = {
   loaded: "curator_seeded_v2",
 };
 
+// Predefined art background classes
 const artLibrary = [
   "art-swirl",
   "art-forest",
@@ -15,6 +17,7 @@ const artLibrary = [
   "art-frame",
 ];
 
+// Default sample posts for first-time load
 const seedPosts = [
   {
     id: 101,
@@ -176,6 +179,7 @@ const seedPosts = [
   },
 ];
 
+// Global app state (single source of truth)
 const state = {
   user: null,
   posts: [],
@@ -188,6 +192,7 @@ const state = {
   feedFilter: "all",
 };
 
+// DOM Element References
 const authScreen = document.querySelector("#auth-screen");
 const appScreen = document.querySelector("#app-screen");
 const detailScreen = document.querySelector("#detail-screen");
@@ -245,11 +250,19 @@ const commentCount = document.querySelector("#comment-count");
 const loadMoreComments = document.querySelector("#load-more-comments");
 const toast = document.querySelector("#toast");
 
+// UI runtime variables
 let commentDisplayCount = 3;
 let pendingUploads = [];
 
+// App entry point
 initialize();
 
+/* ==============================================
+            【 Chenqian Fu' s part 】
+   Core: Auth, State, Storage, Navigation, Feed, Lists, Explore, Bookmarks, Analytics
+============================================== */
+
+// Initialize the entire application
 function initialize() {
   seedDataIfNeeded();
   hydrateState();
@@ -257,6 +270,7 @@ function initialize() {
   renderApp();
 }
 
+// Seed initial posts/bookmarks if first time visiting
 function seedDataIfNeeded() {
   if (!localStorage.getItem(STORAGE_KEYS.loaded)) {
     localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(seedPosts));
@@ -266,42 +280,23 @@ function seedDataIfNeeded() {
   }
 }
 
+// Load saved user, posts, bookmarks, likes from localStorage
 function hydrateState() {
-  state.user =
-    readStorage(STORAGE_KEYS.user) || {
-      name: "Alex Rivera",
-      username: "alexrivera",
-      email: "alex@curator.gold",
-      role: "Curator Gold",
-      bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting.",
-    };
+  state.user = readStorage(STORAGE_KEYS.user) || { name: "Alex Rivera", username: "alexrivera", email: "alex@curator.gold", role: "Curator Gold", bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting." };
   state.posts = readStorage(STORAGE_KEYS.posts) || [...seedPosts];
   state.bookmarks = readStorage(STORAGE_KEYS.bookmarks) || [104];
   state.likes = readStorage(STORAGE_KEYS.likes) || [];
 }
 
+// Bind all click/input/submit events to DOM elements
 function bindEvents() {
   authForm.addEventListener("submit", handleSignup);
   demoLogin.addEventListener("click", handleDemoLogin);
   togglePassword.addEventListener("click", togglePasswordVisibility);
   navLinks.forEach((link) => link.addEventListener("click", () => switchView(link.dataset.view)));
   openAnalytics.addEventListener("click", () => switchView("analytics"));
-  trendTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      state.currentTrend = tab.dataset.trend;
-      trendTabs.forEach((node) => node.classList.remove("is-active"));
-      tab.classList.add("is-active");
-      renderTrending();
-    });
-  });
-  feedFilters.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      state.feedFilter = chip.dataset.feed;
-      feedFilters.forEach((node) => node.classList.remove("is-active"));
-      chip.classList.add("is-active");
-      renderCommunityList(filterPosts(globalSearch.value));
-    });
-  });
+  trendTabs.forEach((tab) => { tab.addEventListener("click", () => { state.currentTrend = tab.dataset.trend; trendTabs.forEach((node) => node.classList.remove("is-active")); tab.classList.add("is-active"); renderTrending(); }); });
+  feedFilters.forEach((chip) => { chip.addEventListener("click", () => { state.feedFilter = chip.dataset.feed; feedFilters.forEach((node) => node.classList.remove("is-active")); chip.classList.add("is-active"); renderCommunityList(filterPosts(globalSearch.value)); }); });
   globalSearch.addEventListener("input", () => renderAppViews());
   settingsForm.addEventListener("submit", saveSettings);
   logoutButton.addEventListener("click", logout);
@@ -316,19 +311,19 @@ function bindEvents() {
   loadMoreComments.addEventListener("click", showMoreComments);
 }
 
+// Show auth screen or main app based on login status
 function renderApp() {
   const isAuthenticated = Boolean(state.user);
   authScreen.classList.toggle("hidden", isAuthenticated);
   appScreen.classList.toggle("hidden", !isAuthenticated);
   detailScreen.classList.add("hidden");
-
   if (!isAuthenticated) return;
-
   applyUserToUI();
   switchView(state.currentView);
   renderAppViews();
 }
 
+// Refresh all main views: feed, community, explore, bookmarks, analytics
 function renderAppViews() {
   const filteredPosts = filterPosts(globalSearch.value);
   renderFeedGrid(filteredPosts);
@@ -339,6 +334,7 @@ function renderAppViews() {
   renderTrending();
 }
 
+// Inject current user data into UI (sidebar, profile, greetings)
 function applyUserToUI() {
   const initials = getInitials(state.user.name);
   sidebarName.textContent = state.user.name;
@@ -354,492 +350,185 @@ function applyUserToUI() {
   settingsBio.value = state.user.bio || "";
 }
 
+// Switch between main pages (feed, explore, bookmarks, etc.)
 function switchView(view) {
   state.currentView = view;
-  Object.entries(viewNodes).forEach(([key, node]) => {
-    node.classList.toggle("is-visible", key === view);
-  });
-  navLinks.forEach((link) => {
-    link.classList.toggle("is-active", link.dataset.view === view);
-  });
+  Object.entries(viewNodes).forEach(([key, node]) => { node.classList.toggle("is-visible", key === view); });
+  navLinks.forEach((link) => { link.classList.toggle("is-active", link.dataset.view === view); });
 }
 
+// Render the main feed grid with featured + standard cards
 function renderFeedGrid(posts) {
   const source = [...posts].sort((a, b) => b.createdAt - a.createdAt);
   const primary = source[0];
   const secondary = source[1];
   const featured = source[2] || source[0];
-
   feedGrid.innerHTML = "";
-
   if (primary) feedGrid.appendChild(createFeedCard(primary));
   if (secondary) feedGrid.appendChild(createFeedCard(secondary));
   if (featured) {
     const feature = document.createElement("article");
     feature.className = "feature-card";
-    feature.innerHTML = `
-      <div class="feature-visual ${featured.coverType} ${featured.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(featured.gallery[0])}></div>
-      <div class="feature-content">
-        <div>
-          <span class="micro-label">${featured.category}</span>
-          <h3>${escapeHtml(featured.title)}</h3>
-          <p>${escapeHtml(featured.description.slice(0, 120))}...</p>
-        </div>
-        <div class="card-footer">
-          <div class="card-meta">
-            <div class="avatar small">${escapeHtml(featured.avatar || getInitials(featured.authorName))}</div>
-            <div>
-              <strong>${escapeHtml(featured.authorName)}</strong>
-              <span>${escapeHtml(featured.authorRole)}</span>
-            </div>
-          </div>
-          <button class="icon-button open-feature-detail" data-id="${featured.id}" type="button">→</button>
-        </div>
-      </div>
-    `;
+    feature.innerHTML = `<div class="feature-visual ${featured.coverType} ${featured.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(featured.gallery[0])}></div><div class="feature-content"><div><span class="micro-label">${featured.category}</span><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description.slice(0, 120))}...</p></div><div class="card-footer"><div class="card-meta"><div class="avatar small">${escapeHtml(featured.avatar || getInitials(featured.authorName))}</div><div><strong>${escapeHtml(featured.authorName)}</strong><span>${escapeHtml(featured.authorRole)}</span></div></div><button class="icon-button open-feature-detail" data-id="${featured.id}" type="button">→</button></div></div>`;
     feedGrid.appendChild(feature);
     feature.querySelector(".open-feature-detail").addEventListener("click", () => openDetailView(featured.id));
   }
 }
 
+// Create a single feed card DOM element
 function createFeedCard(post) {
   const card = document.createElement("article");
   card.className = "feed-card";
-  card.innerHTML = `
-    <div class="card-art ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}>
-      <span class="category-pill">${escapeHtml(post.category)}</span>
-    </div>
-    <div class="card-body">
-      <h3>${escapeHtml(post.title)}</h3>
-      <div class="card-footer">
-        <div class="curator-avatars">
-          <div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div>
-          <div class="avatar small">+${Math.max(2, Math.floor(post.likes / 600))}</div>
-        </div>
-        <div class="stat-line">
-          <span>♥ ${formatCount(post.likes)}</span>
-          <span>◼ ${post.comments.length}</span>
-        </div>
-      </div>
-    </div>
-  `;
+  card.innerHTML = `<div class="card-art ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}><span class="category-pill">${escapeHtml(post.category)}</span></div><div class="card-body"><h3>${escapeHtml(post.title)}</h3><div class="card-footer"><div class="curator-avatars"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div class="avatar small">+${Math.max(2, Math.floor(post.likes / 600))}</div></div><div class="stat-line"><span>♥ ${formatCount(post.likes)}</span><span>◼ ${post.comments.length}</span></div></div></div>`;
   card.addEventListener("click", () => openDetailView(post.id));
   return card;
 }
 
+// Render community list view (horizontal image + text cards)
 function renderCommunityList(posts) {
   let list = [...posts].sort((a, b) => b.createdAt - a.createdAt);
-
-  if (state.feedFilter === "uploaded") {
-    list = list.filter((post) => post.origin === "user");
-  }
-  if (state.feedFilter === "reposted") {
-    list = list.filter((post) => post.origin === "repost");
-  }
-
-  communityList.innerHTML = list
-    .map(
-      (post) => `
-        <article class="list-card">
-          <div class="mini-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div>
-          <div class="list-card-body">
-            <div class="panel-title-row compact">
-              <div>
-                <span class="micro-label">${escapeHtml(post.category)}</span>
-                <h3>${escapeHtml(post.title)}</h3>
-              </div>
-              <button class="secondary-button open-post" type="button" data-id="${post.id}">View</button>
-            </div>
-            <p>${escapeHtml(post.description)}</p>
-            <div class="detail-author-row">
-              <div class="card-meta">
-                <div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div>
-                <div>
-                  <strong>${escapeHtml(post.authorName)}</strong>
-                  <span>${escapeHtml(post.authorRole)}</span>
-                </div>
-              </div>
-              <div class="stat-line">
-                <span>♥ ${formatCount(post.likes)}</span>
-                <span>↺ ${post.reposts}</span>
-                <span>⌁ ${post.saves}</span>
-              </div>
-            </div>
-            <div class="action-row">
-              <button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">
-                Like
-              </button>
-              <button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">
-                Save
-              </button>
-              <button class="action-pill" data-action="repost" data-id="${post.id}" type="button">
-                Repost
-              </button>
-              <button class="action-pill" data-action="comment" data-id="${post.id}" type="button">
-                Comment
-              </button>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join("");
-
-  communityList.querySelectorAll(".open-post").forEach((button) => {
-    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
-  });
-
-  communityList.querySelectorAll(".action-pill").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      handlePostAction(button.dataset.action, Number(button.dataset.id));
-    });
-  });
+  if (state.feedFilter === "uploaded") list = list.filter((post) => post.origin === "user");
+  if (state.feedFilter === "reposted") list = list.filter((post) => post.origin === "repost");
+  communityList.innerHTML = list.map((post) => `<article class="list-card"><div class="mini-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="list-card-body"><div class="panel-title-row compact"><div><span class="micro-label">${escapeHtml(post.category)}</span><h3>${escapeHtml(post.title)}</h3></div><button class="secondary-button open-post" type="button" data-id="${post.id}">View</button></div><p>${escapeHtml(post.description)}</p><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><div class="stat-line"><span>♥ ${formatCount(post.likes)}</span><span>↺ ${post.reposts}</span><span>⌁ ${post.saves}</span></div></div><div class="action-row"><button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="repost" data-id="${post.id}" type="button">Repost</button><button class="action-pill" data-action="comment" data-id="${post.id}" type="button">Comment</button></div></div></article>`).join("");
+  communityList.querySelectorAll(".open-post").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
+  communityList.querySelectorAll(".action-pill").forEach((button) => { button.addEventListener("click", (event) => { event.stopPropagation(); handlePostAction(button.dataset.action, Number(button.dataset.id)); }); });
 }
 
+// Render explore page (grid of popular posts)
 function renderExplore(posts) {
-  exploreGrid.innerHTML = posts
-    .slice()
-    .sort((a, b) => b.likes + b.saves - (a.likes + a.saves))
-    .map(
-      (post) => `
-        <article class="explore-card">
-          <div class="explore-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div>
-          <div class="explore-body">
-            <span class="micro-label">${escapeHtml(post.location)}</span>
-            <h3>${escapeHtml(post.title)}</h3>
-            <p>${escapeHtml(post.description.slice(0, 90))}...</p>
-            <div class="bookmark-meta">
-              <span>♥ ${formatCount(post.likes)}</span>
-              <button class="text-button open-explore" type="button" data-id="${post.id}">Open</button>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join("");
-
-  exploreGrid.querySelectorAll(".open-explore").forEach((button) => {
-    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
-  });
+  exploreGrid.innerHTML = posts.slice().sort((a, b) => b.likes + b.saves - (a.likes + a.saves)).map((post) => `<article class="explore-card"><div class="explore-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="explore-body"><span class="micro-label">${escapeHtml(post.location)}</span><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(post.description.slice(0, 90))}...</p><div class="bookmark-meta"><span>♥ ${formatCount(post.likes)}</span><button class="text-button open-explore" type="button" data-id="${post.id}">Open</button></div></div></article>`).join("");
+  exploreGrid.querySelectorAll(".open-explore").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
 }
 
+// Render saved bookmarks page
 function renderBookmarks() {
   const bookmarked = state.posts.filter((post) => isBookmarked(post.id));
-
-  bookmarkGrid.innerHTML = bookmarked.length
-    ? bookmarked
-        .map(
-          (post) => `
-            <article class="bookmark-card">
-              <div class="bookmark-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div>
-              <div class="bookmark-body">
-                <h3>${escapeHtml(post.title)}</h3>
-                <p>${escapeHtml(post.location)} · ${escapeHtml(post.price)}</p>
-                <div class="bookmark-meta">
-                  <span>${post.tags.slice(0, 2).map(escapeHtml).join(" ")}</span>
-                  <button class="text-button open-bookmark" data-id="${post.id}" type="button">View</button>
-                </div>
-              </div>
-            </article>
-          `
-        )
-        .join("")
-    : `<article class="stat-card"><span class="micro-label">Empty</span><h3>0</h3><p>You have not bookmarked any curated finds yet.</p></article>`;
-
-  bookmarkGrid.querySelectorAll(".open-bookmark").forEach((button) => {
-    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
-  });
+  bookmarkGrid.innerHTML = bookmarked.length ? bookmarked.map((post) => `<article class="bookmark-card"><div class="bookmark-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="bookmark-body"><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(post.location)} · ${escapeHtml(post.price)}</p><div class="bookmark-meta"><span>${post.tags.slice(0, 2).map(escapeHtml).join(" ")}</span><button class="text-button open-bookmark" data-id="${post.id}" type="button">View</button></div></div></article>`).join("") : `<article class="stat-card"><span class="micro-label">Empty</span><h3>0</h3><p>You have not bookmarked any curated finds yet.</p></article>`;
+  bookmarkGrid.querySelectorAll(".open-bookmark").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
 }
 
+// Render analytics stats cards
 function renderAnalytics(posts) {
   const totalLikes = posts.reduce((sum, post) => sum + post.likes, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
   const totalReposts = posts.reduce((sum, post) => sum + post.reposts, 0);
   const totalViews = posts.reduce((sum, post) => sum + post.views, 0);
-
-  analyticsGrid.innerHTML = `
-    <article class="stat-card">
-      <span class="micro-label">Reach</span>
-      <h3>${formatCount(totalViews)}</h3>
-      <p>Total views across all published and reposted collections.</p>
-    </article>
-    <article class="stat-card">
-      <span class="micro-label">Likes</span>
-      <h3>${formatCount(totalLikes)}</h3>
-      <p>Signals of appreciation collected by your visible content.</p>
-    </article>
-    <article class="stat-card">
-      <span class="micro-label">Comments</span>
-      <h3>${formatCount(totalComments)}</h3>
-      <p>Conversation depth around your curation and uploads.</p>
-    </article>
-    <article class="stat-card">
-      <span class="micro-label">Reposts</span>
-      <h3>${formatCount(totalReposts)}</h3>
-      <p>How often the network is redistributing your discoveries.</p>
-    </article>
-  `;
+  analyticsGrid.innerHTML = `<article class="stat-card"><span class="micro-label">Reach</span><h3>${formatCount(totalViews)}</h3><p>Total views across all published and reposted collections.</p></article><article class="stat-card"><span class="micro-label">Likes</span><h3>${formatCount(totalLikes)}</h3><p>Signals of appreciation collected by your visible content.</p></article><article class="stat-card"><span class="micro-label">Comments</span><h3>${formatCount(totalComments)}</h3><p>Conversation depth around your curation and uploads.</p></article><article class="stat-card"><span class="micro-label">Reposts</span><h3>${formatCount(totalReposts)}</h3><p>How often the network is redistributing your discoveries.</p></article>`;
 }
 
+// Render trending sidebar list
 function renderTrending() {
-  const ranked = [...state.posts]
-    .sort((a, b) => trendScore(b, state.currentTrend) - trendScore(a, state.currentTrend))
-    .slice(0, 3);
-
-  trendingList.innerHTML = ranked
-    .map(
-      (post, index) => `
-        <article class="trend-item">
-          <div class="trend-index">0${index + 1}</div>
-          <div class="trend-copy">
-            <strong>${escapeHtml(post.title)}</strong>
-            <span>${escapeHtml(post.category)} · ${formatCount(trendScore(post, state.currentTrend))} curated</span>
-          </div>
-        </article>
-      `
-    )
-    .join("");
+  const ranked = [...state.posts].sort((a, b) => trendScore(b, state.currentTrend) - trendScore(a, state.currentTrend)).slice(0, 3);
+  trendingList.innerHTML = ranked.map((post, index) => `<article class="trend-item"><div class="trend-index">0${index + 1}</div><div class="trend-copy"><strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(post.category)} · ${formatCount(trendScore(post, state.currentTrend))} curated</span></div></article>`).join("");
 }
 
-function openDetailView(postId) {
-  const post = findPost(postId);
-  if (!post) return;
-
-  state.currentDetailId = postId;
-  state.currentDetailImageIndex = 0;
-  commentDisplayCount = 3;
-
-  appScreen.classList.add("hidden");
-  detailScreen.classList.remove("hidden");
-
-  renderDetail(post);
-}
-
-function closeDetailView() {
-  detailScreen.classList.add("hidden");
-  appScreen.classList.remove("hidden");
-  state.currentDetailId = null;
-}
-
-function renderDetail(post) {
-  renderDetailHero(post);
-  renderDetailInfo(post);
-  renderComments(post);
-}
-
-function renderDetailHero(post) {
-  const currentAsset = post.gallery[state.currentDetailImageIndex] || post.gallery[0];
-  detailHero.className = "detail-hero";
-  detailHero.removeAttribute("style");
-
-  if (currentAsset.type === "image") {
-    detailHero.classList.add("image-cover");
-    detailHero.style.backgroundImage = `url("${currentAsset.value}")`;
-  } else {
-    detailHero.classList.add(currentAsset.value);
-  }
-
-  thumbnailRow.innerHTML = post.gallery
-    .map((asset, index) => {
-      const imageClass = asset.type === "image" ? "image-cover" : asset.value;
-      const style = asset.type === "image" ? `style="background-image:url('${escapeAttribute(asset.value)}')"` : "";
-      return `<button class="thumb ${imageClass} ${index === state.currentDetailImageIndex ? "is-active" : ""}" data-index="${index}" ${style} type="button"></button>`;
-    })
-    .join("");
-
-  thumbnailRow.querySelectorAll(".thumb").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.currentDetailImageIndex = Number(button.dataset.index);
-      renderDetailHero(post);
-    });
-  });
-}
-
-function renderDetailInfo(post) {
-  const canDelete =
-    post.origin === "user" ||
-    post.origin === "repost" ||
-    post.authorName === state.user.name;
-
-  detailInfoCard.innerHTML = `
-    <div class="interaction-row">
-      <div>
-        <span class="micro-label">${escapeHtml(post.category)}</span>
-        <span class="micro-label">Private</span>
-      </div>
-      <div class="interaction-row">
-        <button class="icon-button detail-like ${isLiked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">♥</button>
-        <button class="icon-button detail-save ${isBookmarked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">⌑</button>
-      </div>
-    </div>
-
-    <h2>${escapeHtml(post.title)}</h2>
-
-    <div class="detail-author-row">
-      <div class="card-meta">
-        <div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div>
-        <div>
-          <strong>${escapeHtml(post.authorName)}</strong>
-          <span>${escapeHtml(post.authorRole)}</span>
-        </div>
-      </div>
-      <button class="follow-button" type="button">Follow</button>
-    </div>
-
-    <div class="detail-meta-grid">
-      <article>
-        <small>Price</small>
-        <strong>${escapeHtml(post.price || "N/A")}</strong>
-      </article>
-      <article>
-        <small>Location</small>
-        <strong>${escapeHtml(post.location)}</strong>
-      </article>
-    </div>
-
-    <small>Associated tags</small>
-    <div class="tag-row">
-      ${post.tags.map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("")}
-    </div>
-
-    <p>${escapeHtml(post.description)}</p>
-
-    <div class="detail-bottom-row">
-      <span>${formatCount(post.likes)} likes</span>
-      <span>${post.saves} saves</span>
-      <span>${post.reposts} reposts</span>
-      <button class="detail-link-action danger" data-detail-action="report" data-id="${post.id}" type="button">Report</button>
-      <button class="detail-link-action" data-detail-action="delete" data-id="${post.id}" type="button" ${canDelete ? "" : "disabled"}>
-        Delete
-      </button>
-    </div>
-
-    <div class="action-row">
-      <button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button>
-      <button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button>
-      <button class="action-pill" data-action="repost" data-id="${post.id}" type="button">Repost</button>
-    </div>
-  `;
-
-  detailInfoCard.querySelectorAll("[data-action]").forEach((button) => {
-    button.addEventListener("click", () => {
-      handlePostAction(button.dataset.action, Number(button.dataset.id));
-      renderDetail(findPost(Number(button.dataset.id)));
-    });
-  });
-
-  detailInfoCard.querySelector(".detail-like").addEventListener("click", () => {
-    handlePostAction("like", post.id);
-    renderDetail(findPost(post.id));
-  });
-
-  detailInfoCard.querySelector(".detail-save").addEventListener("click", () => {
-    handlePostAction("save", post.id);
-    renderDetail(findPost(post.id));
-  });
-
-  detailInfoCard.querySelectorAll("[data-detail-action]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const action = button.dataset.detailAction;
-      if (action === "report") {
-        showToast("Post reported for review.");
-      }
-      if (action === "delete") {
-        if (!canDelete) {
-          showToast("Only your own uploaded or reposted content can be deleted.");
-          return;
-        }
-        deletePost(post.id);
-      }
-    });
-  });
-}
-
-function renderComments(post) {
-  const commentsToShow = post.comments.slice(0, commentDisplayCount);
-  commentCount.textContent = post.comments.length;
-  commentList.innerHTML = commentsToShow
-    .map(
-      (comment) => `
-        <article class="comment-item">
-          <div class="avatar small">${escapeHtml(comment.avatar || getInitials(comment.user))}</div>
-          <div>
-            <strong>${escapeHtml(comment.user)}</strong>
-            <div class="comment-meta">${escapeHtml(comment.time)}</div>
-            <p>${escapeHtml(comment.text)}</p>
-            <div class="comment-actions">
-              <span>♥ ${Math.max(2, comment.text.length % 27)}</span>
-              <span>Reply</span>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join("");
-
-  loadMoreComments.classList.toggle("hidden", commentDisplayCount >= post.comments.length);
-}
-
+// Handle signup form submission
 function handleSignup(event) {
   event.preventDefault();
-  const user = {
-    name: document.querySelector("#signup-name").value.trim(),
-    email: document.querySelector("#signup-email").value.trim(),
-    username: document.querySelector("#signup-username").value.trim(),
-    role: "Curator Gold",
-    bio: "Building a curated library of unique finds worth saving, sharing, and discussing.",
-  };
-
+  const user = { name: document.querySelector("#signup-name").value.trim(), email: document.querySelector("#signup-email").value.trim(), username: document.querySelector("#signup-username").value.trim(), role: "Curator Gold", bio: "Building a curated library of unique finds worth saving, sharing, and discussing." };
   state.user = user;
   persistState();
   showToast("Account created. Welcome to The Curator.");
   renderApp();
 }
 
+// Quick demo login
 function handleDemoLogin() {
-  state.user = {
-    name: "Alex Rivera",
-    email: "alex@curator.gold",
-    username: "alexrivera",
-    role: "Curator Gold",
-    bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting.",
-  };
+  state.user = { name: "Alex Rivera", email: "alex@curator.gold", username: "alexrivera", role: "Curator Gold", bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting." };
   persistState();
   showToast("Logged in with the demo curator account.");
   renderApp();
 }
 
+// Toggle password visibility
 function togglePasswordVisibility() {
   const show = signupPassword.type === "password";
   signupPassword.type = show ? "text" : "password";
   togglePassword.textContent = show ? "Hide" : "Show";
 }
 
+// Save profile settings to state & storage
 function saveSettings(event) {
   event.preventDefault();
-  state.user = {
-    ...state.user,
-    name: settingsName.value.trim(),
-    username: settingsUsername.value.trim(),
-    email: settingsEmail.value.trim(),
-    bio: settingsBio.value.trim(),
-  };
+  state.user = { ...state.user, name: settingsName.value.trim(), username: settingsUsername.value.trim(), email: settingsEmail.value.trim(), bio: settingsBio.value.trim() };
   persistState();
   applyUserToUI();
   showToast("Profile updated.");
 }
 
+// Logout: clear user and return to auth screen
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.user);
   state.user = null;
   renderApp();
 }
 
+/* ==============================================
+            【 Xuehan Wang' s part 】
+   Core: Detail View, Comments, Create Post, Actions (Like/Save/Repost/Delete), Modals, Helpers
+============================================== */
+
+// Open full post detail page
+function openDetailView(postId) {
+  const post = findPost(postId);
+  if (!post) return;
+  state.currentDetailId = postId;
+  state.currentDetailImageIndex = 0;
+  commentDisplayCount = 3;
+  appScreen.classList.add("hidden");
+  detailScreen.classList.remove("hidden");
+  renderDetail(post);
+}
+
+// Close detail view and return to main app
+function closeDetailView() {
+  detailScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
+  state.currentDetailId = null;
+}
+
+// Render entire detail page: hero gallery + info + comments
+function renderDetail(post) {
+  renderDetailHero(post);
+  renderDetailInfo(post);
+  renderComments(post);
+}
+
+// Render main hero image + thumbnail gallery
+function renderDetailHero(post) {
+  const currentAsset = post.gallery[state.currentDetailImageIndex] || post.gallery[0];
+  detailHero.className = "detail-hero";
+  detailHero.removeAttribute("style");
+  if (currentAsset.type === "image") { detailHero.classList.add("image-cover"); detailHero.style.backgroundImage = `url("${currentAsset.value}")`; }
+  else { detailHero.classList.add(currentAsset.value); }
+  thumbnailRow.innerHTML = post.gallery.map((asset, index) => { const imageClass = asset.type === "image" ? "image-cover" : asset.value; const style = asset.type === "image" ? `style="background-image:url('${escapeAttribute(asset.value)}')"` : ""; return `<button class="thumb ${imageClass} ${index === state.currentDetailImageIndex ? "is-active" : ""}" data-index="${index}" ${style} type="button"></button>`; }).join("");
+  thumbnailRow.querySelectorAll(".thumb").forEach((button) => { button.addEventListener("click", () => { state.currentDetailImageIndex = Number(button.dataset.index); renderDetailHero(post); }); });
+}
+
+// Render post info, author, stats, actions
+function renderDetailInfo(post) {
+  const canDelete = post.origin === "user" || post.origin === "repost" || post.authorName === state.user.name;
+  detailInfoCard.innerHTML = `<div class="interaction-row"><div><span class="micro-label">${escapeHtml(post.category)}</span><span class="micro-label">Private</span></div><div class="interaction-row"><button class="icon-button detail-like ${isLiked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">♥</button><button class="icon-button detail-save ${isBookmarked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">⌑</button></div></div><h2>${escapeHtml(post.title)}</h2><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><button class="follow-button" type="button">Follow</button></div><div class="detail-meta-grid"><article><small>Price</small><strong>${escapeHtml(post.price || "N/A")}</strong></article><article><small>Location</small><strong>${escapeHtml(post.location)}</strong></article></div><small>Associated tags</small><div class="tag-row">${post.tags.map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("")}</div><p>${escapeHtml(post.description)}</p><div class="detail-bottom-row"><span>${formatCount(post.likes)} likes</span><span>${post.saves} saves</span><span>${post.reposts} reposts</span><button class="detail-link-action danger" data-detail-action="report" data-id="${post.id}" type="button">Report</button><button class="detail-link-action" data-detail-action="delete" data-id="${post.id}" type="button" ${canDelete ? "" : "disabled"}>Delete</button></div><div class="action-row"><button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="repost" data-id="${post.id}" type="button">Repost</button></div>`;
+  detailInfoCard.querySelectorAll("[data-action]").forEach((button) => { button.addEventListener("click", () => { handlePostAction(button.dataset.action, Number(button.dataset.id)); renderDetail(findPost(Number(button.dataset.id))); }); });
+  detailInfoCard.querySelector(".detail-like").addEventListener("click", () => { handlePostAction("like", post.id); renderDetail(findPost(post.id)); });
+  detailInfoCard.querySelector(".detail-save").addEventListener("click", () => { handlePostAction("save", post.id); renderDetail(findPost(post.id)); });
+  detailInfoCard.querySelectorAll("[data-detail-action]").forEach((button) => { button.addEventListener("click", () => { const action = button.dataset.detailAction; if (action === "report") showToast("Post reported for review."); if (action === "delete") { if (!canDelete) { showToast("Only your own uploaded or reposted content can be deleted."); return; } deletePost(post.id); } }); });
+}
+
+// Render comment list
+function renderComments(post) {
+  const commentsToShow = post.comments.slice(0, commentDisplayCount);
+  commentCount.textContent = post.comments.length;
+  commentList.innerHTML = commentsToShow.map((comment) => `<article class="comment-item"><div class="avatar small">${escapeHtml(comment.avatar || getInitials(comment.user))}</div><div><strong>${escapeHtml(comment.user)}</strong><div class="comment-meta">${escapeHtml(comment.time)}</div><p>${escapeHtml(comment.text)}</p><div class="comment-actions"><span>♥ ${Math.max(2, comment.text.length % 27)}</span><span>Reply</span></div></div></article>`).join("");
+  loadMoreComments.classList.toggle("hidden", commentDisplayCount >= post.comments.length);
+}
+
+// Open create post modal
 function openCreatePostModal() {
   createModal.classList.remove("hidden");
 }
 
+// Close create post modal and reset form
 function closeCreatePostModal() {
   createModal.classList.add("hidden");
   createPostForm.reset();
@@ -847,55 +536,24 @@ function closeCreatePostModal() {
   pendingUploads = [];
 }
 
+// Handle image upload preview
 async function handleImageSelection(event) {
   const files = Array.from(event.target.files || []).slice(0, 4);
   pendingUploads = await Promise.all(files.map(fileToDataUrl));
-  uploadPreview.innerHTML = pendingUploads
-    .map((src) => `<div class="preview-item" style="background-image:url('${escapeAttribute(src)}')"></div>`)
-    .join("");
+  uploadPreview.innerHTML = pendingUploads.map((src) => `<div class="preview-item" style="background-image:url('${escapeAttribute(src)}')"></div>`).join("");
 }
 
+// Create and publish new post
 function handleCreatePost(event) {
   event.preventDefault();
-
   const title = document.querySelector("#post-title").value.trim();
   const category = document.querySelector("#post-category").value.trim();
   const price = document.querySelector("#post-price").value.trim() || "Curated";
   const location = document.querySelector("#post-location").value.trim();
   const description = document.querySelector("#post-description").value.trim();
-  const tags = document
-    .querySelector("#post-tags")
-    .value.split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-
-  const gallery =
-    pendingUploads.length > 0
-      ? pendingUploads.map((src) => ({ type: "image", value: src }))
-      : [{ type: "art", value: randomArt() }];
-
-  const post = {
-    id: Date.now(),
-    title,
-    description,
-    category,
-    price,
-    location,
-    tags: tags.length ? tags : ["#curated", "#newpost"],
-    authorName: state.user.name,
-    authorRole: state.user.role || "Curator",
-    avatar: getInitials(state.user.name),
-    likes: 0,
-    comments: [],
-    saves: 0,
-    reposts: 0,
-    views: 0,
-    coverType: gallery[0].type === "art" ? gallery[0].value : randomArt(),
-    gallery,
-    createdAt: Date.now(),
-    origin: "user",
-  };
-
+  const tags = document.querySelector("#post-tags").value.split(",").map((tag) => tag.trim()).filter(Boolean);
+  const gallery = pendingUploads.length > 0 ? pendingUploads.map((src) => ({ type: "image", value: src })) : [{ type: "art", value: randomArt() }];
+  const post = { id: Date.now(), title, description, category, price, location, tags: tags.length ? tags : ["#curated", "#newpost"], authorName: state.user.name, authorRole: state.user.role || "Curator", avatar: getInitials(state.user.name), likes: 0, comments: [], saves: 0, reposts: 0, views: 0, coverType: gallery[0].type === "art" ? gallery[0].value : randomArt(), gallery, createdAt: Date.now(), origin: "user" };
   state.posts.unshift(post);
   persistState();
   closeCreatePostModal();
@@ -904,19 +562,14 @@ function handleCreatePost(event) {
   showToast("Post published and added to your curated feed.");
 }
 
+// Submit new comment
 function handleCommentSubmit(event) {
   event.preventDefault();
   if (!state.currentDetailId) return;
   const value = commentInput.value.trim();
   if (!value) return;
-
   const post = findPost(state.currentDetailId);
-  post.comments.unshift({
-    user: state.user.name,
-    avatar: getInitials(state.user.name),
-    text: value,
-    time: "Just now",
-  });
+  post.comments.unshift({ user: state.user.name, avatar: getInitials(state.user.name), text: value, time: "Just now" });
   persistState();
   commentInput.value = "";
   commentDisplayCount += 1;
@@ -925,35 +578,26 @@ function handleCommentSubmit(event) {
   showToast("Comment posted.");
 }
 
+// Load 3 more comments
 function showMoreComments() {
   if (!state.currentDetailId) return;
   commentDisplayCount += 3;
   renderComments(findPost(state.currentDetailId));
 }
 
+// Handle post actions: like, save, repost, comment
 function handlePostAction(action, postId) {
   const post = findPost(postId);
   if (!post) return;
-
-  if (action === "like") {
-    toggleLike(post);
-  }
-  if (action === "save") {
-    toggleBookmark(post.id);
-  }
-  if (action === "repost") {
-    repostPost(post);
-  }
-  if (action === "comment") {
-    openDetailView(post.id);
-    commentInput.focus();
-    return;
-  }
-
+  if (action === "like") toggleLike(post);
+  if (action === "save") toggleBookmark(post.id);
+  if (action === "repost") repostPost(post);
+  if (action === "comment") { openDetailView(post.id); commentInput.focus(); return; }
   persistState();
   renderAppViews();
 }
 
+// Delete post from state and storage
 function deletePost(postId) {
   state.posts = state.posts.filter((post) => post.id !== postId);
   state.bookmarks = state.bookmarks.filter((id) => id !== postId);
@@ -964,73 +608,38 @@ function deletePost(postId) {
   showToast("Post deleted from your curator space.");
 }
 
+// Toggle like status for a post
 function toggleLike(post) {
-  if (isLiked(post.id)) {
-    state.likes = state.likes.filter((id) => id !== post.id);
-    post.likes = Math.max(0, post.likes - 1);
-    showToast("Like removed.");
-  } else {
-    state.likes.push(post.id);
-    post.likes += 1;
-    showToast("Post liked.");
-  }
+  if (isLiked(post.id)) { state.likes = state.likes.filter((id) => id !== post.id); post.likes = Math.max(0, post.likes - 1); showToast("Like removed."); }
+  else { state.likes.push(post.id); post.likes += 1; showToast("Post liked."); }
 }
 
+// Toggle bookmark status for a post
 function toggleBookmark(postId) {
-  if (isBookmarked(postId)) {
-    state.bookmarks = state.bookmarks.filter((id) => id !== postId);
-    const post = findPost(postId);
-    post.saves = Math.max(0, post.saves - 1);
-    showToast("Removed from bookmarks.");
-  } else {
-    state.bookmarks.push(postId);
-    findPost(postId).saves += 1;
-    showToast("Saved to bookmarks.");
-  }
+  if (isBookmarked(postId)) { state.bookmarks = state.bookmarks.filter((id) => id !== postId); const post = findPost(postId); post.saves = Math.max(0, post.saves - 1); showToast("Removed from bookmarks."); }
+  else { state.bookmarks.push(postId); findPost(postId).saves += 1; showToast("Saved to bookmarks."); }
 }
 
+// Repost an existing post
 function repostPost(post) {
-  const repost = {
-    ...structuredClone(post),
-    id: Date.now(),
-    authorName: state.user.name,
-    authorRole: `${state.user.role || "Curator"} · Reposted`,
-    avatar: getInitials(state.user.name),
-    title: `Reposted: ${post.title}`,
-    description: `Re-shared from ${post.authorName}. ${post.description}`,
-    likes: 0,
-    comments: [],
-    saves: 0,
-    reposts: 0,
-    views: 0,
-    createdAt: Date.now(),
-    origin: "repost",
-  };
-
+  const repost = { ...structuredClone(post), id: Date.now(), authorName: state.user.name, authorRole: `${state.user.role || "Curator"} · Reposted`, avatar: getInitials(state.user.name), title: `Reposted: ${post.title}`, description: `Re-shared from ${post.authorName}. ${post.description}`, likes: 0, comments: [], saves: 0, reposts: 0, views: 0, createdAt: Date.now(), origin: "repost" };
   post.reposts += 1;
   state.posts.unshift(repost);
   showToast("Post reposted to your curated stream.");
 }
 
+// ================================
+// Shared Helper Functions
+// ================================
+
+// Filter posts by search query
 function filterPosts(query = "") {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return [...state.posts];
-
-  return state.posts.filter((post) =>
-    [
-      post.title,
-      post.description,
-      post.category,
-      post.location,
-      post.authorName,
-      ...post.tags,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(normalized)
-  );
+  return state.posts.filter((post) => [post.title, post.description, post.category, post.location, post.authorName, ...post.tags].join(" ").toLowerCase().includes(normalized));
 }
 
+// Save full state to localStorage
 function persistState() {
   localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(state.user));
   localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(state.posts));
@@ -1038,37 +647,33 @@ function persistState() {
   localStorage.setItem(STORAGE_KEYS.likes, JSON.stringify(state.likes));
 }
 
+// Safely read JSON from localStorage
 function readStorage(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
 }
 
+// Find a single post by ID
 function findPost(postId) {
   return state.posts.find((post) => post.id === postId);
 }
 
+// Get user initials from full name
 function getInitials(name = "") {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join("");
+  return name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join("");
 }
 
+// Get first name from full name
 function firstName(name = "") {
   return name.split(" ")[0] || name;
 }
 
+// Format large numbers (1k, 2.5k)
 function formatCount(value) {
   if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
   return String(value);
 }
 
+// Calculate trending score
 function trendScore(post, window) {
   const base = post.likes + post.saves * 2 + post.reposts * 3 + post.comments.length * 2;
   if (window === "daily") return Math.round(base * 0.36);
@@ -1076,32 +681,33 @@ function trendScore(post, window) {
   return base;
 }
 
+// Check if post is bookmarked
 function isBookmarked(postId) {
   return state.bookmarks.includes(postId);
 }
 
+// Check if post is liked
 function isLiked(postId) {
   return state.likes.includes(postId);
 }
 
+// Get random art class
 function randomArt() {
   return artLibrary[Math.floor(Math.random() * artLibrary.length)];
 }
 
+// Create inline background-image style for assets
 function backgroundForAsset(asset) {
   if (!asset || asset.type !== "image") return "";
   return `style="background-image:url('${escapeAttribute(asset.value)}')"`;
 }
 
+// Convert file to base64 data URL
 function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
 }
 
+// Show temporary toast message
 function showToast(message) {
   toast.textContent = message;
   toast.classList.remove("hidden");
@@ -1109,15 +715,12 @@ function showToast(message) {
   showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2200);
 }
 
+// Escape HTML to prevent XSS
 function escapeHtml(value = "") {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 
+// Escape HTML attributes
 function escapeAttribute(value = "") {
   return String(value).replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }

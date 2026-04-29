@@ -11,9 +11,15 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- Ambient background effects -->
     <div class="ambient ambient-a"></div>
     <div class="ambient ambient-b"></div>
 
+   
+    <!-- ================= Chenqian Fu' s part ================== -->
+    <!-- ========== Authentication & Main App ==========-->
+
+    <!-- Authentication Screen (Login / Register) -->
     <section class="screen auth-screen" id="auth-screen">
       <div class="auth-visual">
         <div class="auth-visual-overlay"></div>
@@ -36,6 +42,7 @@
         </div>
       </div>
 
+      <!-- Sign-up form -->
       <div class="auth-panel">
         <div class="auth-panel-inner">
           <h2>Create your account</h2>
@@ -100,10 +107,13 @@
       </div>
     </section>
 
+    <!-- Main Application Layout -->
     <section class="screen app-screen hidden" id="app-screen">
+      <!-- Left Sidebar Navigation -->
       <aside class="sidebar">
         <div class="brand">The Curator</div>
 
+        <!-- User profile preview -->
         <div class="profile-mini">
           <div class="avatar" id="sidebar-avatar">AR</div>
           <div>
@@ -112,6 +122,7 @@
           </div>
         </div>
 
+        <!-- Main navigation menu -->
         <nav class="main-nav">
           <button class="nav-link is-active" data-view="feed" type="button">Feed</button>
           <button class="nav-link" data-view="explore" type="button">Explore</button>
@@ -120,12 +131,15 @@
           <button class="nav-link" data-view="settings" type="button">Settings</button>
         </nav>
 
+        <!-- Create new post button -->
         <button class="primary-button create-button" id="open-create-post" type="button">
           Create Post
         </button>
       </aside>
 
+      <!-- Main Dashboard Content -->
       <main class="dashboard">
+        <!-- Top header with greeting and search -->
         <header class="dashboard-topbar">
           <div>
             <h1 id="greeting-title">Good morning, Alex.</h1>
@@ -134,6 +148,7 @@
             </p>
           </div>
 
+          <!-- Global search bar -->
           <div class="search-cluster">
             <label class="search-shell">
               <span>✦</span>
@@ -147,6 +162,7 @@
           </div>
         </header>
 
+        <!-- Feed View -->
         <section class="view is-visible" id="view-feed">
           <div class="cards-grid" id="feed-grid"></div>
           <section class="community-section panel">
@@ -165,6 +181,7 @@
           </section>
         </section>
 
+        <!-- Explore View -->
         <section class="view" id="view-explore">
           <section class="panel">
             <div class="panel-title-row">
@@ -177,6 +194,7 @@
           </section>
         </section>
 
+        <!-- Bookmarks View -->
         <section class="view" id="view-bookmarks">
           <section class="panel">
             <div class="panel-title-row">
@@ -189,6 +207,7 @@
           </section>
         </section>
 
+        <!-- Analytics View -->
         <section class="view" id="view-analytics">
           <section class="panel analytics-panel">
             <div class="panel-title-row">
@@ -201,6 +220,7 @@
           </section>
         </section>
 
+        <!-- Settings View -->
         <section class="view" id="view-settings">
           <section class="panel settings-panel">
             <div class="panel-title-row">
@@ -237,6 +257,7 @@
         </section>
       </main>
 
+      <!-- Right sidebar: Trending & Upgrade -->
       <aside class="right-rail">
         <section class="trending-card panel">
           <div class="panel-title-row compact">
@@ -254,6 +275,7 @@
           </button>
         </section>
 
+        <!-- Pro upgrade card -->
         <section class="upgrade-card">
           <span class="micro-label light">Curator Pro</span>
           <h3>Unlock advanced audience insights.</h3>
@@ -265,8 +287,13 @@
         </section>
       </aside>
     </section>
+    
+    <!-- ================== Xuehan Wang' s part =================-->
+    <!--======= Detail Page + Modal + Comments =======-->
 
+    <!-- Post Detail Screen -->
     <section class="screen detail-screen hidden" id="detail-screen">
+      <!-- Top navigation bar -->
       <header class="detail-topbar">
         <div class="detail-brand-row">
           <div class="brand small">The Curator</div>
@@ -283,25 +310,31 @@
       </header>
 
       <div class="detail-body">
+        <!-- Back button -->
         <div class="back-row">
           <button id="back-to-feed" class="back-button" type="button">← Back to Feed</button>
         </div>
 
+        <!-- Detail layout: image gallery + info card -->
         <div class="detail-layout">
+          <!-- Image gallery -->
           <section class="gallery-panel">
             <div class="detail-hero" id="detail-hero"></div>
             <div class="thumbnail-row" id="thumbnail-row"></div>
           </section>
 
+          <!-- Post information card -->
           <aside class="detail-info-card" id="detail-info-card"></aside>
         </div>
 
+        <!-- Comment section -->
         <section class="comments-panel">
           <div class="comments-title">
             <h2>Thoughts & Feedback</h2>
             <span id="comment-count">0</span>
           </div>
 
+          <!-- Comment input form -->
           <form id="comment-form" class="comment-input-row">
             <div class="avatar small" id="comment-user-avatar">AR</div>
             <input
@@ -312,8 +345,10 @@
             <button class="send-button" type="submit">➜</button>
           </form>
 
+          <!-- Comment list -->
           <div id="comment-list" class="comment-list"></div>
 
+          <!-- Load more comments button -->
           <button class="outline-button wide" id="load-more-comments" type="button">
             Load more comments
           </button>
@@ -321,6 +356,7 @@
       </div>
     </section>
 
+    <!-- Create Post Modal -->
     <div class="modal hidden" id="create-modal">
       <div class="modal-backdrop" id="close-modal-backdrop"></div>
       <div class="modal-panel">
@@ -332,6 +368,7 @@
           <button class="ghost-icon" id="close-create-modal" type="button">Close</button>
         </div>
 
+        <!-- Create post form -->
         <form id="create-post-form" class="create-form">
           <div class="form-grid">
             <label>
@@ -367,12 +404,14 @@
             <input id="post-tags" type="text" placeholder="#minimalism, #glasshouse, #nature" />
           </label>
 
+          <!-- Image upload area -->
           <label class="upload-zone">
             <span>Upload images</span>
             <input id="post-images" type="file" accept="image/*" multiple />
             <small>Choose up to 4 images. Uploaded images will appear in feed and detail view.</small>
           </label>
 
+          <!-- Upload preview area -->
           <div class="upload-preview" id="upload-preview"></div>
 
           <div class="form-actions">
@@ -385,6 +424,7 @@
       </div>
     </div>
 
+    <!-- Toast notification -->
     <div class="toast hidden" id="toast"></div>
 
     <script src="./script.js"></script>
