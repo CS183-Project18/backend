@@ -627,4 +627,124 @@ public class PostServiceImpl implements PostService {
         response.setIsCover(image.getIsCover());
         return response;
     }
+
+    @Override
+    @Transactional
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Like one published post for the current user.
+     * Params:
+     * - userId: current authenticated user id
+     * - postId: target post id
+     * Returns: None
+     * Throws:
+     * - BusinessException: when post is not published or already liked
+     */
+    public void likePost(Long userId, Long postId) {
+        requirePublishedPost(postId);
+        if (postLikeMapper.countByUserIdAndPostId(userId, postId) > 0) {
+            throw new BusinessException("already liked");
+        }
+        postLikeMapper.insertIgnore(userId, postId);
+        postMapper.increaseLikeCount(postId);
+    }
+
+    @Override
+    @Transactional
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Cancel like relation on one post.
+     * Params:
+     * - userId: current authenticated user id
+     * - postId: target post id
+     * Returns: None
+     * Throws:
+     * - BusinessException: when post is missing or not liked
+     */
+    public void unlikePost(Long userId, Long postId) {
+        requireExistingPost(postId);
+        if (postLikeMapper.countByUserIdAndPostId(userId, postId) == 0) {
+            throw new BusinessException("not liked");
+        }
+        postLikeMapper.deleteByUserIdAndPostId(userId, postId);
+        postMapper.decreaseLikeCount(postId);
+    }
+
+    @Override
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Batch query liked post ids for the current user from a given post id list.
+     * Params:
+     * - userId: current authenticated user id
+     * - postIds: target post id list
+     * Returns:
+     * - List<Long>: liked post ids from the input list
+     * Throws: None
+     */
+    public List<Long> getLikedPostIds(Long userId, List<Long> postIds) {
+        if (userId == null || postIds == null || postIds.isEmpty()) {
+            return List.of();
+        }
+        return postLikeMapper.selectLikedPostIds(userId, postIds);
+    }
+
+    @Override
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Check whether the current user has liked one post.
+     * Params:
+     * - userId: current authenticated user id
+     * - postId: target post id
+     * Returns:
+     * - boolean: true if liked, false otherwise
+     * Throws: None
+     */
+    public boolean isLiked(Long userId, Long postId) {
+        if (userId == null || postId == null) {
+            return false;
+        }
+        return postLikeMapper.countByUserIdAndPostId(userId, postId) > 0;
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Ensure the target post exists and is currently published.
+     * Params:
+     * - postId: target post id
+     * Returns:
+     * - Post: published post entity
+     * Throws:
+     * - BusinessException: when post is missing or not published
+     */
+    private Post requirePublishedPost(Long postId) {
+        Post post = postMapper.selectById(postId);
+        if (post == null || !"PUBLISHED".equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException("post is not available");
+        }
+        return post;
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Ensure the target post exists and is not deleted.
+     * Params:
+     * - postId: target post id
+     * Returns:
+     * - Post: matched post entity
+     * Throws:
+     * - BusinessException: when post is missing or deleted
+     */
+    private Post requireExistingPost(Long postId) {
+        Post post = postMapper.selectById(postId);
+        if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException("post not found");
+        }
+        return post;
+    }
 }

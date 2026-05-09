@@ -159,6 +159,30 @@ public interface PostMapper {
     int increaseViewCount(@Param("id") Long id);
 
     /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Increase one post's like counter by one.
+     * Params:
+     * - id: target post id
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int increaseLikeCount(@Param("id") Long id);
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-10
+     * Purpose: Decrease one post's like counter by one.
+     * Params:
+     * - id: target post id
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int decreaseLikeCount(@Param("id") Long id);
+
+    /**
      * Author: Kaijie Zhu
      * Date: 2026-04-20
      * Purpose: Update editable fields of one post.

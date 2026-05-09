@@ -155,6 +155,20 @@
           AND status = 'PUBLISHED'
     </update>
 
+    <update id="increaseLikeCount">
+        UPDATE posts
+        SET like_count = like_count + 1
+        WHERE id = #{id}
+          AND status != 'DELETED'
+    </update>
+
+    <update id="decreaseLikeCount">
+        UPDATE posts
+        SET like_count = GREATEST(like_count - 1, 0)
+        WHERE id = #{id}
+          AND status != 'DELETED'
+    </update>
+
     <update id="updateById">
         UPDATE posts
         SET store_id = #{storeId},

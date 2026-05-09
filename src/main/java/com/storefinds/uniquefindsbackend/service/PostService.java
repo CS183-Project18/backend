@@ -31,4 +31,12 @@ public interface PostService {
     Result<Void> deletePost(Long userId, Long postId);
 
     List<PostResponse> buildPostResponsesForUser(Long userId, List<Post> posts);
+
+    void likePost(Long userId, Long postId);
+
+    void unlikePost(Long userId, Long postId);
+
+    List<Long> getLikedPostIds(Long userId, List<Long> postIds);
+
+    boolean isLiked(Long userId, Long postId);
 }
