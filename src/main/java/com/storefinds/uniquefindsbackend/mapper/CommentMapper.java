@@ -113,4 +113,17 @@ public interface CommentMapper {
     List<Comment> selectByUserId(@Param("userId") Long userId,
                                  @Param("offset") int offset,
                                  @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-06
+     * Purpose: Update moderation status of one comment by admin action.
+     * Params:
+     * - id: target comment id
+     * - status: new comment status
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int updateStatusById(@Param("id") Long id, @Param("status") String status);
 }

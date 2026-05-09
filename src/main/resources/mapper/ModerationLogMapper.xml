@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.ModerationLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO moderation_logs (
+            target_type, target_id, moderator_id, action, reason
+        ) VALUES (
+            #{targetType}, #{targetId}, #{moderatorId}, #{action}, #{reason}
+        )
+    </insert>
+
+</mapper>

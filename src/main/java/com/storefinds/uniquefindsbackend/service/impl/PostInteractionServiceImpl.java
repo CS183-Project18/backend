@@ -2,6 +2,7 @@ package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.InteractionStatusResponse;
+import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
 import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
@@ -159,9 +160,14 @@ public class PostInteractionServiceImpl implements PostInteractionService {
      * - Result<List<PostResponse>>: favorite post list
      * Throws: None
      */
-    public Result<List<PostResponse>> getMyFavoritePosts(Long userId) {
-        List<Post> posts = postFavoriteMapper.selectFavoritePostsByUserId(userId);
-        return Result.success(postService.buildPostResponsesForUser(userId, posts));
+    public Result<PageResponse<PostResponse>> getMyFavoritePosts(Long userId, int page, int pageSize) {
+        List<Post> posts = postFavoriteMapper.selectFavoritePostsByUserIdPage(userId, toOffset(page, pageSize), pageSize);
+        PageResponse<PostResponse> response = new PageResponse<>();
+        response.setTotal(postFavoriteMapper.countFavoritePostsByUserId(userId));
+        response.setPage(page);
+        response.setPageSize(pageSize);
+        response.setItems(postService.buildPostResponsesForUser(userId, posts));
+        return Result.success(response);
     }
 
     /**
@@ -181,5 +187,20 @@ public class PostInteractionServiceImpl implements PostInteractionService {
             throw new BusinessException("post is not available");
         }
         return post;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Convert page number and page size into SQL row offset.
+     * Params:
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * Returns:
+     * - int: SQL row offset
+     * Throws: None
+     */
+    private int toOffset(int page, int pageSize) {
+        return (page - 1) * pageSize;
     }
 }

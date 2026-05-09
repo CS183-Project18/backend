@@ -2,9 +2,8 @@ package com.storefinds.uniquefindsbackend.service;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.InteractionStatusResponse;
+import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
-
-import java.util.List;
 
 public interface PostInteractionService {
 
@@ -18,5 +17,5 @@ public interface PostInteractionService {
 
     Result<InteractionStatusResponse> getInteractionStatus(Long userId, Long postId);
 
-    Result<List<PostResponse>> getMyFavoritePosts(Long userId);
+    Result<PageResponse<PostResponse>> getMyFavoritePosts(Long userId, int page, int pageSize);
 }

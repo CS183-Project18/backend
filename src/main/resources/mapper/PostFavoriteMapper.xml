@@ -75,4 +75,24 @@
         ORDER BY pf.created_at DESC, p.id DESC
     </select>
 
+    <select id="countFavoritePostsByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM post_favorites pf
+        INNER JOIN posts p ON p.id = pf.post_id
+        WHERE pf.user_id = #{userId}
+          AND p.status = 'PUBLISHED'
+    </select>
+
+    <select id="selectFavoritePostsByUserIdPage" resultMap="FavoritePostResultMap">
+        SELECT
+        <include refid="FavoritePostSelectColumns"/>
+        FROM post_favorites pf
+        INNER JOIN posts p ON p.id = pf.post_id
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE pf.user_id = #{userId}
+          AND p.status = 'PUBLISHED'
+        ORDER BY pf.created_at DESC, p.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
 </mapper>

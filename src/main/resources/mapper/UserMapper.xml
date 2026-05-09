@@ -9,6 +9,9 @@
         <result property="username" column="username"/>
         <result property="email" column="email"/>
         <result property="passwordHash" column="password_hash"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="bio" column="bio"/>
         <result property="role" column="role"/>
         <result property="status" column="status"/>
         <result property="emailVerified" column="email_verified"/>
@@ -18,7 +21,7 @@
     </resultMap>
 
     <select id="selectByUsername" resultMap="UserResultMap">
-        SELECT id, username, email, password_hash, role, status,
+        SELECT id, username, email, password_hash, nickname, avatar_url, bio, role, status,
                email_verified, last_login_at, created_at, updated_at
         FROM users
         WHERE username = #{username}
@@ -26,7 +29,7 @@
     </select>
 
     <select id="selectByEmail" resultMap="UserResultMap">
-        SELECT id, username, email, password_hash, role, status,
+        SELECT id, username, email, password_hash, nickname, avatar_url, bio, role, status,
                email_verified, last_login_at, created_at, updated_at
         FROM users
         WHERE email = #{email}
@@ -34,7 +37,7 @@
     </select>
 
     <select id="selectById" resultMap="UserResultMap">
-        SELECT id, username, email, password_hash, role, status,
+        SELECT id, username, email, password_hash, nickname, avatar_url, bio, role, status,
                email_verified, last_login_at, created_at, updated_at
         FROM users
         WHERE id = #{id}
@@ -42,14 +45,22 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users (username, email, password_hash, role, status, email_verified)
-        VALUES (#{username}, #{email}, #{passwordHash}, #{role}, #{status}, #{emailVerified})
+        INSERT INTO users (username, email, password_hash, nickname, avatar_url, bio, role, status, email_verified)
+        VALUES (#{username}, #{email}, #{passwordHash}, #{nickname}, #{avatarUrl}, #{bio}, #{role}, #{status}, #{emailVerified})
     </insert>
 
     <update id="updateLastLoginAt">
         UPDATE users
         SET last_login_at = NOW()
         WHERE id = #{userId}
+    </update>
+
+    <update id="updateProfile">
+        UPDATE users
+        SET nickname = #{nickname},
+            avatar_url = #{avatarUrl},
+            bio = #{bio}
+        WHERE id = #{id}
     </update>
 
 </mapper>

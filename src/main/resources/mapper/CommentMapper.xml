@@ -109,4 +109,12 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <update id="updateStatusById">
+        UPDATE comments
+        SET status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+          AND status != #{status}
+    </update>
+
 </mapper>

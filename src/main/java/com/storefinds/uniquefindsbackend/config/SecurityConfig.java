@@ -61,6 +61,9 @@ public class SecurityConfig {
                                 "/api/auth/login/code",
                                 "/api/auth/code/send"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/published").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

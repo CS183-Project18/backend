@@ -46,6 +46,30 @@ public interface PostMapper {
 
     /**
      * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Count all published posts for public feed display.
+     * Params: None
+     * Returns:
+     * - long: published post count
+     * Throws: None
+     */
+    long countPublishedPosts();
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Query one page of published posts for public feed display.
+     * Params:
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: published post page list
+     * Throws: None
+     */
+    List<Post> selectPublishedPostsPage(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Kaijie Zhu
      * Date: 2026-04-19
      * Purpose: Query all non-deleted posts created by one user.
      * Params:
@@ -55,6 +79,72 @@ public interface PostMapper {
      * Throws: None
      */
     List<Post> selectByUserId(@Param("userId") Long userId);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Count all non-deleted posts created by one user.
+     * Params:
+     * - userId: owner user id
+     * Returns:
+     * - long: owner's post count
+     * Throws: None
+     */
+    long countByUserId(@Param("userId") Long userId);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Query one page of non-deleted posts created by one user.
+     * Params:
+     * - userId: owner user id
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: owner's post page list
+     * Throws: None
+     */
+    List<Post> selectByUserIdPage(@Param("userId") Long userId,
+                                  @Param("offset") int offset,
+                                  @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Count all published posts matching the search conditions.
+     * Params:
+     * - keyword: normalized search keyword or null
+     * - keywordLike: SQL like keyword or null
+     * - categoryId: optional category id
+     * Returns:
+     * - long: matched post count
+     * Throws: None
+     */
+    long countSearchPublishedPosts(@Param("keyword") String keyword,
+                                   @Param("keywordLike") String keywordLike,
+                                   @Param("categoryId") Long categoryId);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Query one page of published posts matching the search conditions.
+     * Params:
+     * - keyword: normalized search keyword or null
+     * - keywordLike: SQL like keyword or null
+     * - categoryId: optional category id
+     * - sort: normalized sort option
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: matched post page list
+     * Throws: None
+     */
+    List<Post> searchPublishedPosts(@Param("keyword") String keyword,
+                                    @Param("keywordLike") String keywordLike,
+                                    @Param("categoryId") Long categoryId,
+                                    @Param("sort") String sort,
+                                    @Param("offset") int offset,
+                                    @Param("pageSize") int pageSize);
 
     /**
      * Author: Kaijie Zhu
@@ -92,4 +182,66 @@ public interface PostMapper {
      * Throws: None
      */
     int softDeleteById(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Count all posts currently pending review.
+     * Params: None
+     * Returns:
+     * - long: pending post count
+     * Throws: None
+     */
+    long countPendingReviewPosts();
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Query one page of posts currently pending review.
+     * Params:
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: pending post page list
+     * Throws: None
+     */
+    List<Post> selectPendingReviewPosts(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Approve one pending or hidden post and publish it.
+     * Params:
+     * - id: target post id
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int approveById(@Param("id") Long id);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Reject one post and save moderation reason.
+     * Params:
+     * - id: target post id
+     * - moderationReason: moderation reason text
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int rejectById(@Param("id") Long id, @Param("moderationReason") String moderationReason);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Hide one published post and save moderation reason.
+     * Params:
+     * - id: target post id
+     * - moderationReason: moderation reason text
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int hideById(@Param("id") Long id, @Param("moderationReason") String moderationReason);
 }

@@ -64,6 +64,22 @@
         ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
     </select>
 
+    <select id="countPublishedPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE status = 'PUBLISHED'
+    </select>
+
+    <select id="selectPublishedPostsPage" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'PUBLISHED'
+        ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
     <select id="selectByUserId" resultMap="PostResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
@@ -72,6 +88,64 @@
         WHERE p.user_id = #{userId}
           AND p.status != 'DELETED'
         ORDER BY p.created_at DESC, p.id DESC
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE user_id = #{userId}
+          AND status != 'DELETED'
+    </select>
+
+    <select id="selectByUserIdPage" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.user_id = #{userId}
+          AND p.status != 'DELETED'
+        ORDER BY p.created_at DESC, p.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <sql id="PublishedSearchWhere">
+        p.status = 'PUBLISHED'
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                p.title LIKE #{keywordLike}
+                OR p.description LIKE #{keywordLike}
+            )
+        </if>
+    </sql>
+
+    <select id="countSearchPublishedPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts p
+        WHERE
+        <include refid="PublishedSearchWhere"/>
+    </select>
+
+    <select id="searchPublishedPosts" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE
+        <include refid="PublishedSearchWhere"/>
+        <choose>
+            <when test="sort == 'hot'">
+                ORDER BY (p.view_count + p.like_count * 3 + p.favorite_count * 4 + p.comment_count * 5) DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <otherwise>
+                ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
     <update id="increaseViewCount">
@@ -102,6 +176,47 @@
         WHERE id = #{id}
           AND user_id = #{userId}
           AND status != 'DELETED'
+    </update>
+
+    <select id="countPendingReviewPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE status = 'PENDING_REVIEW'
+    </select>
+
+    <select id="selectPendingReviewPosts" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'PENDING_REVIEW'
+        ORDER BY p.created_at ASC, p.id ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <update id="approveById">
+        UPDATE posts
+        SET status = 'PUBLISHED',
+            published_at = CASE WHEN published_at IS NULL THEN NOW() ELSE published_at END,
+            moderation_reason = NULL
+        WHERE id = #{id}
+          AND status IN ('PENDING_REVIEW', 'REJECTED', 'HIDDEN')
+    </update>
+
+    <update id="rejectById">
+        UPDATE posts
+        SET status = 'REJECTED',
+            moderation_reason = #{moderationReason}
+        WHERE id = #{id}
+          AND status != 'DELETED'
+    </update>
+
+    <update id="hideById">
+        UPDATE posts
+        SET status = 'HIDDEN',
+            moderation_reason = #{moderationReason}
+        WHERE id = #{id}
+          AND status = 'PUBLISHED'
     </update>
 
 </mapper>

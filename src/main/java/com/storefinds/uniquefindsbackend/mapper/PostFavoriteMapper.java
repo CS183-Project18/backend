@@ -72,4 +72,32 @@ public interface PostFavoriteMapper {
      * Throws: None
      */
     List<Post> selectFavoritePostsByUserId(@Param("userId") Long userId);
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-06
+     * Purpose: Count all visible favorited posts of one user.
+     * Params:
+     * - userId: actor user id
+     * Returns:
+     * - long: favorited post count
+     * Throws: None
+     */
+    long countFavoritePostsByUserId(@Param("userId") Long userId);
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-06
+     * Purpose: Query one page of visible favorited posts of one user ordered by favorite time.
+     * Params:
+     * - userId: actor user id
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: favorited post page list
+     * Throws: None
+     */
+    List<Post> selectFavoritePostsByUserIdPage(@Param("userId") Long userId,
+                                               @Param("offset") int offset,
+                                               @Param("pageSize") int pageSize);
 }

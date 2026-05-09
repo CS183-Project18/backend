@@ -10,6 +10,9 @@ public class User {
     private String username;
     private String email;
     private String passwordHash;
+    private String nickname;
+    private String avatarUrl;
+    private String bio;
     private String role;
     private String status;
     private Integer emailVerified;

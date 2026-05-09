@@ -2,10 +2,12 @@ package com.storefinds.uniquefindsbackend.controller.user;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.InteractionStatusResponse;
+import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.security.CurrentUser;
 import com.storefinds.uniquefindsbackend.service.PostInteractionService;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -14,9 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -140,8 +141,10 @@ public class PostInteractionController {
      * Throws:
      * - BusinessException: when current request is unauthenticated
      */
-    public Result<List<PostResponse>> getMyFavoritePosts(Authentication authentication) {
-        return postInteractionService.getMyFavoritePosts(requireCurrentUser(authentication).userId());
+    public Result<PageResponse<PostResponse>> getMyFavoritePosts(@RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                                 @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                                 Authentication authentication) {
+        return postInteractionService.getMyFavoritePosts(requireCurrentUser(authentication).userId(), page, pageSize);
     }
 
     /**

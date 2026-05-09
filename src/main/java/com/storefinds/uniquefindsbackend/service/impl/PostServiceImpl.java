@@ -2,6 +2,7 @@ package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
+import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostImageRequest;
 import com.storefinds.uniquefindsbackend.dto.PostImageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
@@ -124,9 +125,14 @@ public class PostServiceImpl implements PostService {
      * - Result<List<PostResponse>>: published post list
      * Throws: None
      */
-    public Result<List<PostResponse>> getPublishedPosts(Long userId) {
-        List<Post> posts = postMapper.selectPublishedPosts();
-        return Result.success(buildPostResponsesForUser(userId, posts));
+    public Result<PageResponse<PostResponse>> getPublishedPosts(Long userId, int page, int pageSize) {
+        return Result.success(buildPostPage(
+                postMapper.countPublishedPosts(),
+                page,
+                pageSize,
+                postMapper.selectPublishedPostsPage(toOffset(page, pageSize), pageSize),
+                userId
+        ));
     }
 
     @Override
@@ -140,8 +146,55 @@ public class PostServiceImpl implements PostService {
      * - Result<List<PostResponse>>: current user's post list
      * Throws: None
      */
-    public Result<List<PostResponse>> getMyPosts(Long userId) {
-        return Result.success(buildPostResponsesForUser(userId, postMapper.selectByUserId(userId)));
+    public Result<PageResponse<PostResponse>> getMyPosts(Long userId, int page, int pageSize) {
+        return Result.success(buildPostPage(
+                postMapper.countByUserId(userId),
+                page,
+                pageSize,
+                postMapper.selectByUserIdPage(userId, toOffset(page, pageSize), pageSize),
+                userId
+        ));
+    }
+
+    @Override
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Search published posts by keyword, category, and sort option.
+     * Params:
+     * - userId: current authenticated user id or null for guest
+     * - keyword: raw search keyword
+     * - categoryId: optional category id
+     * - sort: raw sort option
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * Returns:
+     * - Result<PageResponse<PostResponse>>: matched published post page
+     * Throws: None
+     */
+    public Result<PageResponse<PostResponse>> searchPublishedPosts(Long userId,
+                                                                   String keyword,
+                                                                   Long categoryId,
+                                                                   String sort,
+                                                                   int page,
+                                                                   int pageSize) {
+        String normalizedKeyword = normalizeOptionalText(keyword);
+        String keywordLike = normalizedKeyword == null ? null : "%" + normalizedKeyword + "%";
+        String normalizedSort = normalizeSort(sort);
+        return Result.success(buildPostPage(
+                postMapper.countSearchPublishedPosts(normalizedKeyword, keywordLike, categoryId),
+                page,
+                pageSize,
+                postMapper.searchPublishedPosts(
+                        normalizedKeyword,
+                        keywordLike,
+                        categoryId,
+                        normalizedSort,
+                        toOffset(page, pageSize),
+                        pageSize
+                ),
+                userId
+        ));
     }
 
     @Override
@@ -238,7 +291,7 @@ public class PostServiceImpl implements PostService {
         if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
             throw new BusinessException("post not found");
         }
-        boolean isOwner = userId.equals(post.getUserId());
+        boolean isOwner = userId != null && userId.equals(post.getUserId());
         boolean isPublished = "PUBLISHED".equalsIgnoreCase(post.getStatus());
         if (!isOwner && !isPublished) {
             throw new BusinessException("post is not available");
@@ -318,6 +371,24 @@ public class PostServiceImpl implements PostService {
 
     /**
      * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Normalize post sort option and fall back to latest when omitted.
+     * Params:
+     * - sort: raw sort option
+     * Returns:
+     * - String: normalized sort option
+     * Throws: None
+     */
+    private String normalizeSort(String sort) {
+        String normalized = normalizeOptionalText(sort);
+        if (normalized == null) {
+            return "latest";
+        }
+        return "hot".equalsIgnoreCase(normalized) ? "hot" : "latest";
+    }
+
+    /**
+     * Author: Kaijie Zhu
      * Date: 2026-04-21
      * Purpose: Replace all images of one post with the latest request payload.
      * Params:
@@ -372,6 +443,48 @@ public class PostServiceImpl implements PostService {
             images.add(image);
         }
         return images;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Convert page number and page size into SQL row offset.
+     * Params:
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * Returns:
+     * - int: SQL row offset
+     * Throws: None
+     */
+    private int toOffset(int page, int pageSize) {
+        return (page - 1) * pageSize;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Build one paged post response object for the specified user context.
+     * Params:
+     * - total: total matched post count
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * - posts: source post entity list
+     * - userId: current authenticated user id or null for guest
+     * Returns:
+     * - PageResponse<PostResponse>: paged response payload
+     * Throws: None
+     */
+    private PageResponse<PostResponse> buildPostPage(long total,
+                                                     int page,
+                                                     int pageSize,
+                                                     List<Post> posts,
+                                                     Long userId) {
+        PageResponse<PostResponse> response = new PageResponse<>();
+        response.setTotal(total);
+        response.setPage(page);
+        response.setPageSize(pageSize);
+        response.setItems(buildPostResponsesForUser(userId, posts));
+        return response;
     }
 
     /**

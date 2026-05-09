@@ -2,12 +2,14 @@ package com.storefinds.uniquefindsbackend.controller.user;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
+import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
 import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.security.CurrentUser;
 import com.storefinds.uniquefindsbackend.service.PostService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -18,9 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -75,7 +76,7 @@ public class PostController {
      */
     public Result<PostResponse> getPost(@PathVariable @Min(value = 1, message = "postId must be greater than 0") Long postId,
                                         Authentication authentication) {
-        return postService.getPostById(requireCurrentUser(authentication).userId(), postId);
+        return postService.getPostById(extractCurrentUserId(authentication), postId);
     }
 
     @GetMapping("/published")
@@ -90,8 +91,10 @@ public class PostController {
      * Throws:
      * - BusinessException: when current request is unauthenticated
      */
-    public Result<List<PostResponse>> getPublishedPosts(Authentication authentication) {
-        return postService.getPublishedPosts(requireCurrentUser(authentication).userId());
+    public Result<PageResponse<PostResponse>> getPublishedPosts(@RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                                @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                                Authentication authentication) {
+        return postService.getPublishedPosts(extractCurrentUserId(authentication), page, pageSize);
     }
 
     @GetMapping("/mine")
@@ -106,8 +109,35 @@ public class PostController {
      * Throws:
      * - BusinessException: when current request is unauthenticated
      */
-    public Result<List<PostResponse>> getMyPosts(Authentication authentication) {
-        return postService.getMyPosts(requireCurrentUser(authentication).userId());
+    public Result<PageResponse<PostResponse>> getMyPosts(@RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                         @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                         Authentication authentication) {
+        return postService.getMyPosts(requireCurrentUser(authentication).userId(), page, pageSize);
+    }
+
+    @GetMapping("/search")
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Search published posts by keyword, category, and sort option.
+     * Params:
+     * - keyword: optional search keyword
+     * - categoryId: optional category id
+     * - sort: optional sort option
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * - authentication: spring authentication object
+     * Returns:
+     * - Result<PageResponse<PostResponse>>: matched published post page
+     * Throws: None
+     */
+    public Result<PageResponse<PostResponse>> searchPosts(@RequestParam(required = false) String keyword,
+                                                          @RequestParam(required = false) Long categoryId,
+                                                          @RequestParam(defaultValue = "latest") String sort,
+                                                          @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                          @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                          Authentication authentication) {
+        return postService.searchPublishedPosts(extractCurrentUserId(authentication), keyword, categoryId, sort, page, pageSize);
     }
 
     @PutMapping("/{postId}")
@@ -164,5 +194,22 @@ public class PostController {
             throw new BusinessException("unauthorized");
         }
         return currentUser;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Extract current authenticated user id when request may come from guest.
+     * Params:
+     * - authentication: spring authentication object
+     * Returns:
+     * - Long: authenticated user id or null
+     * Throws: None
+     */
+    private Long extractCurrentUserId(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CurrentUser currentUser)) {
+            return null;
+        }
+        return currentUser.userId();
     }
 }

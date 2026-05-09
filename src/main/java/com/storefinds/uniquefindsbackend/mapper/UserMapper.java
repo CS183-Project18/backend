@@ -66,4 +66,16 @@ public interface UserMapper {
      * Throws: None
      */
     int updateLastLoginAt(@Param("userId") Long userId);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-06
+     * Purpose: Update editable profile fields of one user.
+     * Params:
+     * - user: user entity carrying latest profile values
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int updateProfile(User user);
 }
