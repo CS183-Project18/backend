@@ -59,7 +59,10 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/login/password",
                                 "/api/auth/login/code",
-                                "/api/auth/code/send"
+                                "/api/auth/code/send",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/published").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/search").permitAll()
