@@ -1,6 +1,6 @@
 package com.storefinds.uniquefindsbackend.common;
 
-public record Result<T>(boolean success, String message, T data) {
+public record Result<T>(boolean success, String code, String message, T data) {
 
     /**
      * Author: Kaijie Zhu
@@ -13,7 +13,7 @@ public record Result<T>(boolean success, String message, T data) {
      * Throws: None
      */
     public static <T> Result<T> success(T data) {
-        return new Result<>(true, "ok", data);
+        return new Result<>(true, ErrorCode.OK, "ok", data);
     }
 
     /**
@@ -28,7 +28,7 @@ public record Result<T>(boolean success, String message, T data) {
      * Throws: None
      */
     public static <T> Result<T> success(String message, T data) {
-        return new Result<>(true, message, data);
+        return new Result<>(true, ErrorCode.OK, message, data);
     }
 
     /**
@@ -42,6 +42,21 @@ public record Result<T>(boolean success, String message, T data) {
      * Throws: None
      */
     public static <T> Result<T> error(String message) {
-        return new Result<>(false, message, null);
+        return new Result<>(false, ErrorCode.BUSINESS_ERROR, message, null);
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-14
+     * Purpose: Build failed result with stable error code and readable message.
+     * Params:
+     * - code: stable error code
+     * - message: error description
+     * Returns:
+     * - Result<T>: standardized error response
+     * Throws: None
+     */
+    public static <T> Result<T> error(String code, String message) {
+        return new Result<>(false, code, message, null);
     }
 }

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.NotificationMapper">
+
+    <resultMap id="NotificationResultMap" type="com.storefinds.uniquefindsbackend.entity.Notification">
+        <id property="id" column="id"/>
+        <result property="recipientUserId" column="recipient_user_id"/>
+        <result property="actorUserId" column="actor_user_id"/>
+        <result property="eventType" column="event_type"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="postId" column="post_id"/>
+        <result property="metadata" column="metadata"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="actorUsername" column="actor_username"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notifications (
+            recipient_user_id, actor_user_id, event_type, target_type, target_id, post_id, metadata, is_read
+        ) VALUES (
+            #{recipientUserId}, #{actorUserId}, #{eventType}, #{targetType}, #{targetId}, #{postId}, #{metadata}, #{isRead}
+        )
+    </insert>
+
+    <select id="countByRecipientUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM notifications
+        WHERE recipient_user_id = #{recipientUserId}
+    </select>
+
+    <select id="countUnreadByRecipientUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM notifications
+        WHERE recipient_user_id = #{recipientUserId}
+          AND is_read = 0
+    </select>
+
+    <select id="countByRecipientUserIdAndEventType" resultType="long">
+        SELECT COUNT(1)
+        FROM notifications
+        WHERE recipient_user_id = #{recipientUserId}
+          AND event_type = #{eventType}
+    </select>
+
+    <select id="selectByRecipientUserId" resultMap="NotificationResultMap">
+        SELECT
+            n.id, n.recipient_user_id, n.actor_user_id, n.event_type, n.target_type, n.target_id,
+            n.post_id, n.metadata, n.is_read, n.created_at,
+            u.username AS actor_username
+        FROM notifications n
+        LEFT JOIN users u ON u.id = n.actor_user_id
+        WHERE n.recipient_user_id = #{recipientUserId}
+        ORDER BY n.created_at DESC, n.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="selectByRecipientUserIdAndEventType" resultMap="NotificationResultMap">
+        SELECT
+            n.id, n.recipient_user_id, n.actor_user_id, n.event_type, n.target_type, n.target_id,
+            n.post_id, n.metadata, n.is_read, n.created_at,
+            u.username AS actor_username
+        FROM notifications n
+        LEFT JOIN users u ON u.id = n.actor_user_id
+        WHERE n.recipient_user_id = #{recipientUserId}
+          AND n.event_type = #{eventType}
+        ORDER BY n.created_at DESC, n.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="selectById" resultMap="NotificationResultMap">
+        SELECT
+            n.id, n.recipient_user_id, n.actor_user_id, n.event_type, n.target_type, n.target_id,
+            n.post_id, n.metadata, n.is_read, n.created_at,
+            u.username AS actor_username
+        FROM notifications n
+        LEFT JOIN users u ON u.id = n.actor_user_id
+        WHERE n.id = #{id}
+        LIMIT 1
+    </select>
+
+    <update id="markAsRead">
+        UPDATE notifications
+        SET is_read = 1
+        WHERE id = #{id}
+          AND recipient_user_id = #{recipientUserId}
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE notifications
+        SET is_read = 1
+        WHERE recipient_user_id = #{recipientUserId}
+          AND is_read = 0
+    </update>
+</mapper>

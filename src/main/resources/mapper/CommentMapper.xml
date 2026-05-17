@@ -7,6 +7,7 @@
     <resultMap id="CommentResultMap" type="com.storefinds.uniquefindsbackend.entity.Comment">
         <id property="id" column="id"/>
         <result property="postId" column="post_id"/>
+        <result property="postOwnerId" column="post_owner_id"/>
         <result property="userId" column="user_id"/>
         <result property="parentId" column="parent_id"/>
         <result property="rootId" column="root_id"/>
@@ -14,6 +15,7 @@
         <result property="content" column="content"/>
         <result property="status" column="status"/>
         <result property="likeCount" column="like_count"/>
+        <result property="isPinned" column="is_pinned"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="postTitle" column="post_title"/>
@@ -23,7 +25,8 @@
 
     <sql id="CommentSelectColumns">
         c.id, c.post_id, c.user_id, c.parent_id, c.root_id, c.reply_to_user_id,
-        c.content, c.status, c.like_count, c.created_at, c.updated_at,
+        p.user_id AS post_owner_id,
+        c.content, c.status, c.like_count, c.is_pinned, c.created_at, c.updated_at,
         p.title AS post_title,
         u.username AS username,
         ru.username AS reply_to_username
@@ -31,9 +34,9 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO comments (
-            post_id, user_id, parent_id, root_id, reply_to_user_id, content, status
+            post_id, user_id, parent_id, root_id, reply_to_user_id, content, status, is_pinned
         ) VALUES (
-            #{postId}, #{userId}, #{parentId}, #{rootId}, #{replyToUserId}, #{content}, #{status}
+            #{postId}, #{userId}, #{parentId}, #{rootId}, #{replyToUserId}, #{content}, #{status}, #{isPinned}
         )
     </insert>
 
@@ -57,7 +60,7 @@
         LEFT JOIN users ru ON ru.id = c.reply_to_user_id
         WHERE c.post_id = #{postId}
           AND c.status = 'VISIBLE'
-        ORDER BY c.created_at ASC, c.id ASC
+        ORDER BY c.is_pinned DESC, c.created_at ASC, c.id ASC
     </select>
 
     <select id="countDisplayableByPostId" resultType="long">
@@ -76,7 +79,27 @@
         LEFT JOIN users ru ON ru.id = c.reply_to_user_id
         WHERE c.post_id = #{postId}
           AND c.status IN ('VISIBLE', 'DELETED')
-        ORDER BY c.created_at ASC, c.id ASC
+        ORDER BY c.is_pinned DESC, c.created_at ASC, c.id ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countVisibleByPostId" resultType="long">
+        SELECT COUNT(1)
+        FROM comments
+        WHERE post_id = #{postId}
+          AND status = 'VISIBLE'
+    </select>
+
+    <select id="selectVisibleByPostIdPage" resultMap="CommentResultMap">
+        SELECT
+        <include refid="CommentSelectColumns"/>
+        FROM comments c
+        INNER JOIN posts p ON p.id = c.post_id
+        INNER JOIN users u ON u.id = c.user_id
+        LEFT JOIN users ru ON ru.id = c.reply_to_user_id
+        WHERE c.post_id = #{postId}
+          AND c.status = 'VISIBLE'
+        ORDER BY c.is_pinned DESC, c.created_at ASC, c.id ASC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
@@ -115,6 +138,22 @@
             updated_at = NOW()
         WHERE id = #{id}
           AND status != #{status}
+    </update>
+
+    <update id="clearPinnedByPostId">
+        UPDATE comments
+        SET is_pinned = 0,
+            updated_at = NOW()
+        WHERE post_id = #{postId}
+          AND is_pinned = 1
+    </update>
+
+    <update id="updatePinnedById">
+        UPDATE comments
+        SET is_pinned = #{isPinned},
+            updated_at = NOW()
+        WHERE id = #{id}
+          AND is_pinned != #{isPinned}
     </update>
 
 </mapper>

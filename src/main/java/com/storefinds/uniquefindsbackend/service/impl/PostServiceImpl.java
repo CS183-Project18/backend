@@ -1,11 +1,17 @@
 package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.common.Result;
+import com.storefinds.uniquefindsbackend.common.InteractionEventType;
+import com.storefinds.uniquefindsbackend.common.ErrorCode;
+import com.storefinds.uniquefindsbackend.common.PostStatus;
+import com.storefinds.uniquefindsbackend.common.ReportTargetType;
 import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
+import com.storefinds.uniquefindsbackend.dto.PostSearchQuery;
 import com.storefinds.uniquefindsbackend.dto.PostImageRequest;
 import com.storefinds.uniquefindsbackend.dto.PostImageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
+import com.storefinds.uniquefindsbackend.dto.TrendingPostsQuery;
 import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.entity.PostImage;
@@ -14,11 +20,16 @@ import com.storefinds.uniquefindsbackend.mapper.PostFavoriteMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostImageMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostLikeMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostMapper;
+import com.storefinds.uniquefindsbackend.service.DiscoveryFacade;
+import com.storefinds.uniquefindsbackend.service.InteractionEventService;
 import com.storefinds.uniquefindsbackend.service.PostService;
+import com.storefinds.uniquefindsbackend.service.SearchQueryParser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -34,43 +45,31 @@ public class PostServiceImpl implements PostService {
     private final PostImageMapper postImageMapper;
     private final PostLikeMapper postLikeMapper;
     private final PostFavoriteMapper postFavoriteMapper;
+    private final SearchQueryParser searchQueryParser;
+    private final DiscoveryFacade discoveryFacade;
+    private final InteractionEventService interactionEventService;
+    private final String publicBaseUrl;
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-17
-     * Purpose: Inject post mapper dependencies for post CRUD business logic.
-     * Params:
-     * - postMapper: post data access mapper
-     * - postImageMapper: post image data access mapper
-     * - postLikeMapper: post like data access mapper
-     * - postFavoriteMapper: post favorite data access mapper
-     * Returns: None
-     * Throws: None
-     */
     public PostServiceImpl(PostMapper postMapper,
                            PostImageMapper postImageMapper,
                            PostLikeMapper postLikeMapper,
-                           PostFavoriteMapper postFavoriteMapper) {
+                           PostFavoriteMapper postFavoriteMapper,
+                           SearchQueryParser searchQueryParser,
+                           DiscoveryFacade discoveryFacade,
+                           InteractionEventService interactionEventService,
+                           @Value("${app.public-base-url:http://localhost:8080}") String publicBaseUrl) {
         this.postMapper = postMapper;
         this.postImageMapper = postImageMapper;
         this.postLikeMapper = postLikeMapper;
         this.postFavoriteMapper = postFavoriteMapper;
+        this.searchQueryParser = searchQueryParser;
+        this.discoveryFacade = discoveryFacade;
+        this.interactionEventService = interactionEventService;
+        this.publicBaseUrl = publicBaseUrl;
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-18
-     * Purpose: Create a new post for the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - request: create post payload
-     * Returns:
-     * - Result<PostResponse>: created post detail
-     * Throws:
-     * - BusinessException: when request content is invalid
-     */
     public Result<PostResponse> createPost(Long userId, CreatePostRequest request) {
         validatePriceRange(request.getPriceMin(), request.getPriceMax());
 
@@ -84,47 +83,47 @@ public class PostServiceImpl implements PostService {
         post.setPriceMax(request.getPriceMax());
         post.setCurrency(normalizeCurrency(request.getCurrency()));
         post.setLocationText(normalizeOptionalText(request.getLocationText()));
-        post.setStatus("PENDING_REVIEW");
+        post.setStatus(PostStatus.PENDING_REVIEW);
         postMapper.insert(post);
         replacePostImages(post.getId(), request.getImages());
+        interactionEventService.record(
+                InteractionEventType.POST_CREATE,
+                userId,
+                post.getId(),
+                null,
+                ReportTargetType.POST,
+                post.getId(),
+                buildMetadata(
+                        "categoryId", request.getCategoryId(),
+                        "storeId", request.getStoreId(),
+                        "status", post.getStatus()
+                )
+        );
 
         Post createdPost = postMapper.selectById(post.getId());
         return Result.success("post created", buildPostResponseForUser(userId, createdPost));
     }
 
     @Override
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-20
-     * Purpose: Query one post detail visible to the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns:
-     * - Result<PostResponse>: post detail
-     * Throws:
-     * - BusinessException: when post is missing or not accessible
-     */
-    public Result<PostResponse> getPostById(Long userId, Long postId) {
-        Post post = requireAccessiblePost(userId, postId);
-        if ("PUBLISHED".equalsIgnoreCase(post.getStatus())) {
+    public Result<PostResponse> getPostById(Long userId, String userRole, Long postId) {
+        Post post = requireAccessiblePost(userId, userRole, postId);
+        if (PostStatus.PUBLISHED.equalsIgnoreCase(post.getStatus())) {
             postMapper.increaseViewCount(postId);
+            interactionEventService.record(
+                    InteractionEventType.POST_VIEW,
+                    userId,
+                    postId,
+                    null,
+                    ReportTargetType.POST,
+                postId,
+                buildMetadata("viewerRole", userRole == null ? "GUEST" : userRole)
+            );
             post = postMapper.selectById(postId);
         }
         return Result.success(buildPostResponseForUser(userId, post));
     }
 
     @Override
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-20
-     * Purpose: Query all published posts ordered by publish time.
-     * Params:
-     * - userId: current authenticated user id
-     * Returns:
-     * - Result<List<PostResponse>>: published post list
-     * Throws: None
-     */
     public Result<PageResponse<PostResponse>> getPublishedPosts(Long userId, int page, int pageSize) {
         return Result.success(buildPostPage(
                 postMapper.countPublishedPosts(),
@@ -136,16 +135,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-19
-     * Purpose: Query all non-deleted posts created by the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * Returns:
-     * - Result<List<PostResponse>>: current user's post list
-     * Throws: None
-     */
     public Result<PageResponse<PostResponse>> getMyPosts(Long userId, int page, int pageSize) {
         return Result.success(buildPostPage(
                 postMapper.countByUserId(userId),
@@ -157,61 +146,44 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-05-06
-     * Purpose: Search published posts by keyword, category, and sort option.
-     * Params:
-     * - userId: current authenticated user id or null for guest
-     * - keyword: raw search keyword
-     * - categoryId: optional category id
-     * - sort: raw sort option
-     * - page: target page number starting from 1
-     * - pageSize: target page size
-     * Returns:
-     * - Result<PageResponse<PostResponse>>: matched published post page
-     * Throws: None
-     */
     public Result<PageResponse<PostResponse>> searchPublishedPosts(Long userId,
                                                                    String keyword,
                                                                    Long categoryId,
                                                                    String sort,
                                                                    int page,
                                                                    int pageSize) {
-        String normalizedKeyword = normalizeOptionalText(keyword);
-        String keywordLike = normalizedKeyword == null ? null : "%" + normalizedKeyword + "%";
-        String normalizedSort = normalizeSort(sort);
-        return Result.success(buildPostPage(
-                postMapper.countSearchPublishedPosts(normalizedKeyword, keywordLike, categoryId),
-                page,
-                pageSize,
-                postMapper.searchPublishedPosts(
-                        normalizedKeyword,
-                        keywordLike,
-                        categoryId,
-                        normalizedSort,
-                        toOffset(page, pageSize),
-                        pageSize
-                ),
-                userId
-        ));
+        PostSearchQuery query = searchQueryParser.parsePostSearchQuery(keyword, categoryId, sort, page, pageSize);
+        interactionEventService.record(
+                InteractionEventType.SEARCH_REQUEST,
+                userId,
+                null,
+                null,
+                null,
+                null,
+                buildMetadata(
+                        "keyword", query.keyword(),
+                        "categoryId", query.categoryId(),
+                        "sort", query.sort(),
+                        "page", query.page(),
+                        "pageSize", query.pageSize()
+                )
+        );
+        PageResponse<Post> postPage = discoveryFacade.searchPublishedPosts(query);
+        return Result.success(buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId));
+    }
+
+    @Override
+    public Result<PageResponse<PostResponse>> getTrendingPosts(Long userId,
+                                                               String window,
+                                                               int page,
+                                                               int pageSize) {
+        TrendingPostsQuery query = searchQueryParser.parseTrendingPostsQuery(window, page, pageSize);
+        PageResponse<Post> postPage = discoveryFacade.getTrendingPosts(query);
+        return Result.success(buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId));
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-19
-     * Purpose: Update one post owned by the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * - request: update payload
-     * Returns:
-     * - Result<PostResponse>: updated post detail
-     * Throws:
-     * - BusinessException: when post is missing, forbidden, or request is invalid
-     */
     public Result<PostResponse> updatePost(Long userId, Long postId, UpdatePostRequest request) {
         Post existingPost = requireOwnedPost(userId, postId);
         validatePriceRange(request.getPriceMin(), request.getPriceMax());
@@ -233,119 +205,51 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-21
-     * Purpose: Soft delete one post owned by the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns:
-     * - Result<Void>: deletion result
-     * Throws:
-     * - BusinessException: when post is missing or forbidden
-     */
     public Result<Void> deletePost(Long userId, Long postId) {
         requireOwnedPost(userId, postId);
         postMapper.softDeleteById(postId, userId);
         return Result.success("post deleted", null);
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-18
-     * Purpose: Ensure the target post exists and belongs to the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns:
-     * - Post: matched owned post
-     * Throws:
-     * - BusinessException: when post is missing, deleted, or forbidden
-     */
     private Post requireOwnedPost(Long userId, Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post not found");
+        if (post == null || PostStatus.DELETED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "post not found");
         }
         if (!userId.equals(post.getUserId())) {
-            throw new BusinessException("you can only operate your own posts");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "you can only operate your own posts");
         }
         return post;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-20
-     * Purpose: Ensure the target post can be viewed by the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns:
-     * - Post: accessible post detail
-     * Throws:
-     * - BusinessException: when post is missing or not publicly visible
-     */
-    private Post requireAccessiblePost(Long userId, Long postId) {
+    private Post requireAccessiblePost(Long userId, String userRole, Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post not found");
+        if (post == null || PostStatus.DELETED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "post not found");
         }
         boolean isOwner = userId != null && userId.equals(post.getUserId());
-        boolean isPublished = "PUBLISHED".equalsIgnoreCase(post.getStatus());
-        if (!isOwner && !isPublished) {
-            throw new BusinessException("post is not available");
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+        boolean isPublished = PostStatus.PUBLISHED.equalsIgnoreCase(post.getStatus());
+        if (!isOwner && !isAdmin && !isPublished) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post is not available");
         }
         return post;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-18
-     * Purpose: Validate min/max price relationship before persistence.
-     * Params:
-     * - priceMin: minimum price
-     * - priceMax: maximum price
-     * Returns: None
-     * Throws:
-     * - BusinessException: when priceMin is greater than priceMax
-     */
     private void validatePriceRange(BigDecimal priceMin, BigDecimal priceMax) {
         if (priceMin != null && priceMax != null && priceMin.compareTo(priceMax) > 0) {
-            throw new BusinessException("priceMin cannot be greater than priceMax");
+            throw new BusinessException(ErrorCode.INVALID_ARGUMENT, "priceMin cannot be greater than priceMax");
         }
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-17
-     * Purpose: Trim one required text field and reject blank content.
-     * Params:
-     * - value: raw text value
-     * - errorMessage: exception message when field is blank
-     * Returns:
-     * - String: normalized text value
-     * Throws:
-     * - BusinessException: when normalized value is blank
-     */
     private String normalizeRequiredText(String value, String errorMessage) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.isEmpty()) {
-            throw new BusinessException(errorMessage);
+            throw new BusinessException(ErrorCode.INVALID_ARGUMENT, errorMessage);
         }
         return normalized;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-17
-     * Purpose: Trim one optional text field and convert blank to null.
-     * Params:
-     * - value: raw text value
-     * Returns:
-     * - String: normalized text or null
-     * Throws: None
-     */
     private String normalizeOptionalText(String value) {
         if (value == null) {
             return null;
@@ -354,50 +258,11 @@ public class PostServiceImpl implements PostService {
         return normalized.isEmpty() ? null : normalized;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-18
-     * Purpose: Normalize currency value and apply default when omitted.
-     * Params:
-     * - currency: raw currency code
-     * Returns:
-     * - String: upper-cased 3-letter currency code
-     * Throws: None
-     */
     private String normalizeCurrency(String currency) {
         String normalized = normalizeOptionalText(currency);
         return normalized == null ? "CNY" : normalized.toUpperCase();
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-05-06
-     * Purpose: Normalize post sort option and fall back to latest when omitted.
-     * Params:
-     * - sort: raw sort option
-     * Returns:
-     * - String: normalized sort option
-     * Throws: None
-     */
-    private String normalizeSort(String sort) {
-        String normalized = normalizeOptionalText(sort);
-        if (normalized == null) {
-            return "latest";
-        }
-        return "hot".equalsIgnoreCase(normalized) ? "hot" : "latest";
-    }
-
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-21
-     * Purpose: Replace all images of one post with the latest request payload.
-     * Params:
-     * - postId: target post id
-     * - imageRequests: latest image payload list
-     * Returns: None
-     * Throws:
-     * - BusinessException: when more than 9 images are provided
-     */
     private void replacePostImages(Long postId, List<PostImageRequest> imageRequests) {
         postImageMapper.deleteByPostId(postId);
         List<PostImage> images = buildPostImages(postId, imageRequests);
@@ -406,24 +271,12 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-19
-     * Purpose: Convert request image payloads into post image entities.
-     * Params:
-     * - postId: target post id
-     * - imageRequests: request image list
-     * Returns:
-     * - List<PostImage>: normalized image entities
-     * Throws:
-     * - BusinessException: when too many images are provided
-     */
     private List<PostImage> buildPostImages(Long postId, List<PostImageRequest> imageRequests) {
         if (imageRequests == null || imageRequests.isEmpty()) {
             return Collections.emptyList();
         }
         if (imageRequests.size() > 9) {
-            throw new BusinessException("a post can contain at most 9 images");
+            throw new BusinessException(ErrorCode.INVALID_ARGUMENT, "a post can contain at most 9 images");
         }
 
         List<PostImage> images = new ArrayList<>();
@@ -445,35 +298,10 @@ public class PostServiceImpl implements PostService {
         return images;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-05-06
-     * Purpose: Convert page number and page size into SQL row offset.
-     * Params:
-     * - page: target page number starting from 1
-     * - pageSize: target page size
-     * Returns:
-     * - int: SQL row offset
-     * Throws: None
-     */
     private int toOffset(int page, int pageSize) {
         return (page - 1) * pageSize;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-05-06
-     * Purpose: Build one paged post response object for the specified user context.
-     * Params:
-     * - total: total matched post count
-     * - page: target page number starting from 1
-     * - pageSize: target page size
-     * - posts: source post entity list
-     * - userId: current authenticated user id or null for guest
-     * Returns:
-     * - PageResponse<PostResponse>: paged response payload
-     * Throws: None
-     */
     private PageResponse<PostResponse> buildPostPage(long total,
                                                      int page,
                                                      int pageSize,
@@ -487,16 +315,6 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-20
-     * Purpose: Convert a list of post entities to response objects with image data.
-     * Params:
-     * - posts: source post entity list
-     * Returns:
-     * - List<PostResponse>: response list with images attached
-     * Throws: None
-     */
     public List<PostResponse> buildPostResponsesForUser(Long userId, List<Post> posts) {
         if (posts == null || posts.isEmpty()) {
             return List.of();
@@ -520,16 +338,6 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-20
-     * Purpose: Group image response objects by post id for batch response assembly.
-     * Params:
-     * - postIds: target post ids
-     * Returns:
-     * - Map<Long,List<PostImageResponse>>: grouped images keyed by post id
-     * Throws: None
-     */
     private Map<Long, List<PostImageResponse>> groupImageResponsesByPostId(List<Long> postIds) {
         Map<Long, List<PostImageResponse>> imageMap = new LinkedHashMap<>();
         for (PostImage image : postImageMapper.selectByPostIds(postIds)) {
@@ -539,16 +347,6 @@ public class PostServiceImpl implements PostService {
         return imageMap;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-21
-     * Purpose: Convert post entity to API response object.
-     * Params:
-     * - post: source post entity
-     * Returns:
-     * - PostResponse: response payload object
-     * Throws: None
-     */
     private PostResponse buildPostResponseForUser(Long userId, Post post) {
         boolean likedByCurrentUser = userId != null && postLikeMapper.countByUserIdAndPostId(userId, post.getId()) > 0;
         boolean favoritedByCurrentUser = userId != null
@@ -559,19 +357,6 @@ public class PostServiceImpl implements PostService {
                 .toList(), likedByCurrentUser, favoritedByCurrentUser);
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-21
-     * Purpose: Convert post entity and prepared image list to API response object.
-     * Params:
-     * - post: source post entity
-     * - images: prepared image response list
-     * - likedByCurrentUser: whether current user has liked the post
-     * - favoritedByCurrentUser: whether current user has favorited the post
-     * Returns:
-     * - PostResponse: response payload object
-     * Throws: None
-     */
     private PostResponse toPostResponse(Post post,
                                         List<PostImageResponse> images,
                                         boolean likedByCurrentUser,
@@ -596,6 +381,7 @@ public class PostServiceImpl implements PostService {
         response.setCommentCount(post.getCommentCount());
         response.setLikedByCurrentUser(likedByCurrentUser);
         response.setFavoritedByCurrentUser(favoritedByCurrentUser);
+        response.setShareUrl(buildShareUrl(post.getId()));
         response.setPublishedAt(post.getPublishedAt());
         response.setCreatedAt(post.getCreatedAt());
         response.setUpdatedAt(post.getUpdatedAt());
@@ -603,16 +389,6 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    /**
-     * Author: Kaijie Zhu
-     * Date: 2026-04-18
-     * Purpose: Convert post image entity to API response object.
-     * Params:
-     * - image: source image entity
-     * Returns:
-     * - PostImageResponse: image response payload object
-     * Throws: None
-     */
     private PostImageResponse toPostImageResponse(PostImage image) {
         PostImageResponse response = new PostImageResponse();
         response.setId(image.getId());
@@ -630,60 +406,31 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Like one published post for the current user.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns: None
-     * Throws:
-     * - BusinessException: when post is not published or already liked
-     */
     public void likePost(Long userId, Long postId) {
-        requirePublishedPost(postId);
+        Post post = postMapper.selectById(postId);
+        if (post == null || !PostStatus.PUBLISHED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post is not available");
+        }
         if (postLikeMapper.countByUserIdAndPostId(userId, postId) > 0) {
-            throw new BusinessException("already liked");
+            throw new BusinessException(ErrorCode.CONFLICT, "already liked");
         }
         postLikeMapper.insertIgnore(userId, postId);
-        postMapper.increaseLikeCount(postId);
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Cancel like relation on one post.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns: None
-     * Throws:
-     * - BusinessException: when post is missing or not liked
-     */
     public void unlikePost(Long userId, Long postId) {
-        requireExistingPost(postId);
+        Post post = postMapper.selectById(postId);
+        if (post == null || PostStatus.DELETED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "post not found");
+        }
         if (postLikeMapper.countByUserIdAndPostId(userId, postId) == 0) {
-            throw new BusinessException("not liked");
+            throw new BusinessException(ErrorCode.INVALID_STATE, "not liked");
         }
         postLikeMapper.deleteByUserIdAndPostId(userId, postId);
-        postMapper.decreaseLikeCount(postId);
     }
 
     @Override
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Batch query liked post ids for the current user from a given post id list.
-     * Params:
-     * - userId: current authenticated user id
-     * - postIds: target post id list
-     * Returns:
-     * - List<Long>: liked post ids from the input list
-     * Throws: None
-     */
     public List<Long> getLikedPostIds(Long userId, List<Long> postIds) {
         if (userId == null || postIds == null || postIds.isEmpty()) {
             return List.of();
@@ -692,17 +439,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Check whether the current user has liked one post.
-     * Params:
-     * - userId: current authenticated user id
-     * - postId: target post id
-     * Returns:
-     * - boolean: true if liked, false otherwise
-     * Throws: None
-     */
     public boolean isLiked(Long userId, Long postId) {
         if (userId == null || postId == null) {
             return false;
@@ -710,41 +446,18 @@ public class PostServiceImpl implements PostService {
         return postLikeMapper.countByUserIdAndPostId(userId, postId) > 0;
     }
 
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Ensure the target post exists and is currently published.
-     * Params:
-     * - postId: target post id
-     * Returns:
-     * - Post: published post entity
-     * Throws:
-     * - BusinessException: when post is missing or not published
-     */
-    private Post requirePublishedPost(Long postId) {
-        Post post = postMapper.selectById(postId);
-        if (post == null || !"PUBLISHED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post is not available");
-        }
-        return post;
+    private String buildShareUrl(Long postId) {
+        return publicBaseUrl.replaceAll("/+$", "") + "/posts/" + postId;
     }
 
-    /**
-     * Author: Enqi Guo
-     * Date: 2026-05-10
-     * Purpose: Ensure the target post exists and is not deleted.
-     * Params:
-     * - postId: target post id
-     * Returns:
-     * - Post: matched post entity
-     * Throws:
-     * - BusinessException: when post is missing or deleted
-     */
-    private Post requireExistingPost(Long postId) {
-        Post post = postMapper.selectById(postId);
-        if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post not found");
+    private Map<String, Object> buildMetadata(Object... keyValues) {
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < keyValues.length; i += 2) {
+            Object value = keyValues[i + 1];
+            if (value != null) {
+                metadata.put(String.valueOf(keyValues[i]), value);
+            }
         }
-        return post;
+        return metadata;
     }
 }

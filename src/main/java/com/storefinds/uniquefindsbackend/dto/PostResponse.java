@@ -7,6 +7,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+/**
+ * Author: Kaijie Zhu
+ * Date: 2026-05-10
+ * Purpose: Transfer post detail data including interaction counters and canonical share URL.
+ * Params: None
+ * Returns: None
+ * Throws: None
+ */
 public class PostResponse {
     private Long id;
     private Long userId;
@@ -27,6 +35,7 @@ public class PostResponse {
     private Long commentCount;
     private Boolean likedByCurrentUser;
     private Boolean favoritedByCurrentUser;
+    private String shareUrl;
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -43,6 +43,8 @@ public interface UserMapper {
      */
     User selectById(@Param("id") Long id);
 
+    User selectPublicByUsername(@Param("username") String username);
+
     /**
      * Author: Kaijie Zhu
      * Date: 2026-04-08

@@ -108,6 +108,24 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <select id="countPublishedByUserId" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE user_id = #{userId}
+          AND status = 'PUBLISHED'
+    </select>
+
+    <select id="selectPublishedByUserIdPage" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.user_id = #{userId}
+          AND p.status = 'PUBLISHED'
+        ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
     <sql id="PublishedSearchWhere">
         p.status = 'PUBLISHED'
         <if test="categoryId != null">
@@ -117,8 +135,13 @@
             AND (
                 p.title LIKE #{keywordLike}
                 OR p.description LIKE #{keywordLike}
+                OR p.location_text LIKE #{keywordLike}
             )
         </if>
+    </sql>
+
+    <sql id="HotScoreExpression">
+        (p.view_count + p.like_count * 3 + p.favorite_count * 4 + p.comment_count * 5)
     </sql>
 
     <select id="countSearchPublishedPosts" resultType="long">
@@ -137,7 +160,7 @@
         <include refid="PublishedSearchWhere"/>
         <choose>
             <when test="sort == 'hot'">
-                ORDER BY (p.view_count + p.like_count * 3 + p.favorite_count * 4 + p.comment_count * 5) DESC,
+                ORDER BY <include refid="HotScoreExpression"/> DESC,
                          p.published_at DESC,
                          p.id DESC
             </when>
@@ -145,6 +168,28 @@
                 ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
             </otherwise>
         </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countTrendingPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE status = 'PUBLISHED'
+          AND published_at IS NOT NULL
+          AND published_at &gt;= #{windowStart}
+    </select>
+
+    <select id="selectTrendingPosts" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'PUBLISHED'
+          AND p.published_at IS NOT NULL
+          AND p.published_at &gt;= #{windowStart}
+        ORDER BY <include refid="HotScoreExpression"/> DESC,
+                 p.published_at DESC,
+                 p.id DESC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 

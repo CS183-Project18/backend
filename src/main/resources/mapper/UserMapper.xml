@@ -44,6 +44,15 @@
         LIMIT 1
     </select>
 
+    <select id="selectPublicByUsername" resultMap="UserResultMap">
+        SELECT id, username, email, password_hash, nickname, avatar_url, bio, role, status,
+               email_verified, last_login_at, created_at, updated_at
+        FROM users
+        WHERE username = #{username}
+          AND status = 'ACTIVE'
+        LIMIT 1
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO users (username, email, password_hash, nickname, avatar_url, bio, role, status, email_verified)
         VALUES (#{username}, #{email}, #{passwordHash}, #{nickname}, #{avatarUrl}, #{bio}, #{role}, #{status}, #{emailVerified})

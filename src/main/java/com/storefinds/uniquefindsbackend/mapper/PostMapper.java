@@ -4,6 +4,7 @@ import com.storefinds.uniquefindsbackend.entity.Post;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -108,6 +109,12 @@ public interface PostMapper {
                                   @Param("offset") int offset,
                                   @Param("pageSize") int pageSize);
 
+    long countPublishedByUserId(@Param("userId") Long userId);
+
+    List<Post> selectPublishedByUserIdPage(@Param("userId") Long userId,
+                                           @Param("offset") int offset,
+                                           @Param("pageSize") int pageSize);
+
     /**
      * Author: Kaijie Zhu
      * Date: 2026-05-06
@@ -145,6 +152,34 @@ public interface PostMapper {
                                     @Param("sort") String sort,
                                     @Param("offset") int offset,
                                     @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-11
+     * Purpose: Count all published posts within one trending time window.
+     * Params:
+     * - windowStart: inclusive trending window start time
+     * Returns:
+     * - long: matched trending post count
+     * Throws: None
+     */
+    long countTrendingPosts(@Param("windowStart") LocalDateTime windowStart);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-11
+     * Purpose: Query one page of published posts ranked by trending score within one time window.
+     * Params:
+     * - windowStart: inclusive trending window start time
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: trending post page list
+     * Throws: None
+     */
+    List<Post> selectTrendingPosts(@Param("windowStart") LocalDateTime windowStart,
+                                   @Param("offset") int offset,
+                                   @Param("pageSize") int pageSize);
 
     /**
      * Author: Kaijie Zhu

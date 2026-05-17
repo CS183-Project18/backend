@@ -13,6 +13,8 @@ public class Report {
     private String reasonType;
     private String reasonDetail;
     private String status;
+    private String resolutionAction;
+    private String resolutionNote;
     private Long handledBy;
     private LocalDateTime handledAt;
     private LocalDateTime createdAt;

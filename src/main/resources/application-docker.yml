@@ -1,0 +1,5 @@
+app:
+  auth:
+    debug-code-response: true
+  mail:
+    mock: true

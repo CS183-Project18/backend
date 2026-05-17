@@ -1,6 +1,15 @@
 package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.common.Result;
+import com.storefinds.uniquefindsbackend.common.CommentStatus;
+import com.storefinds.uniquefindsbackend.common.ErrorCode;
+import com.storefinds.uniquefindsbackend.common.InteractionEventType;
+import com.storefinds.uniquefindsbackend.common.ModerationActionType;
+import com.storefinds.uniquefindsbackend.common.NotificationEventType;
+import com.storefinds.uniquefindsbackend.common.NotificationTargetType;
+import com.storefinds.uniquefindsbackend.common.PostStatus;
+import com.storefinds.uniquefindsbackend.common.ReportStatus;
+import com.storefinds.uniquefindsbackend.common.ReportTargetType;
 import com.storefinds.uniquefindsbackend.dto.AdminPostModerationResponse;
 import com.storefinds.uniquefindsbackend.dto.ModerationActionRequest;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
@@ -15,55 +24,51 @@ import com.storefinds.uniquefindsbackend.mapper.ModerationLogMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.mapper.ReportMapper;
 import com.storefinds.uniquefindsbackend.service.AdminModerationService;
+import com.storefinds.uniquefindsbackend.service.InteractionEventService;
+import com.storefinds.uniquefindsbackend.service.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
+/**
+ * Author: Kaijie Zhu
+ * Date: 2026-05-14
+ * Purpose: Implement moderation workflows for posts, comments, reports, and related moderation notifications.
+ * Params: None
+ * Returns: None
+ * Throws: None
+ */
 public class AdminModerationServiceImpl implements AdminModerationService {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminModerationServiceImpl.class);
 
     private final ReportMapper reportMapper;
     private final PostMapper postMapper;
     private final CommentMapper commentMapper;
     private final ModerationLogMapper moderationLogMapper;
+    private final NotificationService notificationService;
+    private final InteractionEventService interactionEventService;
 
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Inject mapper dependencies for admin moderation business logic.
-     * Params:
-     * - reportMapper: report data access mapper
-     * - postMapper: post data access mapper
-     * - commentMapper: comment data access mapper
-     * - moderationLogMapper: moderation log data access mapper
-     * Returns: None
-     * Throws: None
-     */
     public AdminModerationServiceImpl(ReportMapper reportMapper,
                                       PostMapper postMapper,
                                       CommentMapper commentMapper,
-                                      ModerationLogMapper moderationLogMapper) {
+                                      ModerationLogMapper moderationLogMapper,
+                                      NotificationService notificationService,
+                                      InteractionEventService interactionEventService) {
         this.reportMapper = reportMapper;
         this.postMapper = postMapper;
         this.commentMapper = commentMapper;
         this.moderationLogMapper = moderationLogMapper;
+        this.notificationService = notificationService;
+        this.interactionEventService = interactionEventService;
     }
 
     @Override
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Query one page of reports matching admin filter conditions.
-     * Params:
-     * - targetType: optional report target type
-     * - status: optional report status
-     * - page: target page number starting from 1
-     * - pageSize: target page size
-     * Returns:
-     * - Result<PageResponse<ReportResponse>>: matched report page
-     * Throws: None
-     */
     public Result<PageResponse<ReportResponse>> getReports(String targetType, String status, int page, int pageSize) {
         String normalizedTargetType = normalizeTargetType(targetType);
         String normalizedStatus = normalizeReportStatus(status);
@@ -77,17 +82,6 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     }
 
     @Override
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Query one page of posts currently pending review.
-     * Params:
-     * - page: target page number starting from 1
-     * - pageSize: target page size
-     * Returns:
-     * - Result<PageResponse<AdminPostModerationResponse>>: pending post page
-     * Throws: None
-     */
     public Result<PageResponse<AdminPostModerationResponse>> getPendingPosts(int page, int pageSize) {
         List<Post> posts = postMapper.selectPendingReviewPosts(toOffset(page, pageSize), pageSize);
         PageResponse<AdminPostModerationResponse> response = new PageResponse<>();
@@ -100,193 +94,208 @@ public class AdminModerationServiceImpl implements AdminModerationService {
 
     @Override
     @Transactional
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Approve one post and make it published.
-     * Params:
-     * - adminUserId: current admin user id
-     * - postId: target post id
-     * Returns:
-     * - Result<Void>: operation result
-     * Throws:
-     * - BusinessException: when post is missing or deleted
-     */
     public Result<Void> approvePost(Long adminUserId, Long postId) {
-        requireExistingPost(postId);
-        postMapper.approveById(postId);
-        writeModerationLog("POST", postId, adminUserId, "APPROVE", null);
+        Post post = requireExistingPost(postId);
+        if (postMapper.approveById(postId) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow approval");
+        }
+        writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.APPROVE, null);
+        notificationService.createNotification(post.getUserId(),
+                adminUserId,
+                NotificationEventType.POST_MODERATED,
+                NotificationTargetType.POST,
+                postId,
+                postId);
         return Result.success("post approved", null);
     }
 
     @Override
     @Transactional
     /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Reject one post and save moderation reason.
+     * Author: Kaijie Zhu
+     * Date: 2026-05-14
+     * Purpose: Reject one pending post and notify the author about the moderation outcome.
      * Params:
-     * - adminUserId: current admin user id
+     * - adminUserId: moderator user id
      * - postId: target post id
      * - request: moderation action payload
      * Returns:
      * - Result<Void>: operation result
      * Throws:
-     * - BusinessException: when post is missing or deleted
+     * - BusinessException: when the post or reason is invalid
      */
     public Result<Void> rejectPost(Long adminUserId, Long postId, ModerationActionRequest request) {
-        requireExistingPost(postId);
+        Post post = requireExistingPost(postId);
         String reason = normalizeRequiredReason(request);
-        postMapper.rejectById(postId, reason);
-        reportMapper.resolvePendingByTarget("POST", postId, adminUserId);
-        writeModerationLog("POST", postId, adminUserId, "REJECT", reason);
+        if (postMapper.rejectById(postId, reason) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow rejection");
+        }
+        reportMapper.resolvePendingByTarget(ReportTargetType.POST, postId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
+        writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.REJECT, reason);
+        notificationService.createNotification(post.getUserId(),
+                adminUserId,
+                NotificationEventType.POST_MODERATED,
+                NotificationTargetType.POST,
+                postId,
+                postId);
         return Result.success("post rejected", null);
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Hide one published post and save moderation reason.
-     * Params:
-     * - adminUserId: current admin user id
-     * - postId: target post id
-     * - request: moderation action payload
-     * Returns:
-     * - Result<Void>: operation result
-     * Throws:
-     * - BusinessException: when post is missing or deleted
-     */
     public Result<Void> hidePost(Long adminUserId, Long postId, ModerationActionRequest request) {
         Post post = requireExistingPost(postId);
-        if (!"PUBLISHED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post is not published");
+        if (!PostStatus.PUBLISHED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post is not published");
         }
         String reason = normalizeRequiredReason(request);
-        postMapper.hideById(postId, reason);
-        reportMapper.resolvePendingByTarget("POST", postId, adminUserId);
-        writeModerationLog("POST", postId, adminUserId, "HIDE", reason);
+        if (postMapper.hideById(postId, reason) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow hide");
+        }
+        reportMapper.resolvePendingByTarget(ReportTargetType.POST, postId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
+        writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.HIDE, reason);
+        notificationService.createNotification(post.getUserId(),
+                adminUserId,
+                NotificationEventType.POST_MODERATED,
+                NotificationTargetType.POST,
+                postId,
+                postId);
         return Result.success("post hidden", null);
     }
 
     @Override
     @Transactional
     /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Hide one visible comment by admin action.
+     * Author: Kaijie Zhu
+     * Date: 2026-05-14
+     * Purpose: Hide one visible comment and notify the comment author about the moderation outcome.
      * Params:
-     * - adminUserId: current admin user id
+     * - adminUserId: moderator user id
      * - commentId: target comment id
      * - request: moderation action payload
      * Returns:
      * - Result<Void>: operation result
      * Throws:
-     * - BusinessException: when comment is missing or already deleted
+     * - BusinessException: when the comment or reason is invalid
      */
     public Result<Void> hideComment(Long adminUserId, Long commentId, ModerationActionRequest request) {
         Comment comment = requireModeratableComment(commentId);
-        if (!"VISIBLE".equalsIgnoreCase(comment.getStatus())) {
-            throw new BusinessException("comment is not visible");
+        if (!CommentStatus.VISIBLE.equalsIgnoreCase(comment.getStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "comment is not visible");
         }
         String reason = normalizeRequiredReason(request);
-        commentMapper.updateStatusById(commentId, "HIDDEN");
-        reportMapper.resolvePendingByTarget("COMMENT", commentId, adminUserId);
-        writeModerationLog("COMMENT", commentId, adminUserId, "HIDE", reason);
+        if (commentMapper.updateStatusById(commentId, CommentStatus.HIDDEN) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "comment status does not allow hide");
+        }
+        reportMapper.resolvePendingByTarget(ReportTargetType.COMMENT, commentId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
+        writeModerationLog(ReportTargetType.COMMENT, commentId, adminUserId, ModerationActionType.HIDE, reason);
+        notificationService.createNotification(comment.getUserId(),
+                adminUserId,
+                NotificationEventType.COMMENT_MODERATED,
+                NotificationTargetType.COMMENT,
+                commentId,
+                comment.getPostId());
         return Result.success("comment hidden", null);
     }
 
     @Override
     @Transactional
     /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Delete one comment by admin action using the existing deleted placeholder strategy.
+     * Author: Kaijie Zhu
+     * Date: 2026-05-14
+     * Purpose: Delete one comment through moderation flow and notify the comment author.
      * Params:
-     * - adminUserId: current admin user id
+     * - adminUserId: moderator user id
      * - commentId: target comment id
      * - request: moderation action payload
      * Returns:
      * - Result<Void>: operation result
      * Throws:
-     * - BusinessException: when comment is missing or already deleted
+     * - BusinessException: when the comment or reason is invalid
      */
     public Result<Void> deleteComment(Long adminUserId, Long commentId, ModerationActionRequest request) {
-        requireModeratableComment(commentId);
+        Comment comment = requireModeratableComment(commentId);
         String reason = normalizeRequiredReason(request);
-        commentMapper.updateStatusById(commentId, "DELETED");
-        reportMapper.resolvePendingByTarget("COMMENT", commentId, adminUserId);
-        writeModerationLog("COMMENT", commentId, adminUserId, "DELETE", reason);
+        if (commentMapper.updateStatusById(commentId, CommentStatus.DELETED) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "comment status does not allow delete");
+        }
+        reportMapper.resolvePendingByTarget(ReportTargetType.COMMENT, commentId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
+        writeModerationLog(ReportTargetType.COMMENT, commentId, adminUserId, ModerationActionType.DELETE, reason);
+        notificationService.createNotification(comment.getUserId(),
+                adminUserId,
+                NotificationEventType.COMMENT_MODERATED,
+                NotificationTargetType.COMMENT,
+                commentId,
+                comment.getPostId());
         return Result.success("comment deleted", null);
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Mark one report as resolved.
-     * Params:
-     * - adminUserId: current admin user id
-     * - reportId: target report id
-     * - request: moderation action payload
-     * Returns:
-     * - Result<Void>: operation result
-     * Throws:
-     * - BusinessException: when report does not exist
-     */
     public Result<Void> resolveReport(Long adminUserId, Long reportId, ModerationActionRequest request) {
         Report report = requireReport(reportId);
         String reason = normalizeOptionalText(request == null ? null : request.getReason());
-        reportMapper.updateStatus(reportId, "RESOLVED", adminUserId);
-        writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, "APPROVE", reason);
+        if (!isOpenReportStatus(report.getStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow resolve");
+        }
+        reportMapper.updateStatus(reportId, ReportStatus.RESOLVED, adminUserId, ModerationActionType.APPROVE, reason);
+        writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, ModerationActionType.APPROVE, reason);
+        interactionEventService.record(
+                InteractionEventType.REPORT_CLOSE,
+                adminUserId,
+                resolveRelatedPostId(report),
+                ReportTargetType.COMMENT.equals(report.getTargetType()) ? report.getTargetId() : null,
+                report.getTargetType(),
+                report.getTargetId(),
+                Map.of("reportId", reportId, "status", ReportStatus.RESOLVED, "resolutionAction", ModerationActionType.APPROVE)
+        );
+        log.info("report resolved: reportId={}, adminUserId={}", reportId, adminUserId);
         return Result.success("report resolved", null);
     }
 
     @Override
     @Transactional
-    /**
-     * Author: Shuying Liang
-     * Date: 2026-05-06
-     * Purpose: Mark one report as rejected when admin determines the report is invalid.
-     * Params:
-     * - adminUserId: current admin user id
-     * - reportId: target report id
-     * - request: moderation action payload
-     * Returns:
-     * - Result<Void>: operation result
-     * Throws:
-     * - BusinessException: when report does not exist
-     */
     public Result<Void> rejectReport(Long adminUserId, Long reportId, ModerationActionRequest request) {
         Report report = requireReport(reportId);
         String reason = normalizeOptionalText(request == null ? null : request.getReason());
-        reportMapper.updateStatus(reportId, "REJECTED", adminUserId);
-        writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, "UNHIDE", reason);
+        if (!isOpenReportStatus(report.getStatus())) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow reject");
+        }
+        reportMapper.updateStatus(reportId, ReportStatus.REJECTED, adminUserId, ModerationActionType.UNHIDE, reason);
+        writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, ModerationActionType.UNHIDE, reason);
+        interactionEventService.record(
+                InteractionEventType.REPORT_CLOSE,
+                adminUserId,
+                resolveRelatedPostId(report),
+                ReportTargetType.COMMENT.equals(report.getTargetType()) ? report.getTargetId() : null,
+                report.getTargetType(),
+                report.getTargetId(),
+                Map.of("reportId", reportId, "status", ReportStatus.REJECTED, "resolutionAction", ModerationActionType.UNHIDE)
+        );
+        log.info("report rejected: reportId={}, adminUserId={}", reportId, adminUserId);
         return Result.success("report rejected", null);
     }
 
     private Report requireReport(Long reportId) {
         Report report = reportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException("report not found");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "report not found");
         }
         return report;
     }
 
     private Post requireExistingPost(Long postId) {
         Post post = postMapper.selectById(postId);
-        if (post == null || "DELETED".equalsIgnoreCase(post.getStatus())) {
-            throw new BusinessException("post not found");
+        if (post == null || PostStatus.DELETED.equalsIgnoreCase(post.getStatus())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "post not found");
         }
         return post;
     }
 
     private Comment requireModeratableComment(Long commentId) {
         Comment comment = commentMapper.selectById(commentId);
-        if (comment == null || "DELETED".equalsIgnoreCase(comment.getStatus())) {
-            throw new BusinessException("comment not found");
+        if (comment == null || CommentStatus.DELETED.equalsIgnoreCase(comment.getStatus())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "comment not found");
         }
         return comment;
     }
@@ -308,7 +317,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     private String normalizeRequiredReason(ModerationActionRequest request) {
         String normalized = normalizeOptionalText(request == null ? null : request.getReason());
         if (normalized == null) {
-            throw new BusinessException("reason is required");
+            throw new BusinessException(ErrorCode.INVALID_ARGUMENT, "reason is required");
         }
         return normalized;
     }
@@ -328,8 +337,8 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         }
         normalized = normalized.toUpperCase();
         return switch (normalized) {
-            case "POST", "COMMENT", "USER" -> normalized;
-            default -> throw new BusinessException("targetType is invalid");
+            case ReportTargetType.POST, ReportTargetType.COMMENT, ReportTargetType.USER -> normalized;
+            default -> throw new BusinessException(ErrorCode.INVALID_ARGUMENT, "targetType is invalid");
         };
     }
 
@@ -340,9 +349,13 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         }
         normalized = normalized.toUpperCase();
         return switch (normalized) {
-            case "PENDING", "PROCESSING", "RESOLVED", "REJECTED" -> normalized;
-            default -> throw new BusinessException("status is invalid");
+            case ReportStatus.PENDING, ReportStatus.PROCESSING, ReportStatus.RESOLVED, ReportStatus.REJECTED -> normalized;
+            default -> throw new BusinessException(ErrorCode.INVALID_ARGUMENT, "status is invalid");
         };
+    }
+
+    private boolean isOpenReportStatus(String status) {
+        return ReportStatus.PENDING.equalsIgnoreCase(status) || ReportStatus.PROCESSING.equalsIgnoreCase(status);
     }
 
     private ReportResponse toReportResponse(Report report) {
@@ -355,10 +368,13 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setReasonType(report.getReasonType());
         response.setReasonDetail(report.getReasonDetail());
         response.setStatus(report.getStatus());
+        response.setResolutionAction(report.getResolutionAction());
+        response.setResolutionNote(report.getResolutionNote());
         response.setHandledBy(report.getHandledBy());
         response.setHandledByUsername(report.getHandledByUsername());
         response.setHandledAt(report.getHandledAt());
         response.setCreatedAt(report.getCreatedAt());
+        response.setTargetStatus(resolveTargetStatus(report));
         return response;
     }
 
@@ -377,5 +393,25 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setCreatedAt(post.getCreatedAt());
         response.setUpdatedAt(post.getUpdatedAt());
         return response;
+    }
+
+    private Long resolveRelatedPostId(Report report) {
+        if (ReportTargetType.POST.equals(report.getTargetType())) {
+            return report.getTargetId();
+        }
+        Comment comment = commentMapper.selectById(report.getTargetId());
+        return comment == null ? null : comment.getPostId();
+    }
+
+    private String resolveTargetStatus(Report report) {
+        if (ReportTargetType.POST.equals(report.getTargetType())) {
+            Post post = postMapper.selectById(report.getTargetId());
+            return post == null ? PostStatus.DELETED : post.getStatus();
+        }
+        if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
+            Comment comment = commentMapper.selectById(report.getTargetId());
+            return comment == null ? CommentStatus.DELETED : comment.getStatus();
+        }
+        return null;
     }
 }

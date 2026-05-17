@@ -306,6 +306,7 @@ CREATE TABLE IF NOT EXISTS comments (
   content VARCHAR(1000) NOT NULL COMMENT '评论内容',
   status ENUM('VISIBLE','HIDDEN','DELETED') NOT NULL DEFAULT 'VISIBLE' COMMENT '评论状态',
   like_count BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '评论点赞数（可选）',
+  is_pinned TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否置顶',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (id),
@@ -329,6 +330,20 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY (reply_to_user_id) REFERENCES users(id)
     ON DELETE SET NULL
 ) ENGINE=InnoDB COMMENT='评论表（支持回复与楼中楼）';
+
+CREATE TABLE IF NOT EXISTS comment_likes (
+  user_id BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+  comment_id BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  PRIMARY KEY (user_id, comment_id),
+  KEY idx_comment_likes_comment_time (comment_id, created_at),
+  CONSTRAINT fk_comment_likes_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_comment_likes_comment
+    FOREIGN KEY (comment_id) REFERENCES comments(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='评论点赞关系表';
 
 CREATE TABLE IF NOT EXISTS post_views (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '浏览事件ID',
@@ -392,6 +407,32 @@ CREATE TABLE IF NOT EXISTS reports (
     FOREIGN KEY (handled_by) REFERENCES users(id)
     ON DELETE SET NULL
 ) ENGINE=InnoDB COMMENT='用户举报表';
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+  recipient_user_id BIGINT UNSIGNED NOT NULL COMMENT '接收用户ID',
+  actor_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT '操作者用户ID',
+  event_type VARCHAR(40) NOT NULL COMMENT '通知事件类型',
+  target_type ENUM('POST','COMMENT') NOT NULL COMMENT '目标类型',
+  target_id BIGINT UNSIGNED NOT NULL COMMENT '目标ID',
+  post_id BIGINT UNSIGNED DEFAULT NULL COMMENT '关联帖子ID',
+  metadata JSON DEFAULT NULL COMMENT 'optional structured notification metadata',
+  is_read TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已读',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (id),
+  KEY idx_notifications_recipient_time (recipient_user_id, created_at),
+  KEY idx_notifications_recipient_read (recipient_user_id, is_read),
+  KEY idx_notifications_recipient_event_time (recipient_user_id, event_type, created_at),
+  CONSTRAINT fk_notifications_recipient
+    FOREIGN KEY (recipient_user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_notifications_actor
+    FOREIGN KEY (actor_user_id) REFERENCES users(id)
+    ON DELETE SET NULL,
+  CONSTRAINT fk_notifications_post
+    FOREIGN KEY (post_id) REFERENCES posts(id)
+    ON DELETE SET NULL
+) ENGINE=InnoDB COMMENT='站内通知表';
 
 
 /* ============================================================
@@ -525,6 +566,8 @@ DROP TRIGGER IF EXISTS trg_post_likes_after_insert$$
 DROP TRIGGER IF EXISTS trg_post_likes_after_delete$$
 DROP TRIGGER IF EXISTS trg_post_favorites_after_insert$$
 DROP TRIGGER IF EXISTS trg_post_favorites_after_delete$$
+DROP TRIGGER IF EXISTS trg_comment_likes_after_insert$$
+DROP TRIGGER IF EXISTS trg_comment_likes_after_delete$$
 
 -- 评论新增 -> posts.comment_count +1
 CREATE TRIGGER trg_comments_after_insert
@@ -604,6 +647,24 @@ BEGIN
   UPDATE posts
      SET favorite_count = IF(favorite_count > 0, favorite_count - 1, 0)
    WHERE id = OLD.post_id;
+END$$
+
+CREATE TRIGGER trg_comment_likes_after_insert
+AFTER INSERT ON comment_likes
+FOR EACH ROW
+BEGIN
+  UPDATE comments
+     SET like_count = like_count + 1
+   WHERE id = NEW.comment_id;
+END$$
+
+CREATE TRIGGER trg_comment_likes_after_delete
+AFTER DELETE ON comment_likes
+FOR EACH ROW
+BEGIN
+  UPDATE comments
+     SET like_count = IF(like_count > 0, like_count - 1, 0)
+   WHERE id = OLD.comment_id;
 END$$
 
 DELIMITER ;

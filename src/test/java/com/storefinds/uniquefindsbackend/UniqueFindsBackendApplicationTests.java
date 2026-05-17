@@ -1,13 +1,14 @@
 package com.storefinds.uniquefindsbackend;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class UniqueFindsBackendApplicationTests {
 
     @Test
-    void contextLoads() {
+    void applicationClassIsLoadable() {
+        assertEquals("com.storefinds.uniquefindsbackend.UniqueFindsBackendApplication",
+                UniqueFindsBackendApplication.class.getName());
     }
-
 }

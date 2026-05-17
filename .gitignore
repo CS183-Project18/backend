@@ -36,6 +36,7 @@ build/
 src/main/resources/application-dev.yml
 .env
 .env.*
+uploads/
 
 ### Local Database Dumps ###
 *.sql

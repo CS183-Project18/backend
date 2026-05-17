@@ -13,7 +13,7 @@ public interface PostService {
 
     Result<PostResponse> createPost(Long userId, CreatePostRequest request);
 
-    Result<PostResponse> getPostById(Long userId, Long postId);
+    Result<PostResponse> getPostById(Long userId, String userRole, Long postId);
 
     Result<PageResponse<PostResponse>> getPublishedPosts(Long userId, int page, int pageSize);
 
@@ -25,6 +25,11 @@ public interface PostService {
                                                             String sort,
                                                             int page,
                                                             int pageSize);
+
+    Result<PageResponse<PostResponse>> getTrendingPosts(Long userId,
+                                                        String window,
+                                                        int page,
+                                                        int pageSize);
 
     Result<PostResponse> updatePost(Long userId, Long postId, UpdatePostRequest request);
 

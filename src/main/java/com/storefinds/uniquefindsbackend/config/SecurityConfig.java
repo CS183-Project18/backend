@@ -1,6 +1,7 @@
 package com.storefinds.uniquefindsbackend.config;
 
 import com.storefinds.uniquefindsbackend.security.JwtAuthenticationFilter;
+import com.storefinds.uniquefindsbackend.security.RestAccessDeniedHandler;
 import com.storefinds.uniquefindsbackend.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     /**
      * Author: Kaijie Zhu
@@ -32,9 +34,11 @@ public class SecurityConfig {
      * Throws: None
      */
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          RestAuthenticationEntryPoint restAuthenticationEntryPoint) {
+                          RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+                          RestAccessDeniedHandler restAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+        this.restAccessDeniedHandler = restAccessDeniedHandler;
     }
 
     @Bean
@@ -53,7 +57,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                        .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/register",
@@ -66,8 +72,13 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/published").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/trending").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/*/share").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/profile").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/posts").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/images/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

@@ -2,6 +2,8 @@ package com.storefinds.uniquefindsbackend.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -11,6 +13,8 @@ import java.io.IOException;
 
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private static final Logger log = LoggerFactory.getLogger(RestAuthenticationEntryPoint.class);
 
     @Override
     /**
@@ -28,8 +32,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
+        log.warn("unauthorized request: method={}, uri={}", request.getMethod(), request.getRequestURI());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write("{\"success\":false,\"message\":\"unauthorized\",\"data\":null}");
+        response.getWriter().write("{\"success\":false,\"code\":\"UNAUTHORIZED\",\"message\":\"unauthorized\",\"data\":null}");
     }
 }

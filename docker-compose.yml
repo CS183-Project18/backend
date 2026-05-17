@@ -1,0 +1,62 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: unique-finds-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root1234}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-unique_finds}
+      MYSQL_USER: ${MYSQL_USER:-unique_finds_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-unique_finds_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/unique_finds_full_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./sql/demo_seed_data.sql:/docker-entrypoint-initdb.d/02_demo_seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root1234}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ai-service:
+    build:
+      context: ./ai-service
+    container_name: unique-finds-ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  backend:
+    build:
+      context: .
+    container_name: unique-finds-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      FUZHOU_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      FUZHOU_DATASOURCE_HOST: mysql
+      FUZHOU_DATASOURCE_PORT: 3306
+      FUZHOU_DATASOURCE_DATABASE: ${MYSQL_DATABASE:-unique_finds}
+      FUZHOU_DATASOURCE_USERNAME: ${MYSQL_USER:-unique_finds_user}
+      FUZHOU_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-unique_finds_pass}
+      FUZHOU_MAIL_HOST: ${MAIL_HOST:-smtp.qq.com}
+      FUZHOU_MAIL_USERNAME: ${MAIL_USERNAME:-demo@example.com}
+      FUZHOU_MAIL_PASSWORD: ${MAIL_PASSWORD:-replace_me}
+      FUZHOU_MAIL_DEFAULT_ENCODING: ${MAIL_DEFAULT_ENCODING:-UTF-8}
+      FUZHOU_JWT_USER_SECRET_KEY: ${JWT_USER_SECRET_KEY:-NzA2MDI4NjQ2MDI2MzY4NzA4MjM0MTA2NTMxMzgzNjE=}
+      FUZHOU_JWT_REFRESH_SECRET_KEY: ${JWT_REFRESH_SECRET_KEY:-MjI0NjEyNzU4NjcwNjAxNDc2NDA0MzUyMzIzMTg4NjY=}
+      AI_SERVICE_BASE_URL: ${AI_SERVICE_BASE_URL:-http://ai-service:8000}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  mysql-data:

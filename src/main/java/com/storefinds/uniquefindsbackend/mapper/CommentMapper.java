@@ -73,6 +73,12 @@ public interface CommentMapper {
                                             @Param("offset") int offset,
                                             @Param("pageSize") int pageSize);
 
+    long countVisibleByPostId(@Param("postId") Long postId);
+
+    List<Comment> selectVisibleByPostIdPage(@Param("postId") Long postId,
+                                            @Param("offset") int offset,
+                                            @Param("pageSize") int pageSize);
+
     /**
      * Author: Enqi Guo
      * Date: 2026-04-27
@@ -126,4 +132,8 @@ public interface CommentMapper {
      * Throws: None
      */
     int updateStatusById(@Param("id") Long id, @Param("status") String status);
+
+    int clearPinnedByPostId(@Param("postId") Long postId);
+
+    int updatePinnedById(@Param("id") Long id, @Param("isPinned") Integer isPinned);
 }

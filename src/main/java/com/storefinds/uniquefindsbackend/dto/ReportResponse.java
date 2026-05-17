@@ -14,6 +14,9 @@ public class ReportResponse {
     private String reasonType;
     private String reasonDetail;
     private String status;
+    private String resolutionAction;
+    private String resolutionNote;
+    private String targetStatus;
     private Long handledBy;
     private String handledByUsername;
     private LocalDateTime handledAt;

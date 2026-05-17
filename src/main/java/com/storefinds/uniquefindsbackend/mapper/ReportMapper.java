@@ -92,7 +92,11 @@ public interface ReportMapper {
      * - int: affected rows
      * Throws: None
      */
-    int updateStatus(@Param("id") Long id, @Param("status") String status, @Param("handledBy") Long handledBy);
+    int updateStatus(@Param("id") Long id,
+                     @Param("status") String status,
+                     @Param("handledBy") Long handledBy,
+                     @Param("resolutionAction") String resolutionAction,
+                     @Param("resolutionNote") String resolutionNote);
 
     /**
      * Author: Enqi Guo
@@ -108,5 +112,7 @@ public interface ReportMapper {
      */
     int resolvePendingByTarget(@Param("targetType") String targetType,
                                @Param("targetId") Long targetId,
-                               @Param("handledBy") Long handledBy);
+                               @Param("handledBy") Long handledBy,
+                               @Param("resolutionAction") String resolutionAction,
+                               @Param("resolutionNote") String resolutionNote);
 }

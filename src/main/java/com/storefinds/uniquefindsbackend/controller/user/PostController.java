@@ -4,9 +4,11 @@ import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
+import com.storefinds.uniquefindsbackend.dto.SharePostResponse;
 import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.security.CurrentUser;
+import com.storefinds.uniquefindsbackend.service.PostInteractionService;
 import com.storefinds.uniquefindsbackend.service.PostService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
 
     private final PostService postService;
+    private final PostInteractionService postInteractionService;
 
     /**
      * Author: Kaijie Zhu
@@ -39,8 +42,9 @@ public class PostController {
      * Returns: None
      * Throws: None
      */
-    public PostController(PostService postService) {
+    public PostController(PostService postService, PostInteractionService postInteractionService) {
         this.postService = postService;
+        this.postInteractionService = postInteractionService;
     }
 
     @PostMapping
@@ -76,7 +80,12 @@ public class PostController {
      */
     public Result<PostResponse> getPost(@PathVariable @Min(value = 1, message = "postId must be greater than 0") Long postId,
                                         Authentication authentication) {
-        return postService.getPostById(extractCurrentUserId(authentication), postId);
+        CurrentUser currentUser = extractCurrentUser(authentication);
+        return postService.getPostById(
+                currentUser == null ? null : currentUser.userId(),
+                currentUser == null ? null : currentUser.role(),
+                postId
+        );
     }
 
     @GetMapping("/published")
@@ -140,6 +149,27 @@ public class PostController {
         return postService.searchPublishedPosts(extractCurrentUserId(authentication), keyword, categoryId, sort, page, pageSize);
     }
 
+    @GetMapping("/trending")
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-11
+     * Purpose: Query one page of trending published posts within the selected time window.
+     * Params:
+     * - window: trending window option: daily, weekly, or monthly
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * - authentication: spring authentication object
+     * Returns:
+     * - Result<PageResponse<PostResponse>>: trending post page
+     * Throws: None
+     */
+    public Result<PageResponse<PostResponse>> getTrendingPosts(@RequestParam(defaultValue = "daily") String window,
+                                                               @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                               @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                               Authentication authentication) {
+        return postService.getTrendingPosts(extractCurrentUserId(authentication), window, page, pageSize);
+    }
+
     @PutMapping("/{postId}")
     /**
      * Author: Kaijie Zhu
@@ -178,6 +208,11 @@ public class PostController {
         return postService.deletePost(requireCurrentUser(authentication).userId(), postId);
     }
 
+    @PostMapping("/{postId}/share")
+    public Result<SharePostResponse> sharePost(@PathVariable @Min(value = 1, message = "postId must be greater than 0") Long postId) {
+        return postInteractionService.sharePost(postId);
+    }
+
     /**
      * Author: Kaijie Zhu
      * Date: 2026-04-17
@@ -211,5 +246,12 @@ public class PostController {
             return null;
         }
         return currentUser.userId();
+    }
+
+    private CurrentUser extractCurrentUser(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CurrentUser currentUser)) {
+            return null;
+        }
+        return currentUser;
     }
 }

@@ -10,4 +10,8 @@ public class UserProfileResponse {
     private String avatarUrl;
     private String bio;
     private String role;
+    private Long postCount;
+    private Long publishedPostCount;
+    private Long commentCount;
+    private Long favoriteCount;
 }
