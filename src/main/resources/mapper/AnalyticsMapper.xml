@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.AnalyticsMapper">
+
+    <select id="countActiveUsers" resultType="long">
+        SELECT COUNT(1)
+        FROM users
+        WHERE status = 'ACTIVE'
+    </select>
+
+    <select id="countPublishedPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE status = 'PUBLISHED'
+    </select>
+
+    <select id="countVisibleComments" resultType="long">
+        SELECT COUNT(1)
+        FROM comments
+        WHERE status = 'VISIBLE'
+    </select>
+
+    <select id="countFavorites" resultType="long">
+        SELECT COUNT(1)
+        FROM post_favorites
+    </select>
+
+    <select id="countReports" resultType="long">
+        SELECT COUNT(1)
+        FROM reports
+    </select>
+
+    <select id="countPendingReports" resultType="long">
+        SELECT COUNT(1)
+        FROM reports
+        WHERE status IN ('PENDING', 'PROCESSING')
+    </select>
+
+    <select id="averageReportResolutionHours" resultType="long">
+        SELECT CAST(AVG(TIMESTAMPDIFF(HOUR, created_at, handled_at)) AS SIGNED)
+        FROM reports
+        WHERE handled_at IS NOT NULL
+    </select>
+
+    <select id="countPostCreatesByDay" resultType="map">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date, COUNT(1) AS count
+        FROM posts
+        WHERE created_at &gt;= #{startTime}
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="countCommentCreatesByDay" resultType="map">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date, COUNT(1) AS count
+        FROM comments
+        WHERE created_at &gt;= #{startTime}
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="countFavoritesByDay" resultType="map">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date, COUNT(1) AS count
+        FROM post_favorites
+        WHERE created_at &gt;= #{startTime}
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="countReportsByDay" resultType="map">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date, COUNT(1) AS count
+        FROM reports
+        WHERE created_at &gt;= #{startTime}
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="countHandledReportsByDay" resultType="map">
+        SELECT DATE_FORMAT(handled_at, '%Y-%m-%d') AS date, COUNT(1) AS count
+        FROM reports
+        WHERE handled_at IS NOT NULL
+          AND handled_at &gt;= #{startTime}
+        GROUP BY DATE_FORMAT(handled_at, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="countReportsByReason" resultType="map">
+        SELECT reason_type AS id, reason_type AS name, COUNT(1) AS count
+        FROM reports
+        GROUP BY reason_type
+        ORDER BY count DESC, reason_type ASC
+    </select>
+
+    <select id="topCategories" resultType="map">
+        SELECT c.id AS id, c.name AS name, COUNT(1) AS count
+        FROM posts p
+        INNER JOIN categories c ON c.id = p.category_id
+        WHERE p.status = 'PUBLISHED'
+          AND c.is_active = 1
+        GROUP BY c.id, c.name
+        ORDER BY count DESC, c.name ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="topTags" resultType="map">
+        SELECT t.id AS id, t.name AS name, COUNT(1) AS count
+        FROM post_tags pt
+        INNER JOIN tags t ON t.id = pt.tag_id
+        INNER JOIN posts p ON p.id = pt.post_id
+        WHERE p.status = 'PUBLISHED'
+        GROUP BY t.id, t.name
+        ORDER BY count DESC, t.name ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="topStores" resultType="map">
+        SELECT s.id AS id, CONCAT(s.name, COALESCE(CONCAT(' ', s.branch_name), '')) AS name, COUNT(1) AS count
+        FROM posts p
+        INNER JOIN stores s ON s.id = p.store_id
+        WHERE p.status = 'PUBLISHED'
+          AND s.status = 'ACTIVE'
+        GROUP BY s.id, s.name, s.branch_name
+        ORDER BY count DESC, s.name ASC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

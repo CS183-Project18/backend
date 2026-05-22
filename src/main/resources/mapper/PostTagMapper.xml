@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.PostTagMapper">
+
+    <resultMap id="TagResultMap" type="com.storefinds.uniquefindsbackend.entity.Tag">
+        <id property="id" column="id"/>
+        <result property="postId" column="post_id"/>
+        <result property="name" column="name"/>
+        <result property="heatScore" column="heat_score"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="batchInsert">
+        INSERT INTO post_tags (post_id, tag_id)
+        VALUES
+        <foreach collection="tagIds" item="tagId" separator=",">
+            (#{postId}, #{tagId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByPostId">
+        DELETE FROM post_tags
+        WHERE post_id = #{postId}
+    </delete>
+
+    <select id="selectTagsByPostId" resultMap="TagResultMap">
+        SELECT t.id, t.name, t.heat_score, t.created_at
+        FROM post_tags pt
+        INNER JOIN tags t ON t.id = pt.tag_id
+        WHERE pt.post_id = #{postId}
+        ORDER BY t.name ASC, t.id ASC
+    </select>
+
+    <select id="selectTagsByPostIds" resultMap="TagResultMap">
+        SELECT t.id, t.name, t.heat_score, t.created_at, pt.post_id AS post_id
+        FROM post_tags pt
+        INNER JOIN tags t ON t.id = pt.tag_id
+        WHERE pt.post_id IN
+        <foreach collection="postIds" item="postId" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+        ORDER BY pt.post_id ASC, t.name ASC, t.id ASC
+    </select>
+
+</mapper>

@@ -4,6 +4,7 @@ import com.storefinds.uniquefindsbackend.entity.Post;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -129,7 +130,11 @@ public interface PostMapper {
      */
     long countSearchPublishedPosts(@Param("keyword") String keyword,
                                    @Param("keywordLike") String keywordLike,
-                                   @Param("categoryId") Long categoryId);
+                                   @Param("categoryId") Long categoryId,
+                                   @Param("storeId") Long storeId,
+                                   @Param("tagIds") List<Long> tagIds,
+                                   @Param("priceMin") BigDecimal priceMin,
+                                   @Param("priceMax") BigDecimal priceMax);
 
     /**
      * Author: Kaijie Zhu
@@ -149,9 +154,39 @@ public interface PostMapper {
     List<Post> searchPublishedPosts(@Param("keyword") String keyword,
                                     @Param("keywordLike") String keywordLike,
                                     @Param("categoryId") Long categoryId,
+                                    @Param("storeId") Long storeId,
+                                    @Param("tagIds") List<Long> tagIds,
+                                    @Param("priceMin") BigDecimal priceMin,
+                                    @Param("priceMax") BigDecimal priceMax,
                                     @Param("sort") String sort,
                                     @Param("offset") int offset,
                                     @Param("pageSize") int pageSize);
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Query published posts from one AI-returned candidate id list while preserving AI order unless explicit SQL sort is requested.
+     * Params:
+     * - postIds: AI-returned candidate post ids
+     * - categoryId: optional category id
+     * - storeId: optional store id
+     * - tagIds: optional tag id list
+     * - priceMin: optional minimum price filter
+     * - priceMax: optional maximum price filter
+     * - sort: normalized sort option
+     * - useAiOrder: whether to preserve the AI-returned candidate order
+     * Returns:
+     * - List<Post>: fully matched published post list
+     * Throws: None
+     */
+    List<Post> selectPublishedPostsByIds(@Param("postIds") List<Long> postIds,
+                                         @Param("categoryId") Long categoryId,
+                                         @Param("storeId") Long storeId,
+                                         @Param("tagIds") List<Long> tagIds,
+                                         @Param("priceMin") BigDecimal priceMin,
+                                         @Param("priceMax") BigDecimal priceMax,
+                                         @Param("sort") String sort,
+                                         @Param("useAiOrder") boolean useAiOrder);
 
     /**
      * Author: Kaijie Zhu

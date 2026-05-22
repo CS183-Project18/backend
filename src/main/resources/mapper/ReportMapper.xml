@@ -36,6 +36,14 @@
         )
     </insert>
 
+    <insert id="insertPending" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reports (
+            reporter_id, target_type, target_id, reason_type, reason_detail, status, resolution_action, resolution_note
+        ) VALUES (
+            #{reporterId}, #{targetType}, #{targetId}, #{reasonType}, #{reasonDetail}, 'PENDING', NULL, NULL
+        )
+    </insert>
+
     <select id="countOpenByReporterAndTarget" resultType="long">
         SELECT COUNT(1)
         FROM reports
@@ -92,6 +100,7 @@
             handled_by = #{handledBy},
             handled_at = NOW()
         WHERE id = #{id}
+          AND status IN ('PENDING', 'PROCESSING')
     </update>
 
     <update id="resolvePendingByTarget">

@@ -18,6 +18,7 @@ import com.storefinds.uniquefindsbackend.entity.Comment;
 import com.storefinds.uniquefindsbackend.entity.ModerationLog;
 import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.entity.Report;
+import com.storefinds.uniquefindsbackend.event.PostStatusChangedEvent;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.mapper.CommentMapper;
 import com.storefinds.uniquefindsbackend.mapper.ModerationLogMapper;
@@ -28,6 +29,7 @@ import com.storefinds.uniquefindsbackend.service.InteractionEventService;
 import com.storefinds.uniquefindsbackend.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,19 +55,22 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     private final ModerationLogMapper moderationLogMapper;
     private final NotificationService notificationService;
     private final InteractionEventService interactionEventService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public AdminModerationServiceImpl(ReportMapper reportMapper,
                                       PostMapper postMapper,
                                       CommentMapper commentMapper,
                                       ModerationLogMapper moderationLogMapper,
                                       NotificationService notificationService,
-                                      InteractionEventService interactionEventService) {
+                                      InteractionEventService interactionEventService,
+                                      ApplicationEventPublisher applicationEventPublisher) {
         this.reportMapper = reportMapper;
         this.postMapper = postMapper;
         this.commentMapper = commentMapper;
         this.moderationLogMapper = moderationLogMapper;
         this.notificationService = notificationService;
         this.interactionEventService = interactionEventService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -99,6 +104,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (postMapper.approveById(postId) == 0) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow approval");
         }
+        applicationEventPublisher.publishEvent(new PostStatusChangedEvent(postId, post.getStatus(), PostStatus.PUBLISHED));
         writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.APPROVE, null);
         notificationService.createNotification(post.getUserId(),
                 adminUserId,
@@ -130,6 +136,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (postMapper.rejectById(postId, reason) == 0) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow rejection");
         }
+        applicationEventPublisher.publishEvent(new PostStatusChangedEvent(postId, post.getStatus(), PostStatus.REJECTED));
         reportMapper.resolvePendingByTarget(ReportTargetType.POST, postId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
         writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.REJECT, reason);
         notificationService.createNotification(post.getUserId(),
@@ -152,6 +159,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (postMapper.hideById(postId, reason) == 0) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "post status does not allow hide");
         }
+        applicationEventPublisher.publishEvent(new PostStatusChangedEvent(postId, post.getStatus(), PostStatus.HIDDEN));
         reportMapper.resolvePendingByTarget(ReportTargetType.POST, postId, adminUserId, ModerationActionType.TARGET_MODERATED, reason);
         writeModerationLog(ReportTargetType.POST, postId, adminUserId, ModerationActionType.HIDE, reason);
         notificationService.createNotification(post.getUserId(),
@@ -238,7 +246,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (!isOpenReportStatus(report.getStatus())) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow resolve");
         }
-        reportMapper.updateStatus(reportId, ReportStatus.RESOLVED, adminUserId, ModerationActionType.APPROVE, reason);
+        if (reportMapper.updateStatus(reportId, ReportStatus.RESOLVED, adminUserId, ModerationActionType.APPROVE, reason) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow resolve");
+        }
         writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, ModerationActionType.APPROVE, reason);
         interactionEventService.record(
                 InteractionEventType.REPORT_CLOSE,
@@ -261,7 +271,9 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (!isOpenReportStatus(report.getStatus())) {
             throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow reject");
         }
-        reportMapper.updateStatus(reportId, ReportStatus.REJECTED, adminUserId, ModerationActionType.UNHIDE, reason);
+        if (reportMapper.updateStatus(reportId, ReportStatus.REJECTED, adminUserId, ModerationActionType.UNHIDE, reason) == 0) {
+            throw new BusinessException(ErrorCode.INVALID_STATE, "report status does not allow reject");
+        }
         writeModerationLog(report.getTargetType(), report.getTargetId(), adminUserId, ModerationActionType.UNHIDE, reason);
         interactionEventService.record(
                 InteractionEventType.REPORT_CLOSE,
@@ -375,6 +387,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setHandledAt(report.getHandledAt());
         response.setCreatedAt(report.getCreatedAt());
         response.setTargetStatus(resolveTargetStatus(report));
+        response.setTargetSummary(resolveTargetSummary(report));
         return response;
     }
 
@@ -411,6 +424,28 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
             Comment comment = commentMapper.selectById(report.getTargetId());
             return comment == null ? CommentStatus.DELETED : comment.getStatus();
+        }
+        return null;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Resolve one short target summary string for admin report lists to reduce extra frontend lookups.
+     * Params:
+     * - report: source report entity
+     * Returns:
+     * - String: target summary text or null
+     * Throws: None
+     */
+    private String resolveTargetSummary(Report report) {
+        if (ReportTargetType.POST.equals(report.getTargetType())) {
+            Post post = postMapper.selectById(report.getTargetId());
+            return post == null ? null : post.getTitle();
+        }
+        if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
+            Comment comment = commentMapper.selectById(report.getTargetId());
+            return comment == null ? null : comment.getContent();
         }
         return null;
     }

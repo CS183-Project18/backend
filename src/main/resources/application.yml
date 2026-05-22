@@ -72,9 +72,14 @@ app:
       - image/gif
     public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   ai:
-    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
-    semantic-path: /api/search/semantic
-    multimodal-path: /api/search/multimodal
+    base-url: ${AI_SEARCH_BASE_URL:http://localhost:8000}
+    connection-timeout: 5000
+    read-timeout: 10000
+    index-build-timeout: 120000
+    max-retries: 2
+    circuit-breaker:
+      failure-threshold: 5
+      wait-duration: 60000
 
 springdoc:
   api-docs:

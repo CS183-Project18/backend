@@ -1,6 +1,6 @@
 # Unique Finds Backend
 
-Unique Finds is a discovery and sharing platform for interesting products found in physical stores. This repository contains the Java backend, database scripts, demo data, Docker deployment files, and a lightweight AI service placeholder used for local end-to-end demonstration.
+Unique Finds is a discovery and sharing platform for interesting products found in physical stores. This repository contains the Java backend, database scripts, demo data, Docker deployment files, and the internal `ai-search` service used for semantic text search and image search.
 
 ## Current Backend Scope
 
@@ -16,13 +16,13 @@ Unique Finds is a discovery and sharing platform for interesting products found 
 - Lightweight interaction event ledger for post/comment/report/share/search activity
 - Report audit fields for moderation outcome tracking
 - Swagger / OpenAPI export for Apifox
-- Docker Compose startup for MySQL, backend, and AI placeholder service
+- Docker Compose startup for MySQL, backend, and internal AI search service
 
 ## Project Structure
 
 - `src/`: Java backend source code
 - `sql/`: schema, patch, and demo seed scripts
-- `ai-service/`: Python AI placeholder service reserved for teammate implementation
+- `ai-search/`: Python AI search service for semantic text search and image search
 - `frontend/`: static frontend files
 - `docker-compose.yml`: local multi-service startup file
 
@@ -91,7 +91,15 @@ This will start:
 
 - MySQL
 - Java backend
-- AI placeholder service
+- AI search service
+
+## AI Search Architecture
+
+- The Java backend is the only public API boundary. Frontend clients do not call `ai-search` directly.
+- `GET /api/posts/search` keeps the same public contract, but now uses AI semantic search first when `keyword` is present and falls back to SQL search automatically when AI search is unavailable.
+- `POST /api/posts/search/image` accepts a multipart image upload and returns the standard paginated post response.
+- Image search degrades gracefully. When AI image search is unavailable, the backend returns a successful response with an empty `items` list and a readable message.
+- The backend rebuilds the AI indices on startup and after searchable post content changes.
 
 ## Demo Accounts
 
@@ -115,6 +123,7 @@ Password123
 - `GET /api/posts/{postId}`
 - `POST /api/posts/{postId}/share`
 - `GET /api/posts/search`
+- `POST /api/posts/search/image`
 - `GET /api/posts/trending`
 - `GET /api/posts/{postId}/comments`
 - `POST /api/comments/{commentId}/like`
@@ -176,6 +185,9 @@ Password123
 - `POST_MODERATED`
 - `COMMENT_MODERATED`
 
-## AI Placeholder Note
+## AI Search Notes
 
-The `ai-service/` folder currently contains a lightweight placeholder service that only keeps the Docker and local demo chain complete. The real semantic and multimodal search implementation is reserved for the teammate responsible for AI work.
+- `ai-search` is an internal service intended to run behind the backend on the Docker network.
+- `POST /build_index` rebuilds both semantic and image indices from backend-provided published post data.
+- `GET /semantic_search` returns AI-ranked post ids for text queries.
+- `POST /image_search` returns AI-ranked post ids for uploaded images.

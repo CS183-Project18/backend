@@ -1,13 +1,9 @@
-// Storage & Constants
+const API_BASE = window.CURATOR_API_BASE || localStorage.getItem("curator_api_base") || "http://localhost:8080";
 const STORAGE_KEYS = {
-  user: "curator_user",
-  posts: "curator_posts_v2",
-  bookmarks: "curator_bookmarks_v2",
-  likes: "curator_likes_v2",
-  loaded: "curator_seeded_v2",
+  token: "curator_token_v1",
+  auth: "curator_auth_v1",
 };
 
-// Predefined art background classes
 const artLibrary = [
   "art-swirl",
   "art-forest",
@@ -17,182 +13,31 @@ const artLibrary = [
   "art-frame",
 ];
 
-// Default sample posts for first-time load
-const seedPosts = [
-  {
-    id: 101,
-    title: "The Evolution of Organic Geometry in Web 3.0",
-    description:
-      "A fluid abstract discovery that feels like it belongs in a curated digital gallery. The visual language is expressive, premium, and built for conversation.",
-    category: "Digital Art",
-    price: "Curated",
-    location: "Remote Collection",
-    tags: ["#motion", "#curation", "#digital"],
-    authorName: "Julian Vesper",
-    authorRole: "Principal Architect @ Vesper Collective",
-    avatar: "JV",
-    likes: 2400,
-    comments: [
-      {
-        user: "Marcus Thorne",
-        avatar: "MT",
-        text: "The shape language here feels intentional. I would absolutely save this for future inspiration.",
-        time: "2 hours ago",
-      },
-      {
-        user: "Elena Rossi",
-        avatar: "ER",
-        text: "Strong curation. The color tension gives it a premium editorial tone.",
-        time: "5 hours ago",
-      },
-      {
-        user: "Arthur Vance",
-        avatar: "AV",
-        text: "This belongs on the explore page. The composition is instantly memorable.",
-        time: "Yesterday",
-      },
-    ],
-    saves: 128,
-    reposts: 23,
-    views: 4200,
-    coverType: "art-swirl",
-    gallery: [{ type: "art", value: "art-swirl" }, { type: "art", value: "art-copper" }, { type: "art", value: "art-frame" }],
-    createdAt: Date.now() - 86400000 * 3,
-    origin: "seed",
-  },
-  {
-    id: 102,
-    title: "Regenerative Design: More Than Just a Trend",
-    description:
-      "A forest-driven study in atmosphere, sustainability, and spatial emotion. A socially successful post because the image is strong and the narrative is clear.",
-    category: "Sustainability",
-    price: "Curated",
-    location: "Northern Woods",
-    tags: ["#nature", "#sustainable", "#retreat"],
-    authorName: "Alex Rivera",
-    authorRole: "Curator Gold",
-    avatar: "AR",
-    likes: 1800,
-    comments: [
-      {
-        user: "Mina Lo",
-        avatar: "ML",
-        text: "This is the sort of post that gets reposted because it is both beautiful and useful.",
-        time: "3 hours ago",
-      },
-      {
-        user: "Sora Lin",
-        avatar: "SL",
-        text: "Would love a tagged location list of similar spaces and stores.",
-        time: "7 hours ago",
-      },
-    ],
-    saves: 84,
-    reposts: 15,
-    views: 3800,
-    coverType: "art-forest",
-    gallery: [{ type: "art", value: "art-forest" }, { type: "art", value: "art-frame" }, { type: "art", value: "art-copper" }],
-    createdAt: Date.now() - 86400000 * 2,
-    origin: "seed",
-  },
-  {
-    id: 103,
-    title: "Curating the Perfect Developer Sanctuary",
-    description:
-      "How physical space influences cognitive flow and creative momentum. This long-form find merges high-end visual identity with practical value.",
-    category: "Tech Editorial",
-    price: "$1,450 / hr",
-    location: "Zurich, CH",
-    tags: ["#workspace", "#focus", "#editorial"],
-    authorName: "Marcus Chen",
-    authorRole: "Editorial Director",
-    avatar: "MC",
-    likes: 1204,
-    comments: [
-      {
-        user: "Julian Vesper",
-        avatar: "JV",
-        text: "The lighting balance here is incredible. Very strong material palette as well.",
-        time: "1 hour ago",
-      },
-      {
-        user: "Elena Rossi",
-        avatar: "ER",
-        text: "This has that calm premium feeling the platform should encourage.",
-        time: "4 hours ago",
-      },
-      {
-        user: "Marcus Thorne",
-        avatar: "MT",
-        text: "Would save this instantly for studio planning.",
-        time: "Yesterday",
-      },
-    ],
-    saves: 432,
-    reposts: 31,
-    views: 5200,
-    coverType: "art-workspace",
-    gallery: [{ type: "art", value: "art-workspace" }, { type: "art", value: "art-copper" }, { type: "art", value: "art-frame" }],
-    createdAt: Date.now() - 86400000,
-    origin: "seed",
-  },
-  {
-    id: 104,
-    title: "The Ethereal Pavilion: A Study in Light & Glass",
-    description:
-      "A pristine interior study with soft daylight, a framed forest view, and a spatial calm that feels designed for slow luxury living.",
-    category: "Interior Design",
-    price: "$1,450 / hr",
-    location: "Zurich, CH",
-    tags: ["#minimalism", "#glasshouse", "#sustainable", "#nature"],
-    authorName: "Julian Vesper",
-    authorRole: "Principal Architect @ Vesper Collective",
-    avatar: "JV",
-    likes: 1204,
-    comments: [
-      {
-        user: "Marcus Thorne",
-        avatar: "MT",
-        text: "The way the light interacts with the double-height ceiling is absolutely breathtaking. Did you use specific glass coatings for UV protection or just standard tempered?",
-        time: "2 hours ago",
-      },
-      {
-        user: "Elena Rossi",
-        avatar: "ER",
-        text: "This is exactly the inspiration I needed for my lakeside project. The structural honesty is so refreshing.",
-        time: "5 hours ago",
-      },
-      {
-        user: "Arthur Vance",
-        avatar: "AV",
-        text: "Stunning work, Julian. The cantilevered section looks like it’s floating. I’d love to know more about the structural steel weight.",
-        time: "Yesterday",
-      },
-    ],
-    saves: 432,
-    reposts: 41,
-    views: 6400,
-    coverType: "art-interior",
-    gallery: [{ type: "art", value: "art-interior" }, { type: "art", value: "art-copper" }, { type: "art", value: "art-frame" }],
-    createdAt: Date.now() - 3600000 * 12,
-    origin: "seed",
-  },
-];
-
-// Global app state (single source of truth)
 const state = {
-  user: null,
+  token: "",
+  auth: null,
+  profile: null,
   posts: [],
-  bookmarks: [],
-  likes: [],
+  myPosts: [],
+  favoritePosts: [],
+  trendingPosts: [],
+  categories: [],
+  tags: [],
   currentView: "feed",
   currentTrend: "daily",
-  currentDetailId: null,
+  currentDetailPost: null,
+  currentComments: [],
+  currentCommentsPage: 1,
+  currentCommentsTotal: 0,
   currentDetailImageIndex: 0,
   feedFilter: "all",
+  lastSearchKeyword: "",
+  searchMode: "text",
+  imageSearchMessage: "",
+  imageSearchInFlight: false,
+  loading: false,
 };
 
-// DOM Element References
 const authScreen = document.querySelector("#auth-screen");
 const appScreen = document.querySelector("#app-screen");
 const detailScreen = document.querySelector("#detail-screen");
@@ -223,6 +68,9 @@ const analyticsGrid = document.querySelector("#analytics-grid");
 const trendingList = document.querySelector("#trending-list");
 const openAnalytics = document.querySelector("#open-analytics");
 const globalSearch = document.querySelector("#global-search");
+const detailSearchInput = document.querySelector("#detail-search-input");
+const imageSearchTrigger = document.querySelector("#image-search-trigger");
+const imageSearchInput = document.querySelector("#image-search-input");
 const trendTabs = document.querySelectorAll(".trend-tab");
 const feedFilters = document.querySelectorAll(".filter-chip");
 const settingsForm = document.querySelector("#settings-form");
@@ -250,54 +98,63 @@ const commentCount = document.querySelector("#comment-count");
 const loadMoreComments = document.querySelector("#load-more-comments");
 const toast = document.querySelector("#toast");
 
-// UI runtime variables
-let commentDisplayCount = 3;
 let pendingUploads = [];
+let searchTimer = null;
 
-// App entry point
-initialize();
+initialize().catch((error) => {
+  console.error(error);
+  showToast(error.message || "Failed to initialize frontend.");
+});
 
-/* ==============================================
-            【 Chenqian Fu' s part 】
-   Core: Auth, State, Storage, Navigation, Feed, Lists, Explore, Bookmarks, Analytics
-============================================== */
-
-// Initialize the entire application
-function initialize() {
-  seedDataIfNeeded();
-  hydrateState();
+async function initialize() {
+  hydrateAuthState();
   bindEvents();
+  renderApp();
+  await loadReferenceData();
+  await loadSessionIfPossible();
+  await loadDashboardData();
   renderApp();
 }
 
-// Seed initial posts/bookmarks if first time visiting
-function seedDataIfNeeded() {
-  if (!localStorage.getItem(STORAGE_KEYS.loaded)) {
-    localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(seedPosts));
-    localStorage.setItem(STORAGE_KEYS.bookmarks, JSON.stringify([104]));
-    localStorage.setItem(STORAGE_KEYS.likes, JSON.stringify([]));
-    localStorage.setItem(STORAGE_KEYS.loaded, "true");
-  }
+function hydrateAuthState() {
+  state.token = localStorage.getItem(STORAGE_KEYS.token) || "";
+  state.auth = readStorage(STORAGE_KEYS.auth);
 }
 
-// Load saved user, posts, bookmarks, likes from localStorage
-function hydrateState() {
-  state.user = readStorage(STORAGE_KEYS.user) || { name: "Alex Rivera", username: "alexrivera", email: "alex@curator.gold", role: "Curator Gold", bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting." };
-  state.posts = readStorage(STORAGE_KEYS.posts) || [...seedPosts];
-  state.bookmarks = readStorage(STORAGE_KEYS.bookmarks) || [104];
-  state.likes = readStorage(STORAGE_KEYS.likes) || [];
-}
-
-// Bind all click/input/submit events to DOM elements
 function bindEvents() {
   authForm.addEventListener("submit", handleSignup);
-  demoLogin.addEventListener("click", handleDemoLogin);
+  demoLogin.addEventListener("click", handlePasswordLogin);
   togglePassword.addEventListener("click", togglePasswordVisibility);
   navLinks.forEach((link) => link.addEventListener("click", () => switchView(link.dataset.view)));
   openAnalytics.addEventListener("click", () => switchView("analytics"));
-  trendTabs.forEach((tab) => { tab.addEventListener("click", () => { state.currentTrend = tab.dataset.trend; trendTabs.forEach((node) => node.classList.remove("is-active")); tab.classList.add("is-active"); renderTrending(); }); });
-  feedFilters.forEach((chip) => { chip.addEventListener("click", () => { state.feedFilter = chip.dataset.feed; feedFilters.forEach((node) => node.classList.remove("is-active")); chip.classList.add("is-active"); renderCommunityList(filterPosts(globalSearch.value)); }); });
-  globalSearch.addEventListener("input", () => renderAppViews());
+  trendTabs.forEach((tab) => {
+    tab.addEventListener("click", async () => {
+      state.currentTrend = tab.dataset.trend;
+      trendTabs.forEach((node) => node.classList.remove("is-active"));
+      tab.classList.add("is-active");
+      await loadTrendingPosts();
+      renderTrending();
+    });
+  });
+  feedFilters.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      state.feedFilter = chip.dataset.feed;
+      feedFilters.forEach((node) => node.classList.remove("is-active"));
+      chip.classList.add("is-active");
+      renderAppViews();
+    });
+  });
+  globalSearch.addEventListener("input", handleSearchInput);
+  if (detailSearchInput) {
+    detailSearchInput.addEventListener("input", () => {
+      globalSearch.value = detailSearchInput.value;
+      handleSearchInput();
+    });
+  }
+  if (imageSearchTrigger && imageSearchInput) {
+    imageSearchTrigger.addEventListener("click", () => imageSearchInput.click());
+    imageSearchInput.addEventListener("change", handleImageSearch);
+  }
   settingsForm.addEventListener("submit", saveSettings);
   logoutButton.addEventListener("click", logout);
   openCreatePost.addEventListener("click", openCreatePostModal);
@@ -311,224 +168,406 @@ function bindEvents() {
   loadMoreComments.addEventListener("click", showMoreComments);
 }
 
-// Show auth screen or main app based on login status
+async function loadReferenceData() {
+  try {
+    const [categories, tags] = await Promise.all([
+      apiRequest("/api/categories"),
+      apiRequest("/api/tags"),
+    ]);
+    state.categories = Array.isArray(categories) ? categories : [];
+    state.tags = Array.isArray(tags) ? tags : [];
+  } catch (error) {
+    console.warn("Failed to load reference data.", error);
+  }
+}
+
+async function loadSessionIfPossible() {
+  if (!state.token) {
+    return;
+  }
+
+  try {
+    const [authInfo, profile] = await Promise.all([
+      apiRequest("/api/auth/me", { auth: true }),
+      apiRequest("/api/users/me/profile", { auth: true }),
+    ]);
+    state.auth = authInfo;
+    state.profile = profile;
+    persistAuthState();
+  } catch (error) {
+    console.warn("Stored token is invalid.", error);
+    clearAuthState();
+  }
+}
+
+async function loadDashboardData() {
+  state.loading = true;
+  try {
+    await Promise.all([
+      loadPublishedPosts(),
+      loadMyPosts(),
+      loadTrendingPosts(),
+      loadFavoritePosts(),
+    ]);
+  } finally {
+    state.loading = false;
+  }
+}
+
+async function loadPublishedPosts(keyword = "") {
+  const query = new URLSearchParams({
+    page: "1",
+    pageSize: "20",
+  });
+
+  const trimmedKeyword = keyword.trim();
+  if (trimmedKeyword) {
+    query.set("keyword", trimmedKeyword);
+    state.searchMode = "text";
+    state.lastSearchKeyword = trimmedKeyword;
+  } else {
+    state.searchMode = "feed";
+    state.lastSearchKeyword = "";
+    state.imageSearchMessage = "";
+  }
+
+  const path = trimmedKeyword ? `/api/posts/search?${query.toString()}` : `/api/posts/published?${query.toString()}`;
+  const pageData = await apiRequest(path, { auth: Boolean(state.token) });
+  state.posts = normalizePosts(pageData?.items || []);
+}
+
+async function loadFavoritePosts() {
+  if (!state.token) {
+    state.favoritePosts = [];
+    return;
+  }
+
+  try {
+    const pageData = await apiRequest("/api/posts/favorites/mine?page=1&pageSize=20", { auth: true });
+    state.favoritePosts = normalizePosts(pageData?.items || []);
+  } catch (error) {
+    console.warn("Failed to load favorites.", error);
+    state.favoritePosts = [];
+  }
+}
+
+async function loadMyPosts() {
+  if (!state.token) {
+    state.myPosts = [];
+    return;
+  }
+
+  try {
+    const pageData = await apiRequest("/api/posts/mine?page=1&pageSize=20", { auth: true });
+    state.myPosts = normalizePosts(pageData?.items || []);
+  } catch (error) {
+    console.warn("Failed to load my posts.", error);
+    state.myPosts = [];
+  }
+}
+
+async function loadTrendingPosts() {
+  const query = new URLSearchParams({
+    window: state.currentTrend,
+    page: "1",
+    pageSize: "10",
+  });
+  const pageData = await apiRequest(`/api/posts/trending?${query.toString()}`, { auth: Boolean(state.token) });
+  state.trendingPosts = normalizePosts(pageData?.items || []);
+}
+
 function renderApp() {
-  const isAuthenticated = Boolean(state.user);
+  const isAuthenticated = Boolean(state.token && state.auth);
   authScreen.classList.toggle("hidden", isAuthenticated);
   appScreen.classList.toggle("hidden", !isAuthenticated);
-  detailScreen.classList.add("hidden");
-  if (!isAuthenticated) return;
+  if (!isAuthenticated) {
+    detailScreen.classList.add("hidden");
+    return;
+  }
   applyUserToUI();
   switchView(state.currentView);
   renderAppViews();
 }
 
-// Refresh all main views: feed, community, explore, bookmarks, analytics
 function renderAppViews() {
-  const filteredPosts = filterPosts(globalSearch.value);
-  renderFeedGrid(filteredPosts);
-  renderCommunityList(filteredPosts);
-  renderExplore(filteredPosts);
+  const visiblePosts = getVisiblePosts();
+  renderFeedGrid(visiblePosts);
+  renderCommunityList(visiblePosts);
+  renderExplore(visiblePosts);
   renderBookmarks();
-  renderAnalytics(filteredPosts);
+  renderAnalytics(visiblePosts);
   renderTrending();
 }
 
-// Inject current user data into UI (sidebar, profile, greetings)
 function applyUserToUI() {
-  const initials = getInitials(state.user.name);
-  sidebarName.textContent = state.user.name;
-  sidebarRole.textContent = state.user.role || "Curator";
+  const displayName = getDisplayName();
+  const initials = getInitials(displayName || state.auth?.username || "CU");
+  sidebarName.textContent = displayName || state.auth?.username || "Curator";
+  sidebarRole.textContent = state.profile?.role || state.auth?.role || "USER";
   sidebarAvatar.textContent = initials;
   detailUserAvatar.textContent = initials;
   commentUserAvatar.textContent = initials;
-  greetingTitle.textContent = `Good morning, ${firstName(state.user.name)}.`;
-  greetingSubtitle.textContent = "Discover what’s trending in your curation circles.";
-  settingsName.value = state.user.name || "";
-  settingsUsername.value = state.user.username || "";
-  settingsEmail.value = state.user.email || "";
-  settingsBio.value = state.user.bio || "";
+  greetingTitle.textContent = `Good morning, ${firstName(displayName || state.auth?.username || "Curator")}.`;
+  greetingSubtitle.textContent = state.imageSearchMessage || "Discover what is trending in your curation circles.";
+  settingsName.value = state.profile?.nickname || "";
+  settingsUsername.value = state.profile?.username || state.auth?.username || "";
+  settingsEmail.value = state.auth?.email || "";
+  settingsBio.value = state.profile?.bio || "";
+  settingsUsername.disabled = true;
+  settingsEmail.disabled = true;
+  settingsEmail.placeholder = "Email is not editable in current backend API";
 }
 
-// Switch between main pages (feed, explore, bookmarks, etc.)
 function switchView(view) {
   state.currentView = view;
-  Object.entries(viewNodes).forEach(([key, node]) => { node.classList.toggle("is-visible", key === view); });
-  navLinks.forEach((link) => { link.classList.toggle("is-active", link.dataset.view === view); });
+  Object.entries(viewNodes).forEach(([key, node]) => {
+    node.classList.toggle("is-visible", key === view);
+  });
+  navLinks.forEach((link) => {
+    link.classList.toggle("is-active", link.dataset.view === view);
+  });
 }
 
-// Render the main feed grid with featured + standard cards
 function renderFeedGrid(posts) {
-  const source = [...posts].sort((a, b) => b.createdAt - a.createdAt);
+  const source = [...posts];
   const primary = source[0];
   const secondary = source[1];
   const featured = source[2] || source[0];
   feedGrid.innerHTML = "";
-  if (primary) feedGrid.appendChild(createFeedCard(primary));
-  if (secondary) feedGrid.appendChild(createFeedCard(secondary));
+  if (primary) {
+    feedGrid.appendChild(createFeedCard(primary));
+  }
+  if (secondary) {
+    feedGrid.appendChild(createFeedCard(secondary));
+  }
   if (featured) {
     const feature = document.createElement("article");
+    const asset = currentAsset(featured, 0);
     feature.className = "feature-card";
-    feature.innerHTML = `<div class="feature-visual ${featured.coverType} ${featured.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(featured.gallery[0])}></div><div class="feature-content"><div><span class="micro-label">${featured.category}</span><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(featured.description.slice(0, 120))}...</p></div><div class="card-footer"><div class="card-meta"><div class="avatar small">${escapeHtml(featured.avatar || getInitials(featured.authorName))}</div><div><strong>${escapeHtml(featured.authorName)}</strong><span>${escapeHtml(featured.authorRole)}</span></div></div><button class="icon-button open-feature-detail" data-id="${featured.id}" type="button">→</button></div></div>`;
+    feature.innerHTML = `<div class="feature-visual ${asset.className}" ${asset.style}></div><div class="feature-content"><div><span class="micro-label">${escapeHtml(featured.category)}</span><h3>${escapeHtml(featured.title)}</h3><p>${escapeHtml(truncate(featured.description, 140))}</p></div><div class="card-footer"><div class="card-meta"><div class="avatar small">${escapeHtml(featured.avatar)}</div><div><strong>${escapeHtml(featured.authorName)}</strong><span>${escapeHtml(featured.authorRole)}</span></div></div><button class="icon-button open-feature-detail" data-id="${featured.id}" type="button">Open</button></div></div>`;
     feedGrid.appendChild(feature);
     feature.querySelector(".open-feature-detail").addEventListener("click", () => openDetailView(featured.id));
   }
+  if (!primary && !secondary && !featured) {
+    feedGrid.innerHTML = createEmptyState("No posts yet.", "Start by creating a post or try another search keyword.");
+  }
 }
 
-// Create a single feed card DOM element
 function createFeedCard(post) {
   const card = document.createElement("article");
+  const asset = currentAsset(post, 0);
   card.className = "feed-card";
-  card.innerHTML = `<div class="card-art ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}><span class="category-pill">${escapeHtml(post.category)}</span></div><div class="card-body"><h3>${escapeHtml(post.title)}</h3><div class="card-footer"><div class="curator-avatars"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div class="avatar small">+${Math.max(2, Math.floor(post.likes / 600))}</div></div><div class="stat-line"><span>♥ ${formatCount(post.likes)}</span><span>◼ ${post.comments.length}</span></div></div></div>`;
+  card.innerHTML = `<div class="card-art ${asset.className}" ${asset.style}><span class="category-pill">${escapeHtml(post.category)}</span></div><div class="card-body"><h3>${escapeHtml(post.title)}</h3><div class="card-footer"><div class="curator-avatars"><div class="avatar small">${escapeHtml(post.avatar)}</div><div class="avatar small">+${Math.max(2, Math.floor((post.likes || 0) / 50) || 2)}</div></div><div class="stat-line"><span>Like ${formatCount(post.likes)}</span><span>Comment ${formatCount(post.commentsCount)}</span></div></div></div>`;
   card.addEventListener("click", () => openDetailView(post.id));
   return card;
 }
 
-// Render community list view (horizontal image + text cards)
 function renderCommunityList(posts) {
-  let list = [...posts].sort((a, b) => b.createdAt - a.createdAt);
-  if (state.feedFilter === "uploaded") list = list.filter((post) => post.origin === "user");
-  if (state.feedFilter === "reposted") list = list.filter((post) => post.origin === "repost");
-  communityList.innerHTML = list.map((post) => `<article class="list-card"><div class="mini-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="list-card-body"><div class="panel-title-row compact"><div><span class="micro-label">${escapeHtml(post.category)}</span><h3>${escapeHtml(post.title)}</h3></div><button class="secondary-button open-post" type="button" data-id="${post.id}">View</button></div><p>${escapeHtml(post.description)}</p><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><div class="stat-line"><span>♥ ${formatCount(post.likes)}</span><span>↺ ${post.reposts}</span><span>⌁ ${post.saves}</span></div></div><div class="action-row"><button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="repost" data-id="${post.id}" type="button">Repost</button><button class="action-pill" data-action="comment" data-id="${post.id}" type="button">Comment</button></div></div></article>`).join("");
-  communityList.querySelectorAll(".open-post").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
-  communityList.querySelectorAll(".action-pill").forEach((button) => { button.addEventListener("click", (event) => { event.stopPropagation(); handlePostAction(button.dataset.action, Number(button.dataset.id)); }); });
+  let list = [...posts];
+  if (state.feedFilter === "uploaded") {
+    list = [...state.myPosts];
+  }
+  if (state.feedFilter === "reposted") {
+    list = [];
+  }
+  if (!list.length) {
+    communityList.innerHTML = createEmptyState("No community posts found.", "Try a broader search or switch back to All.");
+    return;
+  }
+
+  communityList.innerHTML = list.map((post) => {
+    const asset = currentAsset(post, 0);
+    return `<article class="list-card"><div class="mini-cover ${asset.className}" ${asset.style}></div><div class="list-card-body"><div class="panel-title-row compact"><div><span class="micro-label">${escapeHtml(post.category)}</span><h3>${escapeHtml(post.title)}</h3></div><button class="secondary-button open-post" type="button" data-id="${post.id}">View</button></div><p>${escapeHtml(post.description)}</p><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar)}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><div class="stat-line"><span>Like ${formatCount(post.likes)}</span><span>Favorite ${formatCount(post.favorites)}</span><span>Comment ${formatCount(post.commentsCount)}</span></div></div><div class="action-row"><button class="action-pill ${post.likedByCurrentUser ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${post.favoritedByCurrentUser ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="share" data-id="${post.id}" type="button">Share</button><button class="action-pill" data-action="comment" data-id="${post.id}" type="button">Comment</button></div></div></article>`;
+  }).join("");
+
+  communityList.querySelectorAll(".open-post").forEach((button) => {
+    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
+  });
+
+  communityList.querySelectorAll(".action-pill").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await handlePostAction(button.dataset.action, Number(button.dataset.id));
+    });
+  });
 }
 
-// Render explore page (grid of popular posts)
 function renderExplore(posts) {
-  exploreGrid.innerHTML = posts.slice().sort((a, b) => b.likes + b.saves - (a.likes + a.saves)).map((post) => `<article class="explore-card"><div class="explore-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="explore-body"><span class="micro-label">${escapeHtml(post.location)}</span><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(post.description.slice(0, 90))}...</p><div class="bookmark-meta"><span>♥ ${formatCount(post.likes)}</span><button class="text-button open-explore" type="button" data-id="${post.id}">Open</button></div></div></article>`).join("");
-  exploreGrid.querySelectorAll(".open-explore").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
+  const list = [...posts].sort((left, right) => (right.likes + right.favorites) - (left.likes + left.favorites));
+  if (!list.length) {
+    exploreGrid.innerHTML = createEmptyState("No explore content yet.", "Run a text search or try image search.");
+    return;
+  }
+
+  exploreGrid.innerHTML = list.map((post) => {
+    const asset = currentAsset(post, 0);
+    return `<article class="explore-card"><div class="explore-cover ${asset.className}" ${asset.style}></div><div class="explore-body"><span class="micro-label">${escapeHtml(post.location)}</span><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(truncate(post.description, 100))}</p><div class="bookmark-meta"><span>Like ${formatCount(post.likes)}</span><button class="text-button open-explore-post" data-id="${post.id}" type="button">Open</button></div></div></article>`;
+  }).join("");
+
+  exploreGrid.querySelectorAll(".open-explore-post").forEach((button) => {
+    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
+  });
 }
 
-// Render saved bookmarks page
 function renderBookmarks() {
-  const bookmarked = state.posts.filter((post) => isBookmarked(post.id));
-  bookmarkGrid.innerHTML = bookmarked.length ? bookmarked.map((post) => `<article class="bookmark-card"><div class="bookmark-cover ${post.coverType} ${post.gallery[0].type === "image" ? "image-cover" : ""}" ${backgroundForAsset(post.gallery[0])}></div><div class="bookmark-body"><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(post.location)} · ${escapeHtml(post.price)}</p><div class="bookmark-meta"><span>${post.tags.slice(0, 2).map(escapeHtml).join(" ")}</span><button class="text-button open-bookmark" data-id="${post.id}" type="button">View</button></div></div></article>`).join("") : `<article class="stat-card"><span class="micro-label">Empty</span><h3>0</h3><p>You have not bookmarked any curated finds yet.</p></article>`;
-  bookmarkGrid.querySelectorAll(".open-bookmark").forEach((button) => { button.addEventListener("click", () => openDetailView(Number(button.dataset.id))); });
+  if (!state.favoritePosts.length) {
+    bookmarkGrid.innerHTML = createEmptyState("No bookmarks yet.", "Use Save on any post to populate this view.");
+    return;
+  }
+
+  bookmarkGrid.innerHTML = state.favoritePosts.map((post) => {
+    const asset = currentAsset(post, 0);
+    return `<article class="bookmark-card"><div class="bookmark-cover ${asset.className}" ${asset.style}></div><div class="bookmark-body"><span class="micro-label">${escapeHtml(post.category)}</span><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(truncate(post.description, 100))}</p><div class="bookmark-meta"><span>${escapeHtml(post.location)}</span><button class="secondary-button open-bookmark-post" type="button" data-id="${post.id}">View</button></div></div></article>`;
+  }).join("");
+
+  bookmarkGrid.querySelectorAll(".open-bookmark-post").forEach((button) => {
+    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
+  });
 }
 
-// Render analytics stats cards
 function renderAnalytics(posts) {
-  const totalLikes = posts.reduce((sum, post) => sum + post.likes, 0);
-  const totalComments = posts.reduce((sum, post) => sum + post.comments.length, 0);
-  const totalReposts = posts.reduce((sum, post) => sum + post.reposts, 0);
-  const totalViews = posts.reduce((sum, post) => sum + post.views, 0);
-  analyticsGrid.innerHTML = `<article class="stat-card"><span class="micro-label">Reach</span><h3>${formatCount(totalViews)}</h3><p>Total views across all published and reposted collections.</p></article><article class="stat-card"><span class="micro-label">Likes</span><h3>${formatCount(totalLikes)}</h3><p>Signals of appreciation collected by your visible content.</p></article><article class="stat-card"><span class="micro-label">Comments</span><h3>${formatCount(totalComments)}</h3><p>Conversation depth around your curation and uploads.</p></article><article class="stat-card"><span class="micro-label">Reposts</span><h3>${formatCount(totalReposts)}</h3><p>How often the network is redistributing your discoveries.</p></article>`;
+  const totalLikes = posts.reduce((sum, post) => sum + (post.likes || 0), 0);
+  const totalFavorites = posts.reduce((sum, post) => sum + (post.favorites || 0), 0);
+  const totalComments = posts.reduce((sum, post) => sum + (post.commentsCount || 0), 0);
+  const publishedCount = posts.length;
+  analyticsGrid.innerHTML = [
+    createStatCard("Visible Posts", publishedCount, "Current feed or search result size"),
+    createStatCard("Total Likes", totalLikes, "Combined like count across visible posts"),
+    createStatCard("Total Favorites", totalFavorites, "Combined favorite count across visible posts"),
+    createStatCard("Total Comments", totalComments, "Combined comment count across visible posts"),
+  ].join("");
 }
 
-// Render trending sidebar list
 function renderTrending() {
-  const ranked = [...state.posts].sort((a, b) => trendScore(b, state.currentTrend) - trendScore(a, state.currentTrend)).slice(0, 3);
-  trendingList.innerHTML = ranked.map((post, index) => `<article class="trend-item"><div class="trend-index">0${index + 1}</div><div class="trend-copy"><strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(post.category)} · ${formatCount(trendScore(post, state.currentTrend))} curated</span></div></article>`).join("");
+  if (!state.trendingPosts.length) {
+    trendingList.innerHTML = createEmptyState("No trending data.", "The backend has not returned trending posts yet.");
+    return;
+  }
+
+  trendingList.innerHTML = state.trendingPosts.map((post, index) => {
+    return `<button class="trend-item" type="button" data-id="${post.id}"><span class="trend-rank">0${index + 1}</span><div><strong>${escapeHtml(post.title)}</strong><small>${escapeHtml(post.category)}</small></div></button>`;
+  }).join("");
+
+  trendingList.querySelectorAll(".trend-item").forEach((button) => {
+    button.addEventListener("click", () => openDetailView(Number(button.dataset.id)));
+  });
 }
 
-// Handle signup form submission
-function handleSignup(event) {
+async function handleSignup(event) {
   event.preventDefault();
-  const user = { name: document.querySelector("#signup-name").value.trim(), email: document.querySelector("#signup-email").value.trim(), username: document.querySelector("#signup-username").value.trim(), role: "Curator Gold", bio: "Building a curated library of unique finds worth saving, sharing, and discussing." };
-  state.user = user;
-  persistState();
-  showToast("Account created. Welcome to The Curator.");
-  renderApp();
+  const fullName = document.querySelector("#signup-name").value.trim();
+  const email = document.querySelector("#signup-email").value.trim();
+  const username = document.querySelector("#signup-username").value.trim();
+  const password = signupPassword.value;
+
+  try {
+    const loginResponse = await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: {
+        username,
+        email,
+        password,
+      },
+    });
+    applyLogin(loginResponse);
+    await loadSessionIfPossible();
+    if (fullName) {
+      await updateProfileQuietly({ nickname: fullName });
+    }
+    await loadDashboardData();
+    renderApp();
+    showToast("Account created successfully.");
+  } catch (error) {
+    showToast(error.message || "Registration failed.");
+  }
 }
 
-// Quick demo login
-function handleDemoLogin() {
-  state.user = { name: "Alex Rivera", email: "alex@curator.gold", username: "alexrivera", role: "Curator Gold", bio: "Curating premium interiors, digital artifacts, and spatial references worth revisiting." };
-  persistState();
-  showToast("Logged in with the demo curator account.");
-  renderApp();
+async function handlePasswordLogin() {
+  const account = document.querySelector("#signup-username").value.trim() || document.querySelector("#signup-email").value.trim();
+  const password = signupPassword.value;
+  if (!account || !password) {
+    showToast("Enter username or email plus password to log in.");
+    return;
+  }
+
+  try {
+    const loginResponse = await apiRequest("/api/auth/login/password", {
+      method: "POST",
+      body: {
+        account,
+        password,
+      },
+    });
+    applyLogin(loginResponse);
+    await loadSessionIfPossible();
+    await loadDashboardData();
+    renderApp();
+    showToast("Logged in successfully.");
+  } catch (error) {
+    showToast(error.message || "Login failed.");
+  }
 }
 
-// Toggle password visibility
-function togglePasswordVisibility() {
-  const show = signupPassword.type === "password";
-  signupPassword.type = show ? "text" : "password";
-  togglePassword.textContent = show ? "Hide" : "Show";
+function applyLogin(loginResponse) {
+  state.token = loginResponse.token;
+  state.auth = {
+    userId: loginResponse.userId,
+    username: loginResponse.username,
+    role: loginResponse.role,
+    email: loginResponse.email,
+  };
+  persistAuthState();
 }
 
-// Save profile settings to state & storage
-function saveSettings(event) {
+async function saveSettings(event) {
   event.preventDefault();
-  state.user = { ...state.user, name: settingsName.value.trim(), username: settingsUsername.value.trim(), email: settingsEmail.value.trim(), bio: settingsBio.value.trim() };
-  persistState();
-  applyUserToUI();
-  showToast("Profile updated.");
+  if (!ensureAuthenticated("Log in before editing your profile.")) {
+    return;
+  }
+
+  try {
+    await updateProfileQuietly({
+      nickname: settingsName.value.trim() || null,
+      bio: settingsBio.value.trim() || null,
+    });
+    renderApp();
+    showToast("Profile updated. Username and email stay read-only in current backend.");
+  } catch (error) {
+    showToast(error.message || "Failed to update profile.");
+  }
 }
 
-// Logout: clear user and return to auth screen
 function logout() {
-  localStorage.removeItem(STORAGE_KEYS.user);
-  state.user = null;
-  renderApp();
+  clearAuthState();
+  state.profile = null;
+  state.myPosts = [];
+  state.favoritePosts = [];
+  state.currentDetailPost = null;
+  globalSearch.value = "";
+  if (detailSearchInput) {
+    detailSearchInput.value = "";
+  }
+  state.lastSearchKeyword = "";
+  state.imageSearchMessage = "";
+  loadDashboardData()
+    .then(() => {
+      state.currentView = "feed";
+      renderApp();
+      showToast("Logged out.");
+    })
+    .catch((error) => {
+      console.warn(error);
+      renderApp();
+    });
 }
 
-/* ==============================================
-            【 Xuehan Wang' s part 】
-   Core: Detail View, Comments, Create Post, Actions (Like/Save/Repost/Delete), Modals, Helpers
-============================================== */
-
-// Open full post detail page
-function openDetailView(postId) {
-  const post = findPost(postId);
-  if (!post) return;
-  state.currentDetailId = postId;
-  state.currentDetailImageIndex = 0;
-  commentDisplayCount = 3;
-  appScreen.classList.add("hidden");
-  detailScreen.classList.remove("hidden");
-  renderDetail(post);
-}
-
-// Close detail view and return to main app
-function closeDetailView() {
-  detailScreen.classList.add("hidden");
-  appScreen.classList.remove("hidden");
-  state.currentDetailId = null;
-}
-
-// Render entire detail page: hero gallery + info + comments
-function renderDetail(post) {
-  renderDetailHero(post);
-  renderDetailInfo(post);
-  renderComments(post);
-}
-
-// Render main hero image + thumbnail gallery
-function renderDetailHero(post) {
-  const currentAsset = post.gallery[state.currentDetailImageIndex] || post.gallery[0];
-  detailHero.className = "detail-hero";
-  detailHero.removeAttribute("style");
-  if (currentAsset.type === "image") { detailHero.classList.add("image-cover"); detailHero.style.backgroundImage = `url("${currentAsset.value}")`; }
-  else { detailHero.classList.add(currentAsset.value); }
-  thumbnailRow.innerHTML = post.gallery.map((asset, index) => { const imageClass = asset.type === "image" ? "image-cover" : asset.value; const style = asset.type === "image" ? `style="background-image:url('${escapeAttribute(asset.value)}')"` : ""; return `<button class="thumb ${imageClass} ${index === state.currentDetailImageIndex ? "is-active" : ""}" data-index="${index}" ${style} type="button"></button>`; }).join("");
-  thumbnailRow.querySelectorAll(".thumb").forEach((button) => { button.addEventListener("click", () => { state.currentDetailImageIndex = Number(button.dataset.index); renderDetailHero(post); }); });
-}
-
-// Render post info, author, stats, actions
-function renderDetailInfo(post) {
-  const canDelete = post.origin === "user" || post.origin === "repost" || post.authorName === state.user.name;
-  detailInfoCard.innerHTML = `<div class="interaction-row"><div><span class="micro-label">${escapeHtml(post.category)}</span><span class="micro-label">Private</span></div><div class="interaction-row"><button class="icon-button detail-like ${isLiked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">♥</button><button class="icon-button detail-save ${isBookmarked(post.id) ? "active" : ""}" data-id="${post.id}" type="button">⌑</button></div></div><h2>${escapeHtml(post.title)}</h2><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar || getInitials(post.authorName))}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><button class="follow-button" type="button">Follow</button></div><div class="detail-meta-grid"><article><small>Price</small><strong>${escapeHtml(post.price || "N/A")}</strong></article><article><small>Location</small><strong>${escapeHtml(post.location)}</strong></article></div><small>Associated tags</small><div class="tag-row">${post.tags.map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("")}</div><p>${escapeHtml(post.description)}</p><div class="detail-bottom-row"><span>${formatCount(post.likes)} likes</span><span>${post.saves} saves</span><span>${post.reposts} reposts</span><button class="detail-link-action danger" data-detail-action="report" data-id="${post.id}" type="button">Report</button><button class="detail-link-action" data-detail-action="delete" data-id="${post.id}" type="button" ${canDelete ? "" : "disabled"}>Delete</button></div><div class="action-row"><button class="action-pill ${isLiked(post.id) ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${isBookmarked(post.id) ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="repost" data-id="${post.id}" type="button">Repost</button></div>`;
-  detailInfoCard.querySelectorAll("[data-action]").forEach((button) => { button.addEventListener("click", () => { handlePostAction(button.dataset.action, Number(button.dataset.id)); renderDetail(findPost(Number(button.dataset.id))); }); });
-  detailInfoCard.querySelector(".detail-like").addEventListener("click", () => { handlePostAction("like", post.id); renderDetail(findPost(post.id)); });
-  detailInfoCard.querySelector(".detail-save").addEventListener("click", () => { handlePostAction("save", post.id); renderDetail(findPost(post.id)); });
-  detailInfoCard.querySelectorAll("[data-detail-action]").forEach((button) => { button.addEventListener("click", () => { const action = button.dataset.detailAction; if (action === "report") showToast("Post reported for review."); if (action === "delete") { if (!canDelete) { showToast("Only your own uploaded or reposted content can be deleted."); return; } deletePost(post.id); } }); });
-}
-
-// Render comment list
-function renderComments(post) {
-  const commentsToShow = post.comments.slice(0, commentDisplayCount);
-  commentCount.textContent = post.comments.length;
-  commentList.innerHTML = commentsToShow.map((comment) => `<article class="comment-item"><div class="avatar small">${escapeHtml(comment.avatar || getInitials(comment.user))}</div><div><strong>${escapeHtml(comment.user)}</strong><div class="comment-meta">${escapeHtml(comment.time)}</div><p>${escapeHtml(comment.text)}</p><div class="comment-actions"><span>♥ ${Math.max(2, comment.text.length % 27)}</span><span>Reply</span></div></div></article>`).join("");
-  loadMoreComments.classList.toggle("hidden", commentDisplayCount >= post.comments.length);
-}
-
-// Open create post modal
 function openCreatePostModal() {
+  if (!ensureAuthenticated("Log in before creating posts.")) {
+    return;
+  }
   createModal.classList.remove("hidden");
 }
 
-// Close create post modal and reset form
 function closeCreatePostModal() {
   createModal.classList.add("hidden");
   createPostForm.reset();
@@ -536,191 +575,657 @@ function closeCreatePostModal() {
   pendingUploads = [];
 }
 
-// Handle image upload preview
 async function handleImageSelection(event) {
   const files = Array.from(event.target.files || []).slice(0, 4);
-  pendingUploads = await Promise.all(files.map(fileToDataUrl));
-  uploadPreview.innerHTML = pendingUploads.map((src) => `<div class="preview-item" style="background-image:url('${escapeAttribute(src)}')"></div>`).join("");
+  pendingUploads = files;
+  const previews = await Promise.all(files.map(fileToDataUrl));
+  uploadPreview.innerHTML = previews.map((src) => `<div class="preview-item" style="background-image:url('${escapeAttribute(src)}')"></div>`).join("");
 }
 
-// Create and publish new post
-function handleCreatePost(event) {
+async function handleCreatePost(event) {
   event.preventDefault();
-  const title = document.querySelector("#post-title").value.trim();
-  const category = document.querySelector("#post-category").value.trim();
-  const price = document.querySelector("#post-price").value.trim() || "Curated";
-  const location = document.querySelector("#post-location").value.trim();
-  const description = document.querySelector("#post-description").value.trim();
-  const tags = document.querySelector("#post-tags").value.split(",").map((tag) => tag.trim()).filter(Boolean);
-  const gallery = pendingUploads.length > 0 ? pendingUploads.map((src) => ({ type: "image", value: src })) : [{ type: "art", value: randomArt() }];
-  const post = { id: Date.now(), title, description, category, price, location, tags: tags.length ? tags : ["#curated", "#newpost"], authorName: state.user.name, authorRole: state.user.role || "Curator", avatar: getInitials(state.user.name), likes: 0, comments: [], saves: 0, reposts: 0, views: 0, coverType: gallery[0].type === "art" ? gallery[0].value : randomArt(), gallery, createdAt: Date.now(), origin: "user" };
-  state.posts.unshift(post);
-  persistState();
-  closeCreatePostModal();
-  renderAppViews();
-  switchView("feed");
-  showToast("Post published and added to your curated feed.");
+  if (!ensureAuthenticated("Log in before creating posts.")) {
+    return;
+  }
+
+  try {
+    const title = document.querySelector("#post-title").value.trim();
+    const categoryName = document.querySelector("#post-category").value.trim();
+    const priceInput = document.querySelector("#post-price").value.trim();
+    const locationText = document.querySelector("#post-location").value.trim();
+    const description = document.querySelector("#post-description").value.trim();
+    const rawTagNames = document.querySelector("#post-tags").value.trim();
+    const { priceMin, priceMax, currency } = parsePriceInput(priceInput);
+    const imagePayload = await uploadSelectedImages();
+    const requestBody = {
+      title,
+      description,
+      categoryId: resolveCategoryId(categoryName),
+      locationText: locationText || null,
+      priceMin,
+      priceMax,
+      currency,
+      tagIds: resolveTagIds(rawTagNames),
+      images: imagePayload,
+    };
+
+    await apiRequest("/api/posts", {
+      method: "POST",
+      auth: true,
+      body: requestBody,
+    });
+
+    await Promise.all([
+      loadPublishedPosts(state.lastSearchKeyword),
+      loadMyPosts(),
+      loadFavoritePosts(),
+      loadTrendingPosts(),
+    ]);
+    closeCreatePostModal();
+    renderApp();
+    showToast("Post submitted successfully.");
+  } catch (error) {
+    showToast(error.message || "Failed to create post.");
+  }
 }
 
-// Submit new comment
-function handleCommentSubmit(event) {
+async function openDetailView(postId) {
+  try {
+    const [postData, commentsPage] = await Promise.all([
+      apiRequest(`/api/posts/${postId}`, { auth: Boolean(state.token) }),
+      apiRequest(`/api/posts/${postId}/comments?page=1&pageSize=20`, { auth: Boolean(state.token) }),
+    ]);
+    state.currentDetailPost = normalizePost(postData);
+    state.currentComments = commentsPage?.items || [];
+    state.currentCommentsPage = 1;
+    state.currentCommentsTotal = Number(commentsPage?.total || 0);
+    state.currentDetailImageIndex = 0;
+    appScreen.classList.add("hidden");
+    detailScreen.classList.remove("hidden");
+    renderDetail();
+  } catch (error) {
+    showToast(error.message || "Failed to load post detail.");
+  }
+}
+
+function closeDetailView() {
+  detailScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
+  state.currentDetailPost = null;
+  state.currentComments = [];
+  state.currentCommentsPage = 1;
+  state.currentCommentsTotal = 0;
+}
+
+function renderDetail() {
+  if (!state.currentDetailPost) {
+    return;
+  }
+  renderDetailHero();
+  renderDetailInfo();
+  renderComments();
+}
+
+function renderDetailHero() {
+  const post = state.currentDetailPost;
+  const asset = currentAsset(post, state.currentDetailImageIndex);
+  detailHero.className = `detail-hero ${asset.className}`;
+  if (asset.style) {
+    detailHero.setAttribute("style", asset.style.replace(/^style="/, "").replace(/"$/, ""));
+  } else {
+    detailHero.removeAttribute("style");
+  }
+  thumbnailRow.innerHTML = post.gallery.map((image, index) => {
+    const item = assetForGallery(image);
+    return `<button class="thumb ${item.className} ${index === state.currentDetailImageIndex ? "is-active" : ""}" data-index="${index}" ${item.style} type="button"></button>`;
+  }).join("");
+  thumbnailRow.querySelectorAll(".thumb").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.currentDetailImageIndex = Number(button.dataset.index);
+      renderDetailHero();
+    });
+  });
+}
+
+function renderDetailInfo() {
+  const post = state.currentDetailPost;
+  const canDelete = post.ownedByCurrentUser;
+  detailInfoCard.innerHTML = `<div class="interaction-row"><div><span class="micro-label">${escapeHtml(post.category)}</span><span class="micro-label">${escapeHtml(post.status)}</span></div><div class="interaction-row"><button class="icon-button detail-like ${post.likedByCurrentUser ? "active" : ""}" data-id="${post.id}" type="button">Like</button><button class="icon-button detail-save ${post.favoritedByCurrentUser ? "active" : ""}" data-id="${post.id}" type="button">Save</button></div></div><h2>${escapeHtml(post.title)}</h2><div class="detail-author-row"><div class="card-meta"><div class="avatar small">${escapeHtml(post.avatar)}</div><div><strong>${escapeHtml(post.authorName)}</strong><span>${escapeHtml(post.authorRole)}</span></div></div><button class="follow-button" type="button" disabled>Follow</button></div><div class="detail-meta-grid"><article><small>Price</small><strong>${escapeHtml(post.price)}</strong></article><article><small>Location</small><strong>${escapeHtml(post.location)}</strong></article></div><small>Associated tags</small><div class="tag-row">${post.tags.map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join("") || "<span class=\"tag-pill\">No tags</span>"}</div><p>${escapeHtml(post.description)}</p><div class="detail-bottom-row"><span>${formatCount(post.likes)} likes</span><span>${formatCount(post.favorites)} saves</span><span>${formatCount(post.commentsCount)} comments</span><button class="detail-link-action" data-detail-action="share" data-id="${post.id}" type="button">Share</button><button class="detail-link-action danger" data-detail-action="delete" data-id="${post.id}" type="button" ${canDelete ? "" : "disabled"}>Delete</button></div><div class="action-row"><button class="action-pill ${post.likedByCurrentUser ? "is-active" : ""}" data-action="like" data-id="${post.id}" type="button">Like</button><button class="action-pill ${post.favoritedByCurrentUser ? "is-active" : ""}" data-action="save" data-id="${post.id}" type="button">Save</button><button class="action-pill" data-action="share" data-id="${post.id}" type="button">Share</button></div>`;
+
+  detailInfoCard.querySelectorAll("[data-action]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await handlePostAction(button.dataset.action, Number(button.dataset.id), true);
+    });
+  });
+  detailInfoCard.querySelector(".detail-like").addEventListener("click", async () => {
+    await handlePostAction("like", post.id, true);
+  });
+  detailInfoCard.querySelector(".detail-save").addEventListener("click", async () => {
+    await handlePostAction("save", post.id, true);
+  });
+  detailInfoCard.querySelectorAll("[data-detail-action]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      if (button.dataset.detailAction === "share") {
+        await handlePostAction("share", Number(button.dataset.id), true);
+        return;
+      }
+      if (button.dataset.detailAction === "delete") {
+        await deletePost(Number(button.dataset.id));
+      }
+    });
+  });
+}
+
+function renderComments() {
+  commentCount.textContent = String(state.currentCommentsTotal);
+  if (!state.currentComments.length) {
+    commentList.innerHTML = createEmptyState("No comments yet.", "Be the first one to add feedback.");
+  } else {
+    commentList.innerHTML = state.currentComments.map((comment) => {
+      return `<article class="comment-item"><div class="avatar small">${escapeHtml(getInitials(comment.username || "CU"))}</div><div><strong>${escapeHtml(comment.username || "Unknown")}</strong><div class="comment-meta">${escapeHtml(formatDateTime(comment.createdAt))}</div><p>${escapeHtml(comment.content || "")}</p><div class="comment-actions"><span>Like ${formatCount(comment.likeCount || 0)}</span><span>${comment.pinned ? "Pinned" : "Comment"}</span></div></div></article>`;
+    }).join("");
+  }
+  loadMoreComments.classList.toggle("hidden", state.currentComments.length >= state.currentCommentsTotal);
+}
+
+async function handleCommentSubmit(event) {
   event.preventDefault();
-  if (!state.currentDetailId) return;
-  const value = commentInput.value.trim();
-  if (!value) return;
-  const post = findPost(state.currentDetailId);
-  post.comments.unshift({ user: state.user.name, avatar: getInitials(state.user.name), text: value, time: "Just now" });
-  persistState();
-  commentInput.value = "";
-  commentDisplayCount += 1;
-  renderComments(post);
-  renderCommunityList(filterPosts(globalSearch.value));
-  showToast("Comment posted.");
+  if (!state.currentDetailPost) {
+    return;
+  }
+  if (!ensureAuthenticated("Log in before posting comments.")) {
+    return;
+  }
+
+  const content = commentInput.value.trim();
+  if (!content) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/api/posts/${state.currentDetailPost.id}/comments`, {
+      method: "POST",
+      auth: true,
+      body: { content },
+    });
+    commentInput.value = "";
+    await refreshCurrentDetail();
+    showToast("Comment posted.");
+  } catch (error) {
+    showToast(error.message || "Failed to post comment.");
+  }
 }
 
-// Load 3 more comments
-function showMoreComments() {
-  if (!state.currentDetailId) return;
-  commentDisplayCount += 3;
-  renderComments(findPost(state.currentDetailId));
+async function showMoreComments() {
+  if (!state.currentDetailPost) {
+    return;
+  }
+  const nextPage = state.currentCommentsPage + 1;
+  try {
+    const commentsPage = await apiRequest(`/api/posts/${state.currentDetailPost.id}/comments?page=${nextPage}&pageSize=20`, {
+      auth: Boolean(state.token),
+    });
+    state.currentCommentsPage = nextPage;
+    state.currentCommentsTotal = Number(commentsPage?.total || state.currentCommentsTotal);
+    state.currentComments = state.currentComments.concat(commentsPage?.items || []);
+    renderComments();
+  } catch (error) {
+    showToast(error.message || "Failed to load more comments.");
+  }
 }
 
-// Handle post actions: like, save, repost, comment
-function handlePostAction(action, postId) {
-  const post = findPost(postId);
-  if (!post) return;
-  if (action === "like") toggleLike(post);
-  if (action === "save") toggleBookmark(post.id);
-  if (action === "repost") repostPost(post);
-  if (action === "comment") { openDetailView(post.id); commentInput.focus(); return; }
-  persistState();
-  renderAppViews();
+async function handlePostAction(action, postId, refreshDetail = false) {
+  try {
+    if (action === "comment") {
+      await openDetailView(postId);
+      commentInput.focus();
+      return;
+    }
+    if (action === "share") {
+      await sharePost(postId);
+      return;
+    }
+    if (!ensureAuthenticated("Log in before using this action.")) {
+      return;
+    }
+
+    const post = findVisiblePost(postId);
+    if (action === "like") {
+      if (post?.likedByCurrentUser) {
+        await apiRequest(`/api/posts/${postId}/like`, { method: "DELETE", auth: true });
+      } else {
+        await apiRequest(`/api/posts/${postId}/like`, { method: "POST", auth: true });
+      }
+    }
+    if (action === "save") {
+      if (post?.favoritedByCurrentUser) {
+        await apiRequest(`/api/posts/${postId}/favorite`, { method: "DELETE", auth: true });
+      } else {
+        await apiRequest(`/api/posts/${postId}/favorite`, { method: "POST", auth: true });
+      }
+    }
+
+    await Promise.all([
+      loadPublishedPosts(state.lastSearchKeyword),
+      loadMyPosts(),
+      loadFavoritePosts(),
+      loadTrendingPosts(),
+    ]);
+    if (refreshDetail || (state.currentDetailPost && state.currentDetailPost.id === postId)) {
+      await refreshCurrentDetail();
+    }
+    renderApp();
+  } catch (error) {
+    showToast(error.message || "Action failed.");
+  }
 }
 
-// Delete post from state and storage
-function deletePost(postId) {
-  state.posts = state.posts.filter((post) => post.id !== postId);
-  state.bookmarks = state.bookmarks.filter((id) => id !== postId);
-  state.likes = state.likes.filter((id) => id !== postId);
-  persistState();
-  closeDetailView();
-  renderAppViews();
-  showToast("Post deleted from your curator space.");
+async function deletePost(postId) {
+  if (!ensureAuthenticated("Log in before deleting posts.")) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/api/posts/${postId}`, {
+      method: "DELETE",
+      auth: true,
+    });
+    await Promise.all([
+      loadPublishedPosts(state.lastSearchKeyword),
+      loadMyPosts(),
+      loadFavoritePosts(),
+      loadTrendingPosts(),
+    ]);
+    closeDetailView();
+    renderApp();
+    showToast("Post deleted.");
+  } catch (error) {
+    showToast(error.message || "Failed to delete post.");
+  }
 }
 
-// Toggle like status for a post
-function toggleLike(post) {
-  if (isLiked(post.id)) { state.likes = state.likes.filter((id) => id !== post.id); post.likes = Math.max(0, post.likes - 1); showToast("Like removed."); }
-  else { state.likes.push(post.id); post.likes += 1; showToast("Post liked."); }
+async function sharePost(postId) {
+  try {
+    const shareData = await apiRequest(`/api/posts/${postId}/share`, {
+      method: "POST",
+      auth: Boolean(state.token),
+    });
+    if (shareData?.shareUrl && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareData.shareUrl);
+      showToast("Share link copied.");
+      return;
+    }
+    showToast(shareData?.shareUrl || "Share link generated.");
+  } catch (error) {
+    showToast(error.message || "Failed to generate share link.");
+  }
 }
 
-// Toggle bookmark status for a post
-function toggleBookmark(postId) {
-  if (isBookmarked(postId)) { state.bookmarks = state.bookmarks.filter((id) => id !== postId); const post = findPost(postId); post.saves = Math.max(0, post.saves - 1); showToast("Removed from bookmarks."); }
-  else { state.bookmarks.push(postId); findPost(postId).saves += 1; showToast("Saved to bookmarks."); }
+function handleSearchInput() {
+  if (detailSearchInput && detailSearchInput.value !== globalSearch.value) {
+    detailSearchInput.value = globalSearch.value;
+  }
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    try {
+      await loadPublishedPosts(globalSearch.value);
+      renderApp();
+    } catch (error) {
+      showToast(error.message || "Search failed.");
+    }
+  }, 300);
 }
 
-// Repost an existing post
-function repostPost(post) {
-  const repost = { ...structuredClone(post), id: Date.now(), authorName: state.user.name, authorRole: `${state.user.role || "Curator"} · Reposted`, avatar: getInitials(state.user.name), title: `Reposted: ${post.title}`, description: `Re-shared from ${post.authorName}. ${post.description}`, likes: 0, comments: [], saves: 0, reposts: 0, views: 0, createdAt: Date.now(), origin: "repost" };
-  post.reposts += 1;
-  state.posts.unshift(repost);
-  showToast("Post reposted to your curated stream.");
+async function handleImageSearch(event) {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  state.imageSearchInFlight = true;
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("page", "1");
+    formData.append("pageSize", "20");
+    const envelope = await apiRequest("/api/posts/search/image", {
+      method: "POST",
+      auth: Boolean(state.token),
+      formData,
+      returnEnvelope: true,
+    });
+    state.posts = normalizePosts(envelope?.data?.items || []);
+    state.imageSearchMessage = envelope?.message || "Showing image search results.";
+    state.searchMode = "image";
+    switchView("explore");
+    renderApp();
+    showToast(state.posts.length ? "Image search complete." : "Image search returned no posts.");
+  } catch (error) {
+    showToast(error.message || "Image search failed.");
+  } finally {
+    state.imageSearchInFlight = false;
+    event.target.value = "";
+  }
 }
 
-// ================================
-// Shared Helper Functions
-// ================================
-
-// Filter posts by search query
-function filterPosts(query = "") {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return [...state.posts];
-  return state.posts.filter((post) => [post.title, post.description, post.category, post.location, post.authorName, ...post.tags].join(" ").toLowerCase().includes(normalized));
+async function refreshCurrentDetail() {
+  if (!state.currentDetailPost) {
+    return;
+  }
+  await openDetailView(state.currentDetailPost.id);
 }
 
-// Save full state to localStorage
-function persistState() {
-  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(state.user));
-  localStorage.setItem(STORAGE_KEYS.posts, JSON.stringify(state.posts));
-  localStorage.setItem(STORAGE_KEYS.bookmarks, JSON.stringify(state.bookmarks));
-  localStorage.setItem(STORAGE_KEYS.likes, JSON.stringify(state.likes));
+function getVisiblePosts() {
+  return state.posts;
 }
 
-// Safely read JSON from localStorage
+function findVisiblePost(postId) {
+  return [...state.posts, ...state.favoritePosts, ...state.trendingPosts].find((post) => post.id === postId) || state.currentDetailPost;
+}
+
+function normalizePosts(posts) {
+  return posts.map(normalizePost);
+}
+
+function normalizePost(post) {
+  const images = Array.isArray(post.images) ? post.images : [];
+  const gallery = images.length
+    ? images.map((image) => ({
+        type: "image",
+        value: image.imageUrl,
+      }))
+    : [{
+        type: "art",
+        value: randomArt(post.id),
+      }];
+
+  return {
+    id: post.id,
+    title: post.title || "Untitled Post",
+    description: post.description || "",
+    category: post.categorySummary?.name || "Uncategorized",
+    location: post.locationText || post.storeSummary?.name || "Unknown Location",
+    price: formatPrice(post.priceMin, post.priceMax, post.currency),
+    tags: Array.isArray(post.tags) ? post.tags.map((tag) => `#${tag.name}`) : [],
+    authorName: post.authorUsername || "Unknown User",
+    authorRole: post.status || "PUBLISHED",
+    avatar: getInitials(post.authorUsername || "CU"),
+    likes: Number(post.likeCount || 0),
+    favorites: Number(post.favoriteCount || 0),
+    commentsCount: Number(post.commentCount || 0),
+    views: Number(post.viewCount || 0),
+    gallery,
+    createdAt: post.createdAt || post.publishedAt || new Date().toISOString(),
+    updatedAt: post.updatedAt || post.createdAt || new Date().toISOString(),
+    status: post.status || "PUBLISHED",
+    likedByCurrentUser: Boolean(post.likedByCurrentUser),
+    favoritedByCurrentUser: Boolean(post.favoritedByCurrentUser),
+    shareUrl: post.shareUrl || "",
+    ownedByCurrentUser: Boolean(state.auth?.userId && post.userId === state.auth.userId),
+  };
+}
+
+function currentAsset(post, index) {
+  const image = post.gallery[index] || post.gallery[0] || { type: "art", value: randomArt(post.id) };
+  return assetForGallery(image);
+}
+
+function assetForGallery(image) {
+  if (image.type === "image") {
+    return {
+      className: "image-cover",
+      style: `style="background-image:url('${escapeAttribute(image.value)}')"`,
+    };
+  }
+  return {
+    className: image.value,
+    style: "",
+  };
+}
+
+function createStatCard(label, value, caption) {
+  return `<article class="analytics-card"><span class="micro-label">${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong><p>${escapeHtml(caption)}</p></article>`;
+}
+
+function createEmptyState(title, description) {
+  return `<article class="panel" style="padding:24px;"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(description)}</p></article>`;
+}
+
+function togglePasswordVisibility() {
+  const showPassword = signupPassword.type === "password";
+  signupPassword.type = showPassword ? "text" : "password";
+  togglePassword.textContent = showPassword ? "Hide" : "Show";
+}
+
+function persistAuthState() {
+  localStorage.setItem(STORAGE_KEYS.token, state.token);
+  localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(state.auth));
+}
+
+function clearAuthState() {
+  state.token = "";
+  state.auth = null;
+  localStorage.removeItem(STORAGE_KEYS.token);
+  localStorage.removeItem(STORAGE_KEYS.auth);
+}
+
 function readStorage(key) {
-  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Storage parse failed.", error);
+    return null;
+  }
 }
 
-// Find a single post by ID
-function findPost(postId) {
-  return state.posts.find((post) => post.id === postId);
+function getDisplayName() {
+  return state.profile?.nickname || state.profile?.username || state.auth?.username || "";
 }
 
-// Get user initials from full name
-function getInitials(name = "") {
-  return name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join("");
+function firstName(name) {
+  return String(name || "").trim().split(/\s+/)[0] || "Curator";
 }
 
-// Get first name from full name
-function firstName(name = "") {
-  return name.split(" ")[0] || name;
+function getInitials(name) {
+  const tokens = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!tokens.length) {
+    return "CU";
+  }
+  return tokens.slice(0, 2).map((token) => token[0].toUpperCase()).join("");
 }
 
-// Format large numbers (1k, 2.5k)
-function formatCount(value) {
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-  return String(value);
+function truncate(value, length) {
+  if (!value || value.length <= length) {
+    return value || "";
+  }
+  return `${value.slice(0, length - 3)}...`;
 }
 
-// Calculate trending score
-function trendScore(post, window) {
-  const base = post.likes + post.saves * 2 + post.reposts * 3 + post.comments.length * 2;
-  if (window === "daily") return Math.round(base * 0.36);
-  if (window === "weekly") return Math.round(base * 0.72);
-  return base;
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-// Check if post is bookmarked
-function isBookmarked(postId) {
-  return state.bookmarks.includes(postId);
+function escapeAttribute(value) {
+  return escapeHtml(value).replaceAll("`", "&#96;");
 }
 
-// Check if post is liked
-function isLiked(postId) {
-  return state.likes.includes(postId);
-}
-
-// Get random art class
-function randomArt() {
-  return artLibrary[Math.floor(Math.random() * artLibrary.length)];
-}
-
-// Create inline background-image style for assets
-function backgroundForAsset(asset) {
-  if (!asset || asset.type !== "image") return "";
-  return `style="background-image:url('${escapeAttribute(asset.value)}')"`;
-}
-
-// Convert file to base64 data URL
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
-}
-
-// Show temporary toast message
 function showToast(message) {
   toast.textContent = message;
   toast.classList.remove("hidden");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2200);
+  window.clearTimeout(showToast.timerId);
+  showToast.timerId = window.setTimeout(() => {
+    toast.classList.add("hidden");
+  }, 2600);
 }
 
-// Escape HTML to prevent XSS
-function escapeHtml(value = "") {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(Number(value || 0));
 }
 
-// Escape HTML attributes
-function escapeAttribute(value = "") {
-  return String(value).replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+function formatDateTime(value) {
+  if (!value) {
+    return "Just now";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Just now";
+  }
+  return date.toLocaleString();
+}
+
+function formatPrice(priceMin, priceMax, currency) {
+  if (priceMin == null && priceMax == null) {
+    return "N/A";
+  }
+
+  const normalizedCurrency = currency || "USD";
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: normalizedCurrency,
+    maximumFractionDigits: 2,
+  });
+  if (priceMin != null && priceMax != null && Number(priceMin) !== Number(priceMax)) {
+    return `${formatter.format(Number(priceMin))} - ${formatter.format(Number(priceMax))}`;
+  }
+  return formatter.format(Number(priceMin ?? priceMax));
+}
+
+function randomArt(seed = Date.now()) {
+  return artLibrary[Math.abs(Number(seed)) % artLibrary.length];
+}
+
+function parsePriceInput(value) {
+  if (!value) {
+    return { priceMin: null, priceMax: null, currency: null };
+  }
+
+  const matches = value.match(/-?\d+(\.\d+)?/g) || [];
+  const symbol = value.trim()[0];
+  const currency = symbol === "￥" ? "CNY" : symbol === "€" ? "EUR" : symbol === "£" ? "GBP" : "USD";
+  if (!matches.length) {
+    return { priceMin: null, priceMax: null, currency };
+  }
+  if (matches.length === 1) {
+    return { priceMin: Number(matches[0]), priceMax: Number(matches[0]), currency };
+  }
+  return {
+    priceMin: Number(matches[0]),
+    priceMax: Number(matches[1]),
+    currency,
+  };
+}
+
+function resolveCategoryId(name) {
+  if (!name) {
+    return null;
+  }
+  const category = state.categories.find((item) => String(item.name).toLowerCase() === name.toLowerCase());
+  return category?.id || null;
+}
+
+function resolveTagIds(rawTagNames) {
+  if (!rawTagNames) {
+    return [];
+  }
+  return rawTagNames
+    .split(",")
+    .map((tag) => tag.trim().replace(/^#/, ""))
+    .filter(Boolean)
+    .map((tagName) => state.tags.find((tag) => String(tag.name).toLowerCase() === tagName.toLowerCase())?.id)
+    .filter(Boolean);
+}
+
+async function uploadSelectedImages() {
+  if (!pendingUploads.length) {
+    return [];
+  }
+
+  const uploads = [];
+  for (const file of pendingUploads) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiRequest("/api/files/images", {
+      method: "POST",
+      auth: true,
+      formData,
+    });
+    uploads.push({
+      imageUrl: response.url,
+      imageKey: response.fileName,
+      thumbnailUrl: response.url,
+      fileSize: response.size,
+      mimeType: response.contentType,
+    });
+  }
+  return uploads;
+}
+
+async function updateProfileQuietly(body) {
+  state.profile = await apiRequest("/api/users/me/profile", {
+    method: "PUT",
+    auth: true,
+    body,
+  });
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error || new Error("Failed to read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function ensureAuthenticated(message) {
+  if (state.token && state.auth) {
+    return true;
+  }
+  showToast(message);
+  return false;
+}
+
+async function apiRequest(path, options = {}) {
+  const {
+    method = "GET",
+    auth = false,
+    body,
+    formData,
+    returnEnvelope = false,
+  } = options;
+
+  const headers = {};
+  if (auth && state.token) {
+    headers.Authorization = `Bearer ${state.token}`;
+  }
+  if (!formData) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: formData || (body ? JSON.stringify(body) : undefined),
+  });
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(payload?.message || `Request failed with status ${response.status}.`);
+  }
+  if (!payload?.success) {
+    throw new Error(payload?.message || "Business request failed.");
+  }
+  return returnEnvelope ? payload : payload.data;
 }

@@ -12,6 +12,8 @@ public final class PostSortOption {
 
     public static final String LATEST = "latest";
     public static final String HOT = "hot";
+    public static final String FAVORITES = "favorites";
+    public static final String COMMENTS = "comments";
 
     private PostSortOption() {
     }

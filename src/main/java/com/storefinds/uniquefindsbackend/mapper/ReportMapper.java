@@ -22,6 +22,18 @@ public interface ReportMapper {
     int insert(Report report);
 
     /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Insert one new pending report record while relying on the database unique constraint to block duplicate open submissions.
+     * Params:
+     * - report: report entity to persist
+     * Returns:
+     * - int: affected rows
+     * Throws: None
+     */
+    int insertPending(Report report);
+
+    /**
      * Author: Enqi Guo
      * Date: 2026-05-06
      * Purpose: Count all open reports submitted by one user for one target.

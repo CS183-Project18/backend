@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.StoreMapper">
+
+    <resultMap id="StoreResultMap" type="com.storefinds.uniquefindsbackend.entity.Store">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="branchName" column="branch_name"/>
+        <result property="city" column="city"/>
+        <result property="district" column="district"/>
+        <result property="address" column="address"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="phone" column="phone"/>
+        <result property="businessHours" column="business_hours"/>
+        <result property="status" column="status"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="StoreResultMap">
+        SELECT id, name, branch_name, city, district, address, latitude, longitude, phone,
+               business_hours, status, created_by, created_at, updated_at
+        FROM stores
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="selectAll" resultMap="StoreResultMap">
+        SELECT id, name, branch_name, city, district, address, latitude, longitude, phone,
+               business_hours, status, created_by, created_at, updated_at
+        FROM stores
+        ORDER BY updated_at DESC, id DESC
+    </select>
+
+    <select id="selectPublic" resultMap="StoreResultMap">
+        SELECT id, name, branch_name, city, district, address, latitude, longitude, phone,
+               business_hours, status, created_by, created_at, updated_at
+        FROM stores
+        WHERE status = 'ACTIVE'
+        ORDER BY name ASC, id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stores (
+            name, branch_name, city, district, address, latitude, longitude, phone, business_hours, status, created_by
+        ) VALUES (
+            #{name}, #{branchName}, #{city}, #{district}, #{address}, #{latitude}, #{longitude}, #{phone}, #{businessHours}, #{status}, #{createdBy}
+        )
+    </insert>
+
+    <update id="updateById">
+        UPDATE stores
+        SET name = #{name},
+            branch_name = #{branchName},
+            city = #{city},
+            district = #{district},
+            address = #{address},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            phone = #{phone},
+            business_hours = #{businessHours}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatusById">
+        UPDATE stores
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -17,6 +17,7 @@ public class ReportResponse {
     private String resolutionAction;
     private String resolutionNote;
     private String targetStatus;
+    private String targetSummary;
     private Long handledBy;
     private String handledByUsername;
     private LocalDateTime handledAt;

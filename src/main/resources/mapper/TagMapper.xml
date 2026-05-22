@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.storefinds.uniquefindsbackend.mapper.TagMapper">
+
+    <resultMap id="TagResultMap" type="com.storefinds.uniquefindsbackend.entity.Tag">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="heatScore" column="heat_score"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="TagResultMap">
+        SELECT id, name, heat_score, created_at
+        FROM tags
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="selectByName" resultMap="TagResultMap">
+        SELECT id, name, heat_score, created_at
+        FROM tags
+        WHERE name = #{name}
+        LIMIT 1
+    </select>
+
+    <select id="selectAll" resultMap="TagResultMap">
+        SELECT id, name, heat_score, created_at
+        FROM tags
+        ORDER BY heat_score DESC, name ASC, id ASC
+    </select>
+
+    <select id="selectByIds" resultMap="TagResultMap">
+        SELECT id, name, heat_score, created_at
+        FROM tags
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY name ASC, id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tags (name, heat_score)
+        VALUES (#{name}, #{heatScore})
+    </insert>
+
+    <update id="updateById">
+        UPDATE tags
+        SET name = #{name},
+            heat_score = #{heatScore}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

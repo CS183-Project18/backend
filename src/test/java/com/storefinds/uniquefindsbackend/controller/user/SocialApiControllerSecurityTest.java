@@ -2,23 +2,36 @@ package com.storefinds.uniquefindsbackend.controller.user;
 
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.config.SecurityConfig;
+import com.storefinds.uniquefindsbackend.controller.admin.AdminAnalyticsController;
+import com.storefinds.uniquefindsbackend.controller.admin.AdminCategoryController;
 import com.storefinds.uniquefindsbackend.controller.admin.AdminModerationController;
+import com.storefinds.uniquefindsbackend.controller.admin.AdminStoreController;
+import com.storefinds.uniquefindsbackend.controller.admin.AdminTagController;
+import com.storefinds.uniquefindsbackend.dto.AnalyticsDistributionItemResponse;
+import com.storefinds.uniquefindsbackend.dto.CategoryResponse;
 import com.storefinds.uniquefindsbackend.dto.CommentResponse;
 import com.storefinds.uniquefindsbackend.dto.NotificationResponse;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
+import com.storefinds.uniquefindsbackend.dto.StoreResponse;
+import com.storefinds.uniquefindsbackend.dto.TagResponse;
 import com.storefinds.uniquefindsbackend.dto.UserProfileResponse;
+import com.storefinds.uniquefindsbackend.service.AdminAnalyticsService;
 import com.storefinds.uniquefindsbackend.service.AdminModerationService;
+import com.storefinds.uniquefindsbackend.service.CategoryService;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.exception.GlobalExceptionHandler;
 import com.storefinds.uniquefindsbackend.security.JwtAuthenticationFilter;
 import com.storefinds.uniquefindsbackend.security.RestAccessDeniedHandler;
 import com.storefinds.uniquefindsbackend.security.RestAuthenticationEntryPoint;
+import com.storefinds.uniquefindsbackend.service.StoreService;
 import com.storefinds.uniquefindsbackend.dto.UnreadNotificationCountResponse;
 import com.storefinds.uniquefindsbackend.service.CommentService;
 import com.storefinds.uniquefindsbackend.service.NotificationService;
 import com.storefinds.uniquefindsbackend.service.PostInteractionService;
 import com.storefinds.uniquefindsbackend.service.PostService;
+import com.storefinds.uniquefindsbackend.service.TagService;
+import com.storefinds.uniquefindsbackend.service.TrendingService;
 import com.storefinds.uniquefindsbackend.service.UserProfileService;
 import com.storefinds.uniquefindsbackend.util.JwtUtil;
 import org.junit.jupiter.api.Test;
@@ -27,6 +40,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,7 +63,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         CommentController.class,
         CommentInteractionController.class,
         NotificationController.class,
-        AdminModerationController.class
+        CategoryController.class,
+        StoreController.class,
+        TagController.class,
+        DiscoveryController.class,
+        AdminModerationController.class,
+        AdminCategoryController.class,
+        AdminStoreController.class,
+        AdminTagController.class,
+        AdminAnalyticsController.class
 })
 @Import({
         SecurityConfig.class,
@@ -95,6 +118,21 @@ class SocialApiControllerSecurityTest {
 
     @MockitoBean
     private AdminModerationService adminModerationService;
+
+    @MockitoBean
+    private CategoryService categoryService;
+
+    @MockitoBean
+    private StoreService storeService;
+
+    @MockitoBean
+    private TagService tagService;
+
+    @MockitoBean
+    private TrendingService trendingService;
+
+    @MockitoBean
+    private AdminAnalyticsService adminAnalyticsService;
 
     @Test
     /**
@@ -153,6 +191,98 @@ class SocialApiControllerSecurityTest {
                 .andExpect(jsonPath("$.data.items[0].likeCount").value(5))
                 .andExpect(jsonPath("$.data.items[0].likedByCurrentUser").value(false))
                 .andExpect(jsonPath("$.data.items[0].pinned").value(true));
+    }
+
+    @Test
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Verify guests can access newly added structured discovery read APIs.
+     * Params: None
+     * Returns: None
+     * Throws: Exception
+     */
+    void guestCanReadStructuredDiscoveryApis() throws Exception {
+        CategoryResponse category = new CategoryResponse();
+        category.setId(1L);
+        category.setName("Home Decor");
+        category.setActive(true);
+
+        StoreResponse store = new StoreResponse();
+        store.setId(2L);
+        store.setName("North Lane Gift House");
+        store.setStatus("ACTIVE");
+
+        TagResponse tag = new TagResponse();
+        tag.setId(3L);
+        tag.setName("retro");
+
+        AnalyticsDistributionItemResponse item = new AnalyticsDistributionItemResponse(1L, "Home Decor", 6L);
+
+        when(categoryService.getCategories(true)).thenReturn(Result.success(List.of(category)));
+        when(categoryService.getCategoryTree(true)).thenReturn(Result.success(List.of(category)));
+        when(storeService.getStores(true)).thenReturn(Result.success(List.of(store)));
+        when(storeService.getStoreById(2L, true)).thenReturn(Result.success(store));
+        when(tagService.getTags()).thenReturn(Result.success(List.of(tag)));
+        when(trendingService.getTrendingCategories(10)).thenReturn(Result.success(List.of(item)));
+        when(trendingService.getTrendingTags(10)).thenReturn(Result.success(List.of(item)));
+        when(trendingService.getTrendingStores(10)).thenReturn(Result.success(List.of(item)));
+
+        mockMvc.perform(get("/api/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("Home Decor"));
+
+        mockMvc.perform(get("/api/categories/tree"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("Home Decor"));
+
+        mockMvc.perform(get("/api/stores"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].status").value("ACTIVE"));
+
+        mockMvc.perform(get("/api/stores/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("North Lane Gift House"));
+
+        mockMvc.perform(get("/api/tags"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("retro"));
+
+        mockMvc.perform(get("/api/discovery/trending/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("Home Decor"));
+
+        mockMvc.perform(get("/api/discovery/trending/tags"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].count").value(6));
+
+        mockMvc.perform(get("/api/discovery/trending/stores"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].count").value(6));
+    }
+
+    @Test
+    void guestCanUsePublicImageSearchEndpoint() throws Exception {
+        PostResponse post = new PostResponse();
+        post.setId(42L);
+        post.setTitle("Vintage Lamp");
+
+        MockMultipartFile file = new MockMultipartFile("file", "lamp.jpg", "image/jpeg", new byte[]{1, 2, 3});
+        when(postService.searchPublishedPostsByImage(org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.isNull(),
+                        org.mockito.ArgumentMatchers.eq(1),
+                        org.mockito.ArgumentMatchers.eq(20)))
+                .thenReturn(Result.success(pageOf(post)));
+
+        mockMvc.perform(multipart("/api/posts/search/image").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.items[0].id").value(42));
     }
 
     @Test
@@ -305,6 +435,31 @@ class SocialApiControllerSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerFor(2L, "bob", "USER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Verify non-admin users remain blocked from structured admin and analytics endpoints.
+     * Params: None
+     * Returns: None
+     * Throws: Exception
+     */
+    void nonAdminCannotAccessStructuredAdminEndpoints() throws Exception {
+        mockMvc.perform(get("/api/admin/analytics/overview")
+                        .header(HttpHeaders.AUTHORIZATION, bearerFor(2L, "bob", "USER")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+
+        mockMvc.perform(post("/api/admin/tags")
+                        .header(HttpHeaders.AUTHORIZATION, bearerFor(2L, "bob", "USER"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"retro"}
+                                """))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }

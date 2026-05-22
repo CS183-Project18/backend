@@ -131,11 +131,41 @@
         <if test="categoryId != null">
             AND p.category_id = #{categoryId}
         </if>
+        <if test="storeId != null">
+            AND p.store_id = #{storeId}
+        </if>
+        <if test="priceMin != null">
+            AND (p.price_max IS NULL OR p.price_max <![CDATA[>=]]> #{priceMin})
+        </if>
+        <if test="priceMax != null">
+            AND (p.price_min IS NULL OR p.price_min <![CDATA[<=]]> #{priceMax})
+        </if>
+        <if test="tagIds != null and tagIds.size() > 0">
+            AND EXISTS (
+                SELECT 1
+                FROM post_tags fpt
+                WHERE fpt.post_id = p.id
+                  AND fpt.tag_id IN
+                  <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+                      #{tagId}
+                  </foreach>
+            )
+        </if>
         <if test="keyword != null and keyword != ''">
             AND (
                 p.title LIKE #{keywordLike}
                 OR p.description LIKE #{keywordLike}
                 OR p.location_text LIKE #{keywordLike}
+                OR s.name LIKE #{keywordLike}
+                OR s.branch_name LIKE #{keywordLike}
+                OR c.name LIKE #{keywordLike}
+                OR EXISTS (
+                    SELECT 1
+                    FROM post_tags pt
+                    INNER JOIN tags t ON t.id = pt.tag_id
+                    WHERE pt.post_id = p.id
+                      AND t.name LIKE #{keywordLike}
+                )
             )
         </if>
     </sql>
@@ -147,6 +177,8 @@
     <select id="countSearchPublishedPosts" resultType="long">
         SELECT COUNT(1)
         FROM posts p
+        LEFT JOIN stores s ON s.id = p.store_id
+        LEFT JOIN categories c ON c.id = p.category_id
         WHERE
         <include refid="PublishedSearchWhere"/>
     </select>
@@ -156,11 +188,25 @@
         <include refid="PostSelectColumns"/>
         FROM posts p
         INNER JOIN users u ON u.id = p.user_id
+        LEFT JOIN stores s ON s.id = p.store_id
+        LEFT JOIN categories c ON c.id = p.category_id
         WHERE
         <include refid="PublishedSearchWhere"/>
         <choose>
             <when test="sort == 'hot'">
                 ORDER BY <include refid="HotScoreExpression"/> DESC,
+                         p.favorite_count DESC,
+                         p.comment_count DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <when test="sort == 'favorites'">
+                ORDER BY p.favorite_count DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <when test="sort == 'comments'">
+                ORDER BY p.comment_count DESC,
                          p.published_at DESC,
                          p.id DESC
             </when>
@@ -169,6 +215,72 @@
             </otherwise>
         </choose>
         LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="selectPublishedPostsByIds" resultMap="PostResultMap">
+        SELECT
+        <include refid="PostSelectColumns"/>
+        FROM posts p
+        INNER JOIN users u ON u.id = p.user_id
+        LEFT JOIN stores s ON s.id = p.store_id
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.id IN
+        <foreach collection="postIds" item="postId" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+          AND p.status = 'PUBLISHED'
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="storeId != null">
+            AND p.store_id = #{storeId}
+        </if>
+        <if test="priceMin != null">
+            AND (p.price_max IS NULL OR p.price_max <![CDATA[>=]]> #{priceMin})
+        </if>
+        <if test="priceMax != null">
+            AND (p.price_min IS NULL OR p.price_min <![CDATA[<=]]> #{priceMax})
+        </if>
+        <if test="tagIds != null and tagIds.size() > 0">
+            AND EXISTS (
+                SELECT 1
+                FROM post_tags fpt
+                WHERE fpt.post_id = p.id
+                  AND fpt.tag_id IN
+                  <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+                      #{tagId}
+                  </foreach>
+            )
+        </if>
+        <choose>
+            <when test="sort == 'hot'">
+                ORDER BY <include refid="HotScoreExpression"/> DESC,
+                         p.favorite_count DESC,
+                         p.comment_count DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <when test="sort == 'favorites'">
+                ORDER BY p.favorite_count DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <when test="sort == 'comments'">
+                ORDER BY p.comment_count DESC,
+                         p.published_at DESC,
+                         p.id DESC
+            </when>
+            <when test="useAiOrder">
+                ORDER BY FIELD(p.id,
+                <foreach collection="postIds" item="postId" separator=",">
+                    #{postId}
+                </foreach>
+                )
+            </when>
+            <otherwise>
+                ORDER BY p.published_at DESC, p.created_at DESC, p.id DESC
+            </otherwise>
+        </choose>
     </select>
 
     <select id="countTrendingPosts" resultType="long">

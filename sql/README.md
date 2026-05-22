@@ -6,6 +6,7 @@ This project uses MySQL 8+. The schema and demo scripts are separated so you can
 
 - `unique_finds_full_schema.sql`: full schema, triggers, and base dictionary data
 - `demo_seed_data.sql`: demo users, posts, images, interactions, and moderation data
+- `structured_discovery_validation.sql`: read-only validation queries for structured categories, stores, tags, rankings, and report summaries
 - `community_interaction_patch.sql`: interaction patch
 - `community_interaction_validation.sql`: migration validation and count consistency checks for the interaction patch
 - `moderation_governance_patch.sql`: moderation patch
@@ -24,14 +25,16 @@ The latest backend phase relies on Flyway `V3__moderation_audit_and_interaction_
 ```bash
 mysql -u <username> -p < "sql/unique_finds_full_schema.sql"
 mysql -u <username> -p < "sql/demo_seed_data.sql"
+mysql -u <username> -p unique_finds < "sql/structured_discovery_validation.sql"
 ```
 
 ### Option B: DataGrip / Navicat / MySQL Workbench
 
 1. Run `unique_finds_full_schema.sql`
 2. Run `demo_seed_data.sql`
-3. Start the backend once so Flyway can baseline and validate the incremental migrations
-4. Confirm `unique_finds` database and all expected tables are present
+3. Optionally run `structured_discovery_validation.sql` to verify the structured demo data
+4. Start the backend once so Flyway can baseline and validate the incremental migrations
+5. Confirm `unique_finds` database and all expected tables are present
 
 ## Existing Environment Upgrade
 
@@ -68,9 +71,28 @@ The validation script checks:
 - The seed data includes:
   - published posts
   - pending / rejected / hidden moderation states
+  - multi-level categories
+  - active, hidden, and closed stores
+  - active and inactive category examples
   - likes, favorites, comments
   - report and moderation records
   - trending-friendly engagement distribution
+
+## Structured Validation
+
+After loading the schema and demo seed, run:
+
+```bash
+mysql -u <username> -p unique_finds < "sql/structured_discovery_validation.sql"
+```
+
+This verification script checks:
+
+- category tree seed data exists with root and child levels
+- public store seed data contains active stores and separate hidden/closed examples
+- structured search dimensions can be inspected directly by category, store, and tag
+- report target summary data exists for both post and comment reports
+- discovery rankings can be validated against active categories and active stores only
 
 ## Notes
 

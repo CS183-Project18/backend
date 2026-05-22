@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
-@EnableConfigurationProperties(FileStorageProperties.class)
+@EnableConfigurationProperties({FileStorageProperties.class, AISearchProperties.class})
 public class WebResourceConfig implements WebMvcConfigurer {
 
     private final FileStorageProperties fileStorageProperties;

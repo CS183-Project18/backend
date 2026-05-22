@@ -4,10 +4,14 @@ import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
+import com.storefinds.uniquefindsbackend.dto.TagResponse;
 import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.entity.Post;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface PostService {
 
@@ -22,9 +26,23 @@ public interface PostService {
     Result<PageResponse<PostResponse>> searchPublishedPosts(Long userId,
                                                             String keyword,
                                                             Long categoryId,
+                                                            Long storeId,
+                                                            List<Long> tagIds,
+                                                            BigDecimal priceMin,
+                                                            BigDecimal priceMax,
                                                             String sort,
                                                             int page,
                                                             int pageSize);
+
+    Result<PageResponse<PostResponse>> searchPublishedPostsByImage(Long userId,
+                                                                   MultipartFile file,
+                                                                   Long categoryId,
+                                                                   Long storeId,
+                                                                   List<Long> tagIds,
+                                                                   BigDecimal priceMin,
+                                                                   BigDecimal priceMax,
+                                                                   int page,
+                                                                   int pageSize);
 
     Result<PageResponse<PostResponse>> getTrendingPosts(Long userId,
                                                         String window,
@@ -36,6 +54,8 @@ public interface PostService {
     Result<Void> deletePost(Long userId, Long postId);
 
     List<PostResponse> buildPostResponsesForUser(Long userId, List<Post> posts);
+
+    Map<Long, List<TagResponse>> getTagResponseMap(List<Long> postIds);
 
     void likePost(Long userId, Long postId);
 

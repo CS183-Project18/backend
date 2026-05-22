@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -68,5 +69,31 @@ class ReportServiceImplTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> reportService.reportComment(3L, 8L, request));
         assertEquals("you cannot report your own comment", ex.getMessage());
+    }
+
+    @Test
+    void duplicatePendingReportIsRejectedByDatabaseConstraint() {
+        Post post = new Post();
+        post.setId(5L);
+        post.setUserId(9L);
+        post.setStatus("PUBLISHED");
+        when(postMapper.selectById(5L)).thenReturn(post);
+        when(reportMapper.insertPending(org.mockito.ArgumentMatchers.any()))
+                .thenThrow(new DuplicateKeyException("duplicate"));
+
+        CreateReportRequest request = new CreateReportRequest();
+        request.setReasonType("SPAM");
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> reportService.reportPost(3L, 5L, request));
+        assertEquals("you have already submitted a pending report for this target", ex.getMessage());
+        verify(interactionEventService, never()).record(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        );
     }
 }

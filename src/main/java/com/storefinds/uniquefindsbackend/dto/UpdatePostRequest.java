@@ -35,6 +35,8 @@ public class UpdatePostRequest {
     @Size(max = 255, message = "locationText must be at most 255 characters")
     private String locationText;
 
+    private List<Long> tagIds;
+
     @Valid
     private List<PostImageRequest> images;
 }

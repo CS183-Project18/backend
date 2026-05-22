@@ -27,6 +27,9 @@ public class PostResponse {
     private BigDecimal priceMax;
     private String currency;
     private String locationText;
+    private StoreSummaryResponse storeSummary;
+    private CategorySummaryResponse categorySummary;
+    private List<TagResponse> tags;
     private String status;
     private String moderationReason;
     private Long viewCount;

@@ -20,13 +20,19 @@ services:
       timeout: 5s
       retries: 10
 
-  ai-service:
+  ai-search:
     build:
-      context: ./ai-service
-    container_name: unique-finds-ai-service
+      context: ./ai-search
+    container_name: unique-finds-ai-search
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    volumes:
+      - ai-search-cache:/app/cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    # Port 8000 is only exposed internally to other services, not to host
 
   backend:
     build:
@@ -36,8 +42,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      ai-service:
-        condition: service_started
+      ai-search:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       FUZHOU_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
@@ -52,7 +58,7 @@ services:
       FUZHOU_MAIL_DEFAULT_ENCODING: ${MAIL_DEFAULT_ENCODING:-UTF-8}
       FUZHOU_JWT_USER_SECRET_KEY: ${JWT_USER_SECRET_KEY:-NzA2MDI4NjQ2MDI2MzY4NzA4MjM0MTA2NTMxMzgzNjE=}
       FUZHOU_JWT_REFRESH_SECRET_KEY: ${JWT_REFRESH_SECRET_KEY:-MjI0NjEyNzU4NjcwNjAxNDc2NDA0MzUyMzIzMTg4NjY=}
-      AI_SERVICE_BASE_URL: ${AI_SERVICE_BASE_URL:-http://ai-service:8000}
+      AI_SEARCH_BASE_URL: ${AI_SEARCH_BASE_URL:-http://ai-search:8000}
     ports:
       - "8080:8080"
     volumes:
@@ -60,3 +66,4 @@ services:
 
 volumes:
   mysql-data:
+  ai-search-cache:

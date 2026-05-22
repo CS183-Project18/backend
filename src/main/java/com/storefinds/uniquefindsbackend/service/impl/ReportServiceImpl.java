@@ -19,6 +19,7 @@ import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.mapper.ReportMapper;
 import com.storefinds.uniquefindsbackend.service.InteractionEventService;
 import com.storefinds.uniquefindsbackend.service.ReportService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,10 +125,6 @@ public class ReportServiceImpl implements ReportService {
      * - BusinessException: when duplicate pending report exists or reason type is invalid
      */
     private Report createReport(Long userId, String targetType, Long targetId, CreateReportRequest request) {
-        if (reportMapper.countOpenByReporterAndTarget(userId, targetType, targetId) > 0) {
-            throw new BusinessException(ErrorCode.CONFLICT, "you have already submitted a pending report for this target");
-        }
-
         Report report = new Report();
         report.setReporterId(userId);
         report.setTargetType(targetType);
@@ -137,7 +134,11 @@ public class ReportServiceImpl implements ReportService {
         report.setStatus(ReportStatus.PENDING);
         report.setResolutionAction(null);
         report.setResolutionNote(null);
-        reportMapper.insert(report);
+        try {
+            reportMapper.insertPending(report);
+        } catch (DuplicateKeyException ex) {
+            throw new BusinessException(ErrorCode.CONFLICT, "you have already submitted a pending report for this target");
+        }
         interactionEventService.record(
                 InteractionEventType.REPORT_SUBMIT,
                 userId,
@@ -214,6 +215,7 @@ public class ReportServiceImpl implements ReportService {
         response.setHandledAt(report.getHandledAt());
         response.setCreatedAt(report.getCreatedAt());
         response.setTargetStatus(resolveTargetStatus(report));
+        response.setTargetSummary(resolveTargetSummary(report));
         return response;
     }
 
@@ -274,6 +276,28 @@ public class ReportServiceImpl implements ReportService {
         if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
             Comment comment = commentMapper.selectById(report.getTargetId());
             return comment == null ? CommentStatus.DELETED : comment.getStatus();
+        }
+        return null;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Resolve one short target summary string for report response display to reduce extra frontend lookups.
+     * Params:
+     * - report: source report entity
+     * Returns:
+     * - String: target summary text or null
+     * Throws: None
+     */
+    private String resolveTargetSummary(Report report) {
+        if (ReportTargetType.POST.equals(report.getTargetType())) {
+            Post post = postMapper.selectById(report.getTargetId());
+            return post == null ? null : post.getTitle();
+        }
+        if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
+            Comment comment = commentMapper.selectById(report.getTargetId());
+            return comment == null ? null : comment.getContent();
         }
         return null;
     }

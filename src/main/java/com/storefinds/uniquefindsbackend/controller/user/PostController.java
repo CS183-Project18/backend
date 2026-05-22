@@ -24,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Validated
 @RestController
@@ -127,11 +131,15 @@ public class PostController {
     @GetMapping("/search")
     /**
      * Author: Kaijie Zhu
-     * Date: 2026-05-06
-     * Purpose: Search published posts by keyword, category, and sort option.
+     * Date: 2026-05-18
+     * Purpose: Search published posts by keyword, category, store, tags, price range, and sort option.
      * Params:
      * - keyword: optional search keyword
      * - categoryId: optional category id
+     * - storeId: optional store id
+     * - tagIds: optional tag id list
+     * - priceMin: optional minimum price filter
+     * - priceMax: optional maximum price filter
      * - sort: optional sort option
      * - page: target page number starting from 1
      * - pageSize: target page size
@@ -142,11 +150,46 @@ public class PostController {
      */
     public Result<PageResponse<PostResponse>> searchPosts(@RequestParam(required = false) String keyword,
                                                           @RequestParam(required = false) Long categoryId,
-                                                          @RequestParam(defaultValue = "latest") String sort,
+                                                          @RequestParam(required = false) Long storeId,
+                                                          @RequestParam(required = false) List<Long> tagIds,
+                                                          @RequestParam(required = false) BigDecimal priceMin,
+                                                          @RequestParam(required = false) BigDecimal priceMax,
+                                                          @RequestParam(required = false) String sort,
                                                           @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
                                                           @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
                                                           Authentication authentication) {
-        return postService.searchPublishedPosts(extractCurrentUserId(authentication), keyword, categoryId, sort, page, pageSize);
+        return postService.searchPublishedPosts(extractCurrentUserId(authentication), keyword, categoryId, storeId, tagIds, priceMin, priceMax, sort, page, pageSize);
+    }
+
+    @PostMapping("/search/image")
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Search published posts by one uploaded image with optional structured filters.
+     * Params:
+     * - file: uploaded multipart image file
+     * - categoryId: optional category id
+     * - storeId: optional store id
+     * - tagIds: optional tag id list
+     * - priceMin: optional minimum price filter
+     * - priceMax: optional maximum price filter
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * - authentication: spring authentication object
+     * Returns:
+     * - Result<PageResponse<PostResponse>>: matched published post page
+     * Throws: None
+     */
+    public Result<PageResponse<PostResponse>> searchPostsByImage(@RequestParam("file") MultipartFile file,
+                                                                 @RequestParam(required = false) Long categoryId,
+                                                                 @RequestParam(required = false) Long storeId,
+                                                                 @RequestParam(required = false) List<Long> tagIds,
+                                                                 @RequestParam(required = false) BigDecimal priceMin,
+                                                                 @RequestParam(required = false) BigDecimal priceMax,
+                                                                 @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                                 @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
+                                                                 Authentication authentication) {
+        return postService.searchPublishedPostsByImage(extractCurrentUserId(authentication), file, categoryId, storeId, tagIds, priceMin, priceMax, page, pageSize);
     }
 
     @GetMapping("/trending")
@@ -209,6 +252,16 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/share")
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Generate canonical share metadata for one post.
+     * Params:
+     * - postId: target post id
+     * Returns:
+     * - Result<SharePostResponse>: share metadata result
+     * Throws: None
+     */
     public Result<SharePostResponse> sharePost(@PathVariable @Min(value = 1, message = "postId must be greater than 0") Long postId) {
         return postInteractionService.sharePost(postId);
     }
@@ -248,6 +301,16 @@ public class PostController {
         return currentUser.userId();
     }
 
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-18
+     * Purpose: Extract current authenticated user when the request may come from guest or logged-in user.
+     * Params:
+     * - authentication: spring authentication object
+     * Returns:
+     * - CurrentUser: authenticated principal wrapper or null
+     * Throws: None
+     */
     private CurrentUser extractCurrentUser(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof CurrentUser currentUser)) {
             return null;

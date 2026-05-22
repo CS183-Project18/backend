@@ -48,10 +48,12 @@ public class SmtpEmailSender implements EmailSender {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            helper.setFrom("独特好物平台 <" + sendMailer + ">");
+            helper.setFrom("Unique Finds <" + sendMailer + ">");
             helper.setTo(email);
-            helper.setSubject("Unique Finds 验证码");
-            helper.setText("您的验证码是: " + code + "，" + (expireSeconds / 60) + " 分钟内有效。请勿泄露给他人。");
+            helper.setSubject("Unique Finds Verification Code");
+            helper.setText("Your verification code is: " + code
+                    + ". It will expire in " + (expireSeconds / 60)
+                    + " minutes. Please do not share this code with anyone.");
             helper.setSentDate(new Date());
             javaMailSender.send(mimeMessage);
         } catch (Exception ex) {
