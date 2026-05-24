@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Carry one normalized published-post search query across parser, discovery, and SQL search layers.
  * Params: None

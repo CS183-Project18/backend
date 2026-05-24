@@ -3,7 +3,7 @@ package com.storefinds.uniquefindsbackend.common;
 import java.util.Set;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-10
  * Purpose: Define stable notification event type constants shared across interaction and moderation flows.
  * Params: None
@@ -19,6 +19,8 @@ public final class NotificationEventType {
     public static final String COMMENT_PINNED = "COMMENT_PINNED";
     public static final String POST_MODERATED = "POST_MODERATED";
     public static final String COMMENT_MODERATED = "COMMENT_MODERATED";
+    public static final String REPORT_RESOLVED = "REPORT_RESOLVED";
+    public static final String REPORT_REJECTED = "REPORT_REJECTED";
 
     private static final Set<String> SUPPORTED_TYPES = Set.of(
             POST_LIKED,
@@ -27,7 +29,9 @@ public final class NotificationEventType {
             COMMENT_LIKED,
             COMMENT_PINNED,
             POST_MODERATED,
-            COMMENT_MODERATED
+            COMMENT_MODERATED,
+            REPORT_RESOLVED,
+            REPORT_REJECTED
     );
 
     private NotificationEventType() {

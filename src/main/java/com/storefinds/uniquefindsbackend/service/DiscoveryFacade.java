@@ -7,7 +7,7 @@ import com.storefinds.uniquefindsbackend.entity.Post;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Provide a stable discovery boundary that can later combine SQL search, recommendation, and AI retrieval.
  * Params: None

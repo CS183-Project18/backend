@@ -163,7 +163,7 @@ public interface PostMapper {
                                     @Param("pageSize") int pageSize);
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Query published posts from one AI-returned candidate id list while preserving AI order unless explicit SQL sort is requested.
      * Params:

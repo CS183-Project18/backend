@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Curator | Dashboard</title>
+  <style>
+    :root {
+      --bg: #f7f2ff;
+      --bg-2: #efe8ff;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --line: rgba(102, 82, 170, 0.12);
+      --line-strong: rgba(102, 82, 170, 0.2);
+      --text: #453d73;
+      --text-strong: #38305f;
+      --muted: #8e88ae;
+      --accent: #6758ff;
+      --accent-soft: #9186ff;
+      --accent-deep: #5143dc;
+      --danger: #df637b;
+      --shadow: 0 28px 80px rgba(88, 67, 167, 0.12);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --shell: min(1600px, calc(100vw - 28px));
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Avenir Next", sans-serif;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(157, 138, 255, 0.28), transparent 18%),
+        radial-gradient(circle at 92% 14%, rgba(116, 102, 255, 0.18), transparent 18%),
+        linear-gradient(180deg, #fcfbff 0%, var(--bg) 45%, #f6f2ff 100%);
+    }
+    button, input, textarea { font: inherit; }
+    button { border: 0; }
+
+    .ambient {
+      position: fixed;
+      width: 24rem;
+      height: 24rem;
+      border-radius: 999px;
+      filter: blur(90px);
+      opacity: 0.34;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .ambient-a { top: -5rem; left: -6rem; background: rgba(110, 92, 255, 0.34); }
+    .ambient-b { right: -8rem; bottom: -8rem; background: rgba(196, 126, 255, 0.24); }
+
+    .hidden { display: none !important; }
+
+    .dashboard-screen {
+      position: relative;
+      z-index: 1;
+      width: var(--shell);
+      min-height: calc(100vh - 28px);
+      margin: 14px auto;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr) 330px;
+      gap: 26px;
+      padding: 20px;
+      border-radius: 28px;
+      background: rgba(250, 247, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent-deep);
+      letter-spacing: -0.06em;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sidebar-nav { display: grid; gap: 10px; }
+
+    .nav-item, .filter-chip, .primary-button, .secondary-button {
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .nav-item, .filter-chip, .secondary-button {
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+    }
+
+    .nav-item.is-active, .filter-chip.is-active, .primary-button {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      border-color: transparent;
+      box-shadow: 0 14px 34px rgba(103, 88, 255, 0.24);
+    }
+
+    .nav-item:hover, .filter-chip:hover, .primary-button:hover, .secondary-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-button.wide, .secondary-button.wide { width: 100%; }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(245, 240, 255, 0.8);
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, #493f62, #231e34);
+    }
+
+    .avatar.small {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+    }
+
+    .profile-card strong, .meta-author strong { display: block; }
+    .profile-card span, .meta-author span { color: var(--muted); }
+
+    /* Developer A: Main dashboard layout - Tight spacing between elements */
+    .dashboard-main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(247, 242, 255, 0.9);
+      z-index: 10;
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(103, 88, 255, 0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-spinner.large { width: 64px; height: 64px; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .dashboard-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 0;
+    }
+
+    .dashboard-topbar h1 {
+      margin: 0;
+      font-size: clamp(2.6rem, 4vw, 4rem);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+      color: var(--text-strong);
+    }
+
+    .dashboard-topbar p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-shell {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 72px;
+      padding: 0 18px;
+      border-radius: 24px;
+      background: white;
+      box-shadow: 0 14px 36px rgba(103, 88, 255, 0.08);
+    }
+
+    .search-shell span { color: var(--accent); }
+
+    .search-shell small {
+      color: var(--accent-soft);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .search-camera { font-size: 1.2rem; padding: 0 8px; }
+
+    .icon-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+    }
+
+    .icon-pill strong {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      font-size: 0.8rem;
+    }
+
+    /* Developer A: Filter bar with consistent button widths */
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Developer A: Filter buttons with consistent width - all buttons same width */
+    .filter-chip {
+      flex: 1;
+      min-width: 100px;
+      max-width: 140px;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .masonry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 0;
+      width: 100%;
+    }
+
+    /* Developer A: Two-card horizontal layout */
+    .masonry-grid.two-cards {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      justify-content: start;
+    }
+
+    .masonry-card {
+      width: 100%;
+      max-width: 100%;
+      flex-shrink: 0;
+      overflow: hidden;
+      border-radius: 26px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 46px rgba(93, 73, 172, 0.08);
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .masonry-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 52px rgba(93, 73, 172, 0.14);
+    }
+
+    .card-media {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.42), transparent 18%),
+        linear-gradient(145deg, #cdbdff, #8370ea 58%, #4a43b8);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .card-media.media-short,
+    .card-media.media-medium,
+    .card-media.media-tall {
+      height: 280px;
+    }
+
+    .card-pill {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-strong);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .card-pill.subtle {
+      top: auto;
+      bottom: 16px;
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .card-body { padding: 18px; }
+
+    .card-body h3 {
+      margin: 0;
+      color: var(--text-strong);
+      letter-spacing: -0.05em;
+    }
+
+    .card-body p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .meta-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card-location {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .store-badge, .location-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      background: rgba(103, 88, 255, 0.08);
+      color: var(--text);
+    }
+
+    .detail-tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag-pill {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(103, 88, 255, 0.08);
+    }
+
+    .compact-tags { margin-bottom: 14px; }
+
+    .post-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .post-stats button {
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(103, 88, 255, 0.08);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .post-stats button.is-active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+    }
+
+    /* Developer B: Right rail panel */
+    .right-rail {
+      display: grid;
+      gap: 20px;
+      align-content: start;
+    }
+
+    .panel {
+      padding: 20px;
+      border-radius: 28px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .panel-header h2 { font-size: 1.5rem; }
+
+    .trending-list, .notification-preview {
+      display: grid;
+      gap: 14px;
+    }
+
+    .trend-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 20px;
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .trend-item strong {
+      font-size: 2rem;
+      line-height: 1;
+      color: rgba(103, 88, 255, 0.2);
+    }
+
+    .notification-item {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 20px;
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .notification-item.unread {
+      border-color: rgba(103, 88, 255, 0.26);
+      box-shadow: inset 0 0 0 1px rgba(103, 88, 255, 0.1);
+    }
+
+    .notification-item strong { display: block; }
+    .notification-item span { color: var(--muted); }
+
+    .upgrade-card {
+      padding: 26px;
+      border-radius: 30px;
+      color: white;
+      background: linear-gradient(145deg, #5f4fff, #4f3be6);
+      box-shadow: 0 26px 60px rgba(79, 59, 230, 0.24);
+    }
+
+    .upgrade-card h3 {
+      margin: 14px 0;
+      font-size: 2rem;
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+
+    .upgrade-card p {
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.65;
+    }
+
+    .secondary-inverse {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      color: var(--accent);
+      background: white;
+      cursor: pointer;
+    }
+
+    .empty-card {
+      padding: 26px;
+      border-radius: 20px;
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .empty-card h3 {
+      margin: 0;
+      color: var(--text-strong);
+    }
+
+    .empty-card p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .ghost-button {
+      color: var(--accent);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .text-button {
+      color: var(--accent);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .micro-label {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 32px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(103, 88, 255, 0.08);
+    }
+
+    .demo-mode-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(102, 93, 228, 0.14);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Developer B: Detail overlay and post detail page */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      overflow: auto;
+      background: rgba(244, 239, 255, 0.96);
+      backdrop-filter: blur(14px);
+    }
+
+    .detail-shell {
+      width: var(--shell);
+      min-height: calc(100vh - 20px);
+      margin: 10px auto;
+      padding: 18px;
+      border-radius: 28px;
+      background: rgba(250, 247, 255, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .detail-topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .back-button {
+      color: var(--accent);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .detail-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) 360px;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .detail-hero {
+      min-height: 720px;
+      border-radius: 22px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .thumbnail-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .thumbnail {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      border: 3px solid transparent;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+
+    .thumbnail.is-active { border-color: var(--accent); }
+
+    .detail-info-panel {
+      padding: 22px;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .detail-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .detail-badge {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(103, 88, 255, 0.08);
+    }
+
+    .detail-action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-pill {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(103, 88, 255, 0.08);
+      cursor: pointer;
+    }
+
+    .action-pill.is-active {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+    }
+
+    .detail-author-card {
+      margin: 20px 0;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(245, 240, 255, 0.9);
+    }
+
+    .detail-metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .detail-metric {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(245, 240, 255, 0.86);
+    }
+
+    .detail-metric small {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+
+    .detail-metric strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--text-strong);
+      font-size: 1.5rem;
+      letter-spacing: -0.05em;
+    }
+
+    .detail-footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .detail-footer-row button {
+      padding: 0;
+      min-height: auto;
+      color: inherit;
+      background: transparent;
+    }
+
+    .detail-footer-row .danger { color: var(--danger); }
+
+    /* Developer B: Comments panel */
+    .comments-panel {
+      max-width: 980px;
+      margin-top: 28px;
+    }
+
+    .comments-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .comments-header h2 { font-size: 1.5rem; }
+    .comments-header span { color: var(--accent-soft); font-size: 1.5rem; }
+
+    .comment-form {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      margin: 20px 0;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(245, 240, 255, 0.9);
+    }
+
+    .send-button {
+      width: 54px;
+      min-height: 48px;
+      padding: 0;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      cursor: pointer;
+    }
+
+    .comment-form input {
+      width: 100%;
+      min-height: 54px;
+      padding: 0 18px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      outline: none;
+      color: var(--text-strong);
+      background: rgba(241, 236, 255, 0.66);
+    }
+
+    .comment-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+    }
+
+    .comment-content {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .comment-content p {
+      margin: 8px 0 10px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .comment-thread { display: grid; gap: 14px; }
+    .comment-thread .comment-thread { margin-top: 12px; margin-left: 18px; }
+
+    .comment-time {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .comment-item.is-pinned {
+      border-left: 3px solid rgba(96, 88, 234, 0.8);
+      padding-left: 14px;
+    }
+
+    .comment-item.is-nested { margin-left: 18px; }
+
+    .show-more-replies {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Developer B: Create post modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+    }
+
+    .modal-mask {
+      position: absolute;
+      inset: 0;
+      background: rgba(35, 25, 71, 0.36);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      width: min(820px, calc(100vw - 24px));
+      max-height: calc(100vh - 32px);
+      padding: 22px;
+      border-radius: 28px;
+      overflow: auto;
+      background: rgba(251, 249, 255, 0.98);
+      transform: translate(-50%, -50%);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .create-form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .create-form label {
+      display: grid;
+      gap: 8px;
+    }
+
+    .create-form span {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .create-form input, .create-form textarea {
+      width: 100%;
+      min-height: 54px;
+      padding: 0 18px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      outline: none;
+      color: var(--text-strong);
+      background: rgba(241, 236, 255, 0.66);
+    }
+
+    .create-form textarea {
+      min-height: 136px;
+      padding: 16px 18px;
+      resize: vertical;
+    }
+
+    .create-form input:focus, .create-form textarea:focus {
+      border-color: rgba(103, 88, 255, 0.3);
+      box-shadow: 0 0 0 4px rgba(103, 88, 255, 0.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .upload-field {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px dashed rgba(103, 88, 255, 0.26);
+      background: rgba(244, 240, 255, 0.78);
+    }
+
+    .upload-field small { color: var(--muted); }
+
+    .preview-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .preview-card {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 18px;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--line);
+    }
+
+    .preview-remove {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Developer B: Toast notifications */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      padding: 14px 18px;
+      border-radius: 999px;
+      color: white;
+      background: rgba(49, 41, 82, 0.94);
+      box-shadow: 0 18px 38px rgba(49, 41, 82, 0.24);
+      z-index: 40;
+    }
+
+    .ai-tag-row, .suggested-tags {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .upload-progress {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(102, 93, 228, 0.12);
+      overflow: hidden;
+    }
+
+    .upload-progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #5b50ff, #8e85ff);
+      transition: width 0.2s ease;
+    }
+
+    .form-error {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(215, 66, 97, 0.12);
+      color: #7b2542;
+      font-size: 0.92rem;
+    }
+
+    .text-button.is-active { color: var(--danger); }
+
+    .danger { color: var(--danger); }
+
+    /* Image Search Styles */
+    .image-search-content { display: grid; gap: 20px; }
+
+    .image-upload-area {
+      position: relative;
+      min-height: 240px;
+      padding: 20px;
+      border-radius: 20px;
+      border: 2px dashed rgba(103, 88, 255, 0.26);
+      background: rgba(244, 240, 255, 0.78);
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+
+    .image-upload-area:hover {
+      border-color: rgba(103, 88, 255, 0.46);
+      background: rgba(244, 240, 255, 0.9);
+    }
+
+    .image-upload-area input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-hint {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+    }
+
+    .upload-icon { font-size: 3rem; }
+
+    .image-preview-container {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .preview-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 16px;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--line);
+    }
+
+    .search-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 40px;
+    }
+
+    .similar-posts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .similar-post-card {
+      aspect-ratio: 1;
+      border-radius: 16px;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 180ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .similar-post-card:hover {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    .similar-post-title {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      padding: 8px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .similar-post-score {
+      position: absolute;
+      bottom: 4px;
+      right: 8px;
+      padding: 2px 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      color: #4ade80;
+      font-size: 0.625rem;
+      font-weight: 700;
+    }
+
+    .similar-post-tags {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.6rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: white;
+    }
+
+    .similar-post-match-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      color: #1f2937;
+    }
+
+    .similar-post-category {
+      position: absolute;
+      bottom: 24px;
+      left: 8px;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .avatar-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(245, 240, 255, 0.8);
+      border: 1px solid var(--line);
+    }
+
+    .avatar-preview-large {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(103, 88, 255, 0.12);
+      transition: transform 200ms ease;
+    }
+
+    .avatar-preview-large:hover {
+      transform: scale(1.05);
+    }
+
+    .avatar-upload-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .avatar-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    /* Report Modal Styles */
+    .report-content { display: grid; gap: 20px; }
+
+    .report-reasons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .report-reason {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(245, 240, 255, 0.8);
+      border: 2px solid transparent;
+      text-align: left;
+      transition: all 180ms ease;
+    }
+
+    .report-reason:hover {
+      border-color: rgba(103, 88, 255, 0.2);
+      background: rgba(245, 240, 255, 0.96);
+    }
+
+    .report-reason.is-selected {
+      border-color: var(--accent);
+      background: rgba(103, 88, 255, 0.08);
+    }
+
+    .reason-icon { font-size: 1.4rem; }
+
+    .report-reason strong {
+      display: block;
+      color: var(--text-strong);
+    }
+
+    .report-reason small {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    /* Error & Unauthorized States */
+    .error-state {
+      padding: 40px;
+      text-align: center;
+      border-radius: 24px;
+      background: rgba(215, 66, 97, 0.08);
+    }
+
+    .error-state h3 { color: var(--danger); }
+
+    .unauthorized-state {
+      padding: 40px;
+      text-align: center;
+      border-radius: 24px;
+      background: rgba(103, 88, 255, 0.08);
+    }
+
+    .unauthorized-state h3 { color: var(--accent); }
+
+    @media (max-width: 1360px) {
+      .dashboard-screen { grid-template-columns: 220px minmax(0, 1fr); }
+      .right-rail { display: none; }
+      .detail-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      .dashboard-screen { grid-template-columns: 1fr; }
+      .dashboard-topbar { grid-template-columns: 1fr; display: grid; }
+      .topbar-actions { flex-direction: column; align-items: stretch; }
+      .form-grid, .detail-metric-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .dashboard-screen, .detail-shell {
+        width: min(calc(100vw - 12px), 100%);
+        margin: 6px auto;
+      }
+      .dashboard-topbar h1 { font-size: 2.2rem; }
+      .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+      .similar-posts-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-topbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <!-- Developer A: Main dashboard screen with sidebar and navigation -->
+  <section class="dashboard-screen" id="dashboard-screen">
+    <!-- Developer A: Sidebar navigation -->
+    <aside class="sidebar">
+      <div class="brand">The Curator</div>
+      <div class="demo-mode-badge" id="demo-mode-badge">Offline demo mode</div>
+
+      <div class="profile-card">
+        <div class="avatar" id="sidebar-avatar">AR</div>
+        <div>
+          <strong id="sidebar-name">Alex Rivera</strong>
+          <span id="sidebar-role">Curator Gold</span>
+        </div>
+      </div>
+
+      <!-- Developer A: Navigation buttons -->
+      <nav class="sidebar-nav">
+        <button class="nav-item is-active" data-route="feed" type="button">Feed</button>
+        <button class="nav-item" data-route="explore" type="button">Explore</button>
+        <button class="nav-item" data-route="profile" type="button">Profile</button>
+        <button class="nav-item" data-route="bookmarks" type="button">Bookmarks</button>
+        <button class="nav-item" data-route="shared" type="button">Shared</button>
+        <button class="nav-item" data-route="analytics" type="button">Analytics</button>
+        <button class="nav-item" data-route="settings" type="button">Settings</button>
+      </nav>
+
+      <!-- Developer B: Create Post button (opens modal) -->
+      <button class="primary-button wide" id="open-create-post" type="button">Create Post</button>
+    </aside>
+
+    <!-- Developer A: Main content area -->
+    <main class="dashboard-main">
+      <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner large"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+      
+      <!-- Developer A: Dashboard header with title and search -->
+      <header class="dashboard-topbar">
+        <div>
+          <h1 id="dashboard-title">Good morning, Alex.</h1>
+          <p id="dashboard-subtitle">Discover what people are finding in stores around you.</p>
+        </div>
+
+        <div class="topbar-actions">
+          <label class="search-shell">
+            <span>✦</span>
+            <input id="global-search" type="search" placeholder="Search posts, tags, locations..." />
+            <button class="ghost-button search-camera" id="open-image-search" type="button">📷</button>
+            <small>Image search</small>
+          </label>
+          <button class="icon-pill" id="open-notifications" type="button">
+            Notifications
+            <strong id="notification-badge">0</strong>
+          </button>
+        </div>
+      </header>
+
+      <!-- Developer A: Filter bar with consistent width buttons -->
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-chip is-active" data-filter="all" type="button">All</button>
+        <button class="filter-chip" data-filter="uploaded" type="button">Uploaded</button>
+        <button class="filter-chip" data-filter="shared" type="button">Shared</button>
+        <button class="filter-chip" data-filter="bookmarked" type="button">Bookmarked</button>
+        <button class="filter-chip" data-filter="following" type="button">Following</button>
+      </div>
+
+      <!-- Developer A: Content display area -->
+      <section id="dashboard-content"></section>
+    </main>
+
+    <!-- Developer B: Right rail with trending, notifications, and upgrade card -->
+    <aside class="right-rail">
+      <section class="panel trending-panel">
+        <div class="panel-header">
+          <h2>Trending</h2>
+          <span>✦</span>
+        </div>
+        <div id="trending-list" class="trending-list"></div>
+      </section>
+
+      <section class="panel notification-summary">
+        <div class="panel-header">
+          <h2>Notification Center</h2>
+          <button class="text-button" id="open-notifications-alt" type="button">Open</button>
+        </div>
+        <div id="notification-preview" class="notification-preview"></div>
+      </section>
+
+      <section class="upgrade-card">
+        <span class="micro-label light">Curator Pro</span>
+        <h3>Unlock advanced audience insights.</h3>
+        <p>Get detailed breakdowns of who is interacting with your shared local finds.</p>
+        <button class="secondary-inverse" type="button">Upgrade Now</button>
+      </section>
+    </aside>
+  </section>
+
+  <!-- Developer B: Notification drawer -->
+  <aside class="notification-drawer hidden" id="notification-drawer">
+    <div class="drawer-mask" id="close-notification-drawer"></div>
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div>
+          <span class="micro-label">Inbox</span>
+          <h2>Notification Center</h2>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="ghost-button" id="toggle-notification-filter" type="button">Unread only</button>
+          <button class="ghost-button" id="mark-all-read" type="button">Mark all read</button>
+          <button class="ghost-button" id="close-notification-button" type="button">Close</button>
+        </div>
+      </div>
+      <div id="notification-list" class="notification-list"></div>
+    </div>
+  </aside>
+
+  <!-- Developer B: Detail overlay for post detail view -->
+  <section class="detail-overlay hidden" id="detail-overlay">
+    <div class="detail-shell">
+      <header class="detail-topbar">
+        <button class="back-button" id="close-detail" type="button">← Back to Feed</button>
+        <div class="detail-topbar-actions">
+          <button class="ghost-button" id="detail-open-notifications" type="button">Notifications</button>
+          <div class="avatar small" id="detail-avatar">AR</div>
+        </div>
+      </header>
+
+      <div class="detail-layout">
+        <section class="detail-visual-panel">
+          <div class="detail-hero" id="detail-hero"></div>
+          <div class="thumbnail-row" id="thumbnail-row"></div>
+        </section>
+        <aside class="detail-info-panel" id="detail-info-panel"></aside>
+      </div>
+
+      <!-- Developer B: Comments panel -->
+      <section class="comments-panel">
+        <div class="comments-header">
+          <h2>Thoughts & Feedback</h2>
+          <span id="comment-count">0</span>
+        </div>
+
+        <div class="reply-banner hidden" id="reply-banner">
+          Replying to <strong id="reply-target">comment</strong>
+          <button class="text-button" id="cancel-reply" type="button">Cancel</button>
+        </div>
+
+        <form id="comment-form" class="comment-form">
+          <div class="avatar small" id="comment-user-avatar">AR</div>
+          <input id="comment-input" type="text" placeholder="Add to the conversation..." />
+          <button class="send-button" type="submit">➜</button>
+        </form>
+
+        <div id="comment-thread" class="comment-thread"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Developer B: Create post modal -->
+  <section class="modal hidden" id="create-modal">
+    <div class="modal-mask" id="close-create-mask"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label" id="create-modal-label">Create Post</span>
+          <h2 id="create-modal-title">Upload a new local find</h2>
+        </div>
+        <button class="ghost-button" id="close-create-button" type="button">Close</button>
+      </div>
+
+      <form id="create-post-form" class="create-form">
+        <input id="editing-post-id" type="hidden" />
+        <div class="form-grid">
+          <label>
+            <span>Title</span>
+            <input id="post-title" type="text" placeholder="A luminous forest-facing living room" required />
+          </label>
+          <label>
+            <span>Category</span>
+            <input id="post-category" type="text" placeholder="Interior Design" required />
+          </label>
+          <label>
+            <span>Price Range</span>
+            <input id="post-price" type="text" placeholder="$1,450 / hr" />
+          </label>
+          <label>
+            <span>Location</span>
+            <input id="post-location" type="text" placeholder="Zurich, CH" required />
+          </label>
+          <label>
+            <span>Store Name</span>
+            <input id="post-store-name" type="text" placeholder="Quiet Clay Corner" />
+          </label>
+          <label>
+            <span>Store Address</span>
+            <input id="post-store-address" type="text" placeholder="17 Via Foscolo, Milan, IT" />
+          </label>
+        </div>
+
+        <label>
+          <span>Description</span>
+          <textarea id="post-description" rows="5" placeholder="Describe why this find matters and what makes it worth sharing." required></textarea>
+        </label>
+
+        <label>
+          <span>Tags</span>
+          <input id="post-tags" type="text" placeholder="#minimalism, #glasshouse, #nature" />
+        </label>
+
+        <div class="ai-tag-row">
+          <button class="secondary-button" id="suggest-tags-button" type="button">AI tag suggestions</button>
+          <div id="suggested-tags" class="suggested-tags"></div>
+        </div>
+
+        <label class="upload-field">
+          <span>Upload Images</span>
+          <input id="post-images" type="file" accept="image/*" multiple />
+          <small>Max 4 images, 16MB each.</small>
+        </label>
+
+        <div class="preview-grid" id="preview-grid"></div>
+        <div class="upload-progress hidden" id="upload-progress">
+          <div class="upload-progress-bar" id="upload-progress-bar"></div>
+        </div>
+        <div class="form-error hidden" id="create-form-error"></div>
+
+        <div class="form-actions">
+          <button class="secondary-button" id="cancel-create-button" type="button">Cancel</button>
+          <button class="primary-button" id="submit-create-button" type="submit">Publish Post</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Developer B: Image search modal -->
+  <section class="modal hidden" id="image-search-modal">
+    <div class="modal-mask" id="close-image-search-mask"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">Visual Search</span>
+          <h2>Find similar posts by image</h2>
+        </div>
+        <button class="ghost-button" id="close-image-search-button" type="button">Close</button>
+      </div>
+      <div class="image-search-content">
+        <div class="image-upload-area" id="image-upload-area">
+          <input id="image-search-file" type="file" accept="image/*" />
+          <div class="upload-hint">
+            <span class="upload-icon">📷</span>
+            <p>Upload an image to find visually similar posts</p>
+            <small>AI powered visual search</small>
+          </div>
+        </div>
+        <div class="image-preview-container hidden" id="image-preview-container">
+          <div class="preview-image" id="preview-image"></div>
+          <button class="ghost-button" id="remove-preview-image" type="button">Remove image</button>
+        </div>
+        <div class="search-status hidden" id="search-status">
+          <div class="loading-spinner"></div>
+          <p>Searching for visually similar posts...</p>
+        </div>
+        <div class="search-results hidden" id="search-results">
+          <h3>Similar Posts</h3>
+          <div class="similar-posts-grid" id="similar-posts-grid"></div>
+        </div>
+        <div class="form-actions">
+          <button class="secondary-button" id="cancel-image-search-button" type="button">Cancel</button>
+          <button class="primary-button" id="submit-image-search" type="button" disabled>Search</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer B: Report modal -->
+  <section class="modal hidden" id="report-modal">
+    <div class="modal-mask" id="close-report-mask"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <span class="micro-label">Report Content</span>
+          <h2>Why are you reporting this?</h2>
+        </div>
+        <button class="ghost-button" id="close-report-button" type="button">Close</button>
+      </div>
+      <div class="report-content">
+        <input id="report-target-id" type="hidden" />
+        <input id="report-target-type" type="hidden" />
+        <div class="report-reasons">
+          <button class="report-reason" data-reason="spam" type="button">
+            <span class="reason-icon">🚫</span>
+            <div>
+              <strong>Spam or misleading</strong>
+              <small>This looks like spam, phishing, or misleading content.</small>
+            </div>
+          </button>
+          <button class="report-reason" data-reason="inappropriate" type="button">
+            <span class="reason-icon">🔞</span>
+            <div>
+              <strong>Inappropriate content</strong>
+              <small>This contains nudity, violence, or other inappropriate material.</small>
+            </div>
+          </button>
+          <button class="report-reason" data-reason="harmful" type="button">
+            <span class="reason-icon">⚠️</span>
+            <div>
+              <strong>Harmful or dangerous</strong>
+              <small>This promotes harm, self-harm, or dangerous activities.</small>
+            </div>
+          </button>
+          <button class="report-reason" data-reason="copyright" type="button">
+            <span class="reason-icon">©️</span>
+            <div>
+              <strong>Copyright infringement</strong>
+              <small>This violates copyright or intellectual property laws.</small>
+            </div>
+          </button>
+          <button class="report-reason" data-reason="other" type="button">
+            <span class="reason-icon">📝</span>
+            <div>
+              <strong>Other</strong>
+              <small>Something else is wrong with this content.</small>
+            </div>
+          </button>
+        </div>
+        <div class="report-custom-reason hidden" id="report-custom-reason">
+          <label>
+            <span>Additional details</span>
+            <textarea id="report-message" rows="3" placeholder="Please provide more details about why you're reporting this."></textarea>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="secondary-button" id="cancel-report-button" type="button">Cancel</button>
+          <button class="primary-button" id="submit-report-button" type="button" disabled>Submit Report</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer B: Toast notification -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script>
+    // Developer A: Load user data from localStorage or use demo data
+    function loadUserData() {
+      const savedFromLogin = localStorage.getItem("curator_user");
+      if (savedFromLogin) {
+        try {
+          const user = JSON.parse(savedFromLogin);
+          localStorage.removeItem("curator_user");
+          return user;
+        } catch (e) {
+          console.warn("Failed to load user from login, checking saved data");
+        }
+      }
+      
+      const saved = localStorage.getItem("curator_user_data");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.warn("Failed to load saved user data, using demo data");
+        }
+      }
+      return {
+        id: 11,
+        name: "Alex Rivera",
+        username: "alexrivera",
+        email: "alex@curator.gold",
+        role: "Curator Gold",
+        bio: "Exploring thoughtful offline finds from boutique stores, design markets, and neighborhood spaces.",
+        avatar: "AR",
+        followers: 182,
+        following: 54,
+      };
+    }
+
+    // Developer A: Offline demo data - global state initialization
+    const OFFLINE_DEMO = {
+      user: loadUserData(),
+      posts: [
+        {
+          id: 104,
+          authorId: 12,
+          authorName: "Julian Vesper",
+          authorRole: "Principal Architect",
+          avatar: "JV",
+          title: "The Ethereal Pavilion: A Study in Light & Glass",
+          description: "A pristine interior study with soft daylight, a framed forest view, and a calm that feels designed for slow local discovery.",
+          category: "Interior Design",
+          priceRange: "$1,450+",
+          location: "Zurich, CH",
+          storeName: "Vesper Collective Showroom",
+          storeAddress: "9 Aurora Platz, Zurich, CH",
+          tags: ["#minimalism", "#glasshouse", "#sustainable", "#nature"],
+          imageUrls: [],
+          visualStyle: "art-interior",
+          likes: 1204,
+          saves: 432,
+          shares: 41,
+          views: 6400,
+          commentCount: 2,
+          liked: true,
+          bookmarked: true,
+          shared: false,
+          editable: false,
+          visibility: "public",
+          comments: [
+            {
+              id: 1001,
+              authorId: 13,
+              parentId: null,
+              userName: "Marcus Chen",
+              avatar: "MC",
+              text: "The way the light interacts with the double-height ceiling is absolutely breathtaking.",
+              createdLabel: "2h ago",
+              mine: false,
+              liked: false,
+              pinned: true,
+              pinnable: false,
+              deletable: false,
+              deleted: false,
+              likes: 9,
+              replies: [
+                {
+                  id: 1002,
+                  authorId: 12,
+                  parentId: 1001,
+                  userName: "Julian Vesper",
+                  avatar: "JV",
+                  text: "We used low-iron tempered glazing with a soft UV layer.",
+                  createdLabel: "90m ago",
+                  mine: false,
+                  liked: false,
+                  pinned: false,
+                  pinnable: false,
+                  deletable: false,
+                  deleted: false,
+                  likes: 4,
+                  replies: [],
+                },
+              ],
+            },
+            {
+              id: 1003,
+              authorId: 14,
+              parentId: null,
+              userName: "Elena Rossi",
+              avatar: "ER",
+              text: "This is exactly the inspiration I needed for my lakeside project.",
+              createdLabel: "5h ago",
+              mine: false,
+              liked: false,
+              pinned: false,
+              pinnable: false,
+              deletable: false,
+              deleted: false,
+              likes: 6,
+              replies: [],
+            },
+          ],
+        },
+        {
+          id: 103,
+          authorId: 13,
+          authorName: "Marcus Chen",
+          authorRole: "Editorial Director",
+          avatar: "MC",
+          title: "Curating the Perfect Developer Sanctuary",
+          description: "A beautifully merchandised setup photographed inside an independent concept store.",
+          category: "Tech Editorial",
+          priceRange: "$145 - $360",
+          location: "Zurich, CH",
+          storeName: "Studio Notion Supply",
+          storeAddress: "4 Seefeld Lane, Zurich, CH",
+          tags: ["#workspace", "#focus", "#editorial"],
+          imageUrls: [],
+          visualStyle: "art-workspace",
+          likes: 892,
+          saves: 234,
+          shares: 28,
+          views: 4500,
+          commentCount: 0,
+          liked: false,
+          bookmarked: true,
+          shared: true,
+          editable: false,
+          visibility: "public",
+          comments: [],
+        },
+        {
+          id: 102,
+          authorId: 11,
+          authorName: "Alex Rivera",
+          authorRole: "Curator Gold",
+          avatar: "AR",
+          title: "Regenerative Design: More Than Just a Trend",
+          description: "A forest-facing studio find that translates sustainability into something warm and practical.",
+          category: "Sustainability",
+          priceRange: "$58 - $120",
+          location: "Portland, OR",
+          storeName: "Woodland Mercantile",
+          storeAddress: "22 Pine Passage, Portland, OR",
+          tags: ["#nature", "#sustainable", "#retreat"],
+          imageUrls: [],
+          visualStyle: "art-forest",
+          likes: 1500,
+          saves: 84,
+          shares: 15,
+          views: 3200,
+          commentCount: 0,
+          liked: true,
+          bookmarked: false,
+          shared: false,
+          editable: true,
+          visibility: "public",
+          comments: [],
+        },
+        {
+          id: 101,
+          authorId: 14,
+          authorName: "Elena Rossi",
+          authorRole: "Lead Designer",
+          avatar: "ER",
+          title: "Handmade Tea Cups Worth Bringing Home",
+          description: "A neighborhood ceramics shop stocked these textured cups with subtle color fades.",
+          category: "Homeware",
+          priceRange: "$18 - $36",
+          location: "Milan, IT",
+          storeName: "Quiet Clay Corner",
+          storeAddress: "17 Via Foscolo, Milan, IT",
+          tags: ["#ceramic", "#giftidea", "#handmade"],
+          imageUrls: [],
+          visualStyle: "art-copper",
+          likes: 756,
+          saves: 189,
+          shares: 12,
+          views: 2400,
+          commentCount: 0,
+          liked: false,
+          bookmarked: false,
+          shared: false,
+          editable: false,
+          visibility: "public",
+          comments: [],
+        },
+      ],
+      notifications: [
+        { id: 1, type: "reply", message: "Julian replied to a discussion you joined.", targetPostId: 104, createdLabel: "70m ago", read: false },
+        { id: 2, type: "trend", message: "Your regenerative design post entered today's top 3.", targetPostId: 102, createdLabel: "1h ago", read: false },
+        { id: 3, type: "save", message: "Elena saved one of your local finds.", targetPostId: 102, createdLabel: "3h ago", read: true },
+      ],
+      analytics: { totalViews: 10200, totalLikes: 3004, totalComments: 6, totalShares: 56 },
+    };
+
+    // Developer A: Global state management
+    const state = {
+      user: OFFLINE_DEMO.user,
+      posts: [...OFFLINE_DEMO.posts],
+      notifications: [...OFFLINE_DEMO.notifications],
+      analytics: OFFLINE_DEMO.analytics,
+      bookmarkedPostIds: OFFLINE_DEMO.posts.filter(p => p.bookmarked).map(p => p.id),
+      likedPostIds: OFFLINE_DEMO.posts.filter(p => p.liked).map(p => p.id),
+      sharedPostIds: OFFLINE_DEMO.posts.filter(p => p.shared).map(p => p.id),
+      route: "feed",
+      filter: "all",
+      query: "",
+      detailPost: null,
+      detailImageIndex: 0,
+      replyParentId: null,
+      replyParentName: "",
+      composeMode: "create",
+      editingPostId: null,
+      profileTab: "posts",
+      profileUserId: OFFLINE_DEMO.user.id,
+      notificationUnreadOnly: false,
+    };
+
+    // Developer A: DOM element references
+    const els = {
+      dashboardScreen: document.querySelector("#dashboard-screen"),
+      sidebarName: document.querySelector("#sidebar-name"),
+      sidebarRole: document.querySelector("#sidebar-role"),
+      sidebarAvatar: document.querySelector("#sidebar-avatar"),
+      detailAvatar: document.querySelector("#detail-avatar"),
+      commentUserAvatar: document.querySelector("#comment-user-avatar"),
+      dashboardTitle: document.querySelector("#dashboard-title"),
+      dashboardSubtitle: document.querySelector("#dashboard-subtitle"),
+      routeButtons: document.querySelectorAll("[data-route]"),
+      filterButtons: document.querySelectorAll("[data-filter]"),
+      globalSearch: document.querySelector("#global-search"),
+      dashboardContent: document.querySelector("#dashboard-content"),
+      trendingList: document.querySelector("#trending-list"),
+      notificationPreview: document.querySelector("#notification-preview"),
+      notificationBadge: document.querySelector("#notification-badge"),
+      openNotifications: document.querySelector("#open-notifications"),
+      openNotificationsAlt: document.querySelector("#open-notifications-alt"),
+      detailOpenNotifications: document.querySelector("#detail-open-notifications"),
+      notificationDrawer: document.querySelector("#notification-drawer"),
+      closeNotificationDrawer: document.querySelector("#close-notification-drawer"),
+      closeNotificationButton: document.querySelector("#close-notification-button"),
+      notificationList: document.querySelector("#notification-list"),
+      toggleNotificationFilter: document.querySelector("#toggle-notification-filter"),
+      markAllRead: document.querySelector("#mark-all-read"),
+      detailOverlay: document.querySelector("#detail-overlay"),
+      closeDetail: document.querySelector("#close-detail"),
+      detailHero: document.querySelector("#detail-hero"),
+      thumbnailRow: document.querySelector("#thumbnail-row"),
+      detailInfoPanel: document.querySelector("#detail-info-panel"),
+      commentThread: document.querySelector("#comment-thread"),
+      commentForm: document.querySelector("#comment-form"),
+      commentInput: document.querySelector("#comment-input"),
+      commentCount: document.querySelector("#comment-count"),
+      replyBanner: document.querySelector("#reply-banner"),
+      replyTarget: document.querySelector("#reply-target"),
+      cancelReply: document.querySelector("#cancel-reply"),
+      openCreatePost: document.querySelector("#open-create-post"),
+      createModal: document.querySelector("#create-modal"),
+      closeCreateMask: document.querySelector("#close-create-mask"),
+      closeCreateButton: document.querySelector("#close-create-button"),
+      cancelCreateButton: document.querySelector("#cancel-create-button"),
+      createPostForm: document.querySelector("#create-post-form"),
+      createModalLabel: document.querySelector("#create-modal-label"),
+      createModalTitle: document.querySelector("#create-modal-title"),
+      editingPostId: document.querySelector("#editing-post-id"),
+      postTitle: document.querySelector("#post-title"),
+      postCategory: document.querySelector("#post-category"),
+      postPrice: document.querySelector("#post-price"),
+      postLocation: document.querySelector("#post-location"),
+      postStoreName: document.querySelector("#post-store-name"),
+      postStoreAddress: document.querySelector("#post-store-address"),
+      postDescription: document.querySelector("#post-description"),
+      postTags: document.querySelector("#post-tags"),
+      postImages: document.querySelector("#post-images"),
+      previewGrid: document.querySelector("#preview-grid"),
+      suggestTagsButton: document.querySelector("#suggest-tags-button"),
+      suggestedTags: document.querySelector("#suggested-tags"),
+      uploadProgress: document.querySelector("#upload-progress"),
+      uploadProgressBar: document.querySelector("#upload-progress-bar"),
+      createFormError: document.querySelector("#create-form-error"),
+      submitCreateButton: document.querySelector("#submit-create-button"),
+      toast: document.querySelector("#toast"),
+      filterBar: document.querySelector("#filter-bar"),
+      demoModeBadge: document.querySelector("#demo-mode-badge"),
+      openImageSearch: document.querySelector("#open-image-search"),
+      imageSearchModal: document.querySelector("#image-search-modal"),
+      closeImageSearchMask: document.querySelector("#close-image-search-mask"),
+      closeImageSearchButton: document.querySelector("#close-image-search-button"),
+      cancelImageSearchButton: document.querySelector("#cancel-image-search-button"),
+      imageSearchFile: document.querySelector("#image-search-file"),
+      imageUploadArea: document.querySelector("#image-upload-area"),
+      imagePreviewContainer: document.querySelector("#image-preview-container"),
+      previewImage: document.querySelector("#preview-image"),
+      removePreviewImage: document.querySelector("#remove-preview-image"),
+      searchStatus: document.querySelector("#search-status"),
+      searchResults: document.querySelector("#search-results"),
+      similarPostsGrid: document.querySelector("#similar-posts-grid"),
+      submitImageSearch: document.querySelector("#submit-image-search"),
+      reportModal: document.querySelector("#report-modal"),
+      closeReportMask: document.querySelector("#close-report-mask"),
+      closeReportButton: document.querySelector("#close-report-button"),
+      cancelReportButton: document.querySelector("#cancel-report-button"),
+      reportReasons: document.querySelectorAll(".report-reason"),
+      reportTargetId: document.querySelector("#report-target-id"),
+      reportTargetType: document.querySelector("#report-target-type"),
+      reportCustomReason: document.querySelector("#report-custom-reason"),
+      reportMessage: document.querySelector("#report-message"),
+      submitReportButton: document.querySelector("#submit-report-button"),
+      loadingOverlay: document.querySelector("#loading-overlay"),
+    };
+
+    const API_BASE = window.CURATOR_API_BASE || localStorage.getItem("curator_api_base") || "http://localhost:8080";
+    const STORAGE_KEYS = {
+      token: "curator_token_v1",
+      auth: "curator_auth_v1",
+    };
+    const backendState = {
+      token: localStorage.getItem(STORAGE_KEYS.token) || "",
+      auth: readJsonStorage(STORAGE_KEYS.auth),
+      categories: [],
+      tags: [],
+      stores: [],
+      backendAvailable: false,
+      selectedImageSearchFile: null,
+    };
+    let searchTimer = null;
+
+    function requireAuth(message = "Please log in first.") {
+      if (backendState.token) return true;
+      showToast(message);
+      window.setTimeout(() => { window.location.href = "./index.html"; }, 900);
+      return false;
+    }
+
+    function readJsonStorage(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function apiRequest(path, options = {}) {
+      const headers = {};
+      if (options.auth && backendState.token) headers.Authorization = `Bearer ${backendState.token}`;
+      if (!options.formData) headers["Content-Type"] = "application/json";
+      const response = await fetch(`${API_BASE}${path}`, {
+        method: options.method || "GET",
+        headers,
+        body: options.formData || (options.body ? JSON.stringify(options.body) : undefined),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success === false) {
+        throw new Error(payload?.message || `Request failed with status ${response.status}.`);
+      }
+      return options.returnEnvelope ? payload : payload?.data;
+    }
+
+    async function loadBackendData() {
+      if (!backendState.token) {
+        showLoggedOutState();
+        return;
+      }
+      try {
+        showLoading();
+        const [authInfo, profile, postsPage, myPostsPage, favoritesPage, trendingPage, notificationsPage, unreadCount, categories, tags, stores] = await Promise.all([
+          apiRequest("/api/auth/me", { auth: true }),
+          apiRequest("/api/users/me/profile", { auth: true }).catch(() => null),
+          apiRequest("/api/posts/published?page=1&pageSize=30", { auth: true }),
+          apiRequest("/api/posts/mine?page=1&pageSize=30", { auth: true }).catch(() => null),
+          apiRequest("/api/posts/favorites/mine?page=1&pageSize=30", { auth: true }).catch(() => null),
+          apiRequest("/api/posts/trending?window=daily&page=1&pageSize=8", { auth: true }).catch(() => null),
+          apiRequest("/api/notifications?page=1&pageSize=20", { auth: true }).catch(() => null),
+          apiRequest("/api/notifications/unread-count", { auth: true }).catch(() => 0),
+          apiRequest("/api/categories").catch(() => []),
+          apiRequest("/api/tags").catch(() => []),
+          apiRequest("/api/stores").catch(() => []),
+        ]);
+        backendState.auth = authInfo;
+        backendState.categories = Array.isArray(categories) ? categories : [];
+        backendState.tags = Array.isArray(tags) ? tags : [];
+        backendState.stores = Array.isArray(stores) ? stores : [];
+        localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(authInfo));
+        state.user = normalizeUser(authInfo, profile);
+        const publishedPosts = normalizePosts(postsPage?.items || []);
+        const myPosts = normalizePosts(myPostsPage?.items || []).map(post => ({ ...post, editable: true }));
+        const favoriteIds = new Set((favoritesPage?.items || []).map(post => Number(post.id)));
+        const merged = mergeUniquePosts(myPosts.concat(publishedPosts));
+        state.posts = merged.map(post => ({ ...post, bookmarked: post.bookmarked || favoriteIds.has(Number(post.id)) }));
+        state.bookmarkedPostIds = state.posts.filter(post => post.bookmarked).map(post => post.id);
+        state.likedPostIds = state.posts.filter(post => post.liked).map(post => post.id);
+        state.sharedPostIds = state.posts.filter(post => post.shared).map(post => post.id);
+        state.trendingPosts = normalizePosts(trendingPage?.items || []);
+        state.notifications = normalizeNotifications(notificationsPage?.items || []);
+        state.analytics = buildAnalytics(state.posts);
+        els.notificationBadge.textContent = String(Number(unreadCount?.count ?? unreadCount ?? state.notifications.filter(n => !n.read).length));
+        els.demoModeBadge.textContent = "Backend connected";
+        backendState.backendAvailable = true;
+      } catch (error) {
+        console.warn("Backend dashboard load failed.", error);
+        els.demoModeBadge.textContent = "Backend unavailable, showing demo data";
+        showToast("Backend unavailable, showing demo data.");
+        backendState.backendAvailable = false;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function showLoggedOutState() {
+      els.demoModeBadge.textContent = "Not logged in";
+      els.dashboardContent.innerHTML = `<div class="empty-card"><h3>Please log in first</h3><p>This final dashboard uses backend data. Return to the authentication page to continue.</p><button class="primary-button" id="return-login" type="button">Back to login</button></div>`;
+      document.querySelector("#return-login")?.addEventListener("click", () => { window.location.href = "./index.html"; });
+    }
+
+    function normalizeUser(authInfo, profile) {
+      const name = profile?.nickname || profile?.username || authInfo?.username || "Curator";
+      return {
+        ...state.user,
+        id: authInfo?.userId || profile?.userId || state.user.id,
+        name,
+        username: profile?.username || authInfo?.username || state.user.username,
+        email: authInfo?.email || state.user.email,
+        role: authInfo?.role || state.user.role || "USER",
+        avatar: getInitials(name),
+      };
+    }
+
+    function normalizePosts(posts) {
+      return posts.map(normalizePost);
+    }
+
+    function normalizePost(post) {
+      const images = Array.isArray(post.images) ? post.images : [];
+      const imageUrls = images.map(image => image.thumbnailUrl || image.imageUrl || image.url).filter(Boolean);
+      const titleSeed = Number(post.id || 1);
+      return {
+        id: Number(post.id),
+        authorId: post.userId,
+        authorName: post.authorNickname || post.authorUsername || "Curator",
+        authorRole: post.status || "PUBLISHED",
+        avatar: getInitials(post.authorNickname || post.authorUsername || "CU"),
+        title: post.title || "Untitled Post",
+        description: post.description || "",
+        category: post.categorySummary?.name || post.category?.name || post.categoryName || "Uncategorized",
+        priceRange: formatPostPrice(post.priceMin, post.priceMax, post.currency),
+        location: post.locationText || post.storeSummary?.name || post.store?.name || post.storeName || "Unknown location",
+        storeName: post.storeSummary?.name || post.store?.name || post.storeName || "",
+        storeAddress: post.locationText || "",
+        tags: Array.isArray(post.tags) ? post.tags.map(tag => `#${tag.name || tag}`) : [],
+        imageUrls,
+        visualStyle: imageUrls.length ? "" : ["art-interior", "art-workspace", "art-forest", "art-copper"][Math.abs(titleSeed) % 4],
+        likes: Number(post.likeCount || 0),
+        saves: Number(post.favoriteCount || 0),
+        shares: Number(post.shareCount || 0),
+        views: Number(post.viewCount || 0),
+        commentCount: Number(post.commentCount || 0),
+        liked: Boolean(post.likedByCurrentUser),
+        bookmarked: Boolean(post.favoritedByCurrentUser),
+        shared: Boolean(post.sharedByCurrentUser),
+        editable: Boolean(backendState.auth?.userId && Number(post.userId) === Number(backendState.auth.userId)),
+        visibility: post.status || "PUBLISHED",
+        createdLabel: formatRelativeTime(post.createdAt || post.publishedAt),
+        comments: [],
+      };
+    }
+
+    function normalizeNotifications(items) {
+      return items.map(item => ({
+        id: item.id,
+        type: item.type || "notification",
+        message: item.message || item.targetSummary || "Notification",
+        targetPostId: item.targetId,
+        createdLabel: formatRelativeTime(item.createdAt),
+        read: Boolean(item.read),
+      }));
+    }
+
+    function mergeUniquePosts(posts) {
+      const seen = new Set();
+      return posts.filter(post => {
+        if (seen.has(post.id)) return false;
+        seen.add(post.id);
+        return true;
+      });
+    }
+
+    function buildAnalytics(posts) {
+      return {
+        totalViews: posts.reduce((sum, post) => sum + Number(post.views || 0), 0),
+        totalLikes: posts.reduce((sum, post) => sum + Number(post.likes || 0), 0),
+        totalComments: posts.reduce((sum, post) => sum + Number(post.commentCount || 0), 0),
+        totalShares: posts.reduce((sum, post) => sum + Number(post.shares || 0), 0),
+      };
+    }
+
+    function formatPostPrice(priceMin, priceMax, currency) {
+      if (priceMin == null && priceMax == null) return "";
+      const formatter = new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD", maximumFractionDigits: 2 });
+      if (priceMin != null && priceMax != null && Number(priceMin) !== Number(priceMax)) {
+        return `${formatter.format(Number(priceMin))} - ${formatter.format(Number(priceMax))}`;
+      }
+      return formatter.format(Number(priceMin ?? priceMax));
+    }
+
+    function formatRelativeTime(value) {
+      if (!value) return "just now";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "just now";
+      const minutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+      if (minutes < 1) return "just now";
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.round(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.round(hours / 24)}d ago`;
+    }
+
+    function parsePriceInput(value) {
+      const matches = String(value || "").match(/-?\d+(\.\d+)?/g) || [];
+      const upper = String(value || "").toUpperCase();
+      const currency = upper.includes("CNY") || upper.includes("RMB") || upper.includes("¥") ? "CNY" : upper.includes("EUR") || upper.includes("€") ? "EUR" : upper.includes("GBP") || upper.includes("£") ? "GBP" : "USD";
+      if (!matches.length) return { priceMin: null, priceMax: null, currency: null };
+      if (matches.length === 1) return { priceMin: Number(matches[0]), priceMax: Number(matches[0]), currency };
+      return { priceMin: Number(matches[0]), priceMax: Number(matches[1]), currency };
+    }
+
+    function resolveCategoryId(name) {
+      const category = backendState.categories.find(item => String(item.name).toLowerCase() === String(name).toLowerCase());
+      return category?.id || backendState.categories[0]?.id || null;
+    }
+
+    function resolveStoreId(name) {
+      const store = backendState.stores.find(item => String(item.name).toLowerCase() === String(name).toLowerCase());
+      return store?.id || backendState.stores[0]?.id || null;
+    }
+
+    function resolveTagIds(rawValue) {
+      return String(rawValue || "").split(",")
+        .map(tag => tag.trim().replace(/^#/, ""))
+        .filter(Boolean)
+        .map(name => backendState.tags.find(tag => String(tag.name).toLowerCase() === name.toLowerCase())?.id)
+        .filter(Boolean);
+    }
+
+    // Developer A/B: Toast notification utility
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.remove("hidden");
+      setTimeout(() => els.toast.classList.add("hidden"), 3000);
+    }
+
+    function showLoading() { els.loadingOverlay.classList.remove("hidden"); }
+    function hideLoading() { els.loadingOverlay.classList.add("hidden"); }
+
+    // Developer A: Visual style mappings for cards
+    const visualStyles = {
+      "art-interior": "linear-gradient(145deg, #a8c0ff, #3f5efb 45%, #2c3e9e)",
+      "art-workspace": "linear-gradient(145deg, #ffecd2, #fcb69f)",
+      "art-forest": "linear-gradient(145deg, #84fab0, #8fd3f4)",
+      "art-copper": "linear-gradient(145deg, #cdbdff, #8370ea 58%, #4a43b8)",
+    };
+
+    // Developer A: Render masonry card for posts
+    function renderMasonryCard(post) {
+      const card = document.createElement("article");
+      card.className = "masonry-card";
+      card.dataset.postId = post.id;
+      const mediaStyle = post.imageUrls?.length
+        ? `background-image:url('${post.imageUrls[0]}');background-size:cover;background-position:center;`
+        : `background: ${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
+      card.innerHTML = `
+        <div class="card-media ${getMediaHeight(post)}" style="${mediaStyle}"></div>
+        <div class="card-body">
+          <div class="meta-author">
+            <div class="avatar small">${post.avatar}</div>
+            <div>
+              <strong>${post.authorName}</strong>
+              <span>${post.createdLabel || "now"}</span>
+            </div>
+          </div>
+          <div class="card-location">
+            ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
+            ${post.location ? `<span class="location-badge">📍 ${post.location}</span>` : ""}
+          </div>
+          <h3>${post.title}</h3>
+          <p>${post.description.slice(0, 80)}...</p>
+          <div class="compact-tags">
+            ${post.tags.slice(0, 3).map(tag => `<button class="tag-pill">${tag}</button>`).join("")}
+            ${post.tags.length > 3 ? `<span>+${post.tags.length - 3}</span>` : ""}
+          </div>
+          <div class="post-stats">
+            <button class="${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
+              ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+            </button>
+            <button class="${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
+              ⭐ ${post.saves}
+            </button>
+            <button data-action="share">🔗 Share link</button>
+            <button data-action="comment">💬 ${post.commentCount}</button>
+          </div>
+        </div>
+      `;
+      
+      // Add card click event handlers
+      const clickableElements = card.querySelectorAll('.card-media, h3, p');
+      clickableElements.forEach(el => {
+        el.addEventListener('click', () => openDetail(post));
+      });
+      
+      // Add button event handlers
+      card.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          if (action === "comment") {
+            openDetail(post);
+          } else {
+            handleDetailAction(action, post).catch(error => showToast(error.message || "Action failed."));
+          }
+        });
+      });
+      
+      return card;
+    }
+
+    // Developer A: Get media height class for card variation
+    function getMediaHeight(post) {
+      const heights = ["media-short", "media-medium", "media-tall"];
+      return heights[post.id % heights.length];
+    }
+
+    // Developer B: Render trending list item
+    function renderTrendingItem(index, item) {
+      const el = document.createElement("article");
+      el.className = "trend-item";
+      el.innerHTML = `<strong>${index + 1}</strong><div><strong>${item.title}</strong><small>${item.volume}</small></div>`;
+      return el;
+    }
+
+    // Developer B: Render notification item
+    function renderNotification(item) {
+      const el = document.createElement("article");
+      el.className = `notification-item ${item.read ? "" : "unread"}`;
+      el.innerHTML = `<strong>${item.message}</strong><span>${item.createdLabel}</span>`;
+      return el;
+    }
+    
+    // Developer B: Open notification drawer
+    function openNotificationDrawer() {
+      els.notificationDrawer.classList.remove("hidden");
+      renderNotificationList();
+    }
+    
+    // Developer B: Close notification drawer
+    function closeNotificationDrawer() {
+      els.notificationDrawer.classList.add("hidden");
+    }
+    
+    // Developer B: Render notification list
+    function renderNotificationList() {
+      const items = state.notificationUnreadOnly
+        ? state.notifications.filter(n => !n.read)
+        : state.notifications;
+      els.notificationList.innerHTML = items.length
+        ? items.map(n => `<article class="notification-item ${n.read ? "" : "unread"}"><strong>${n.message}</strong><span>${n.createdLabel}</span></article>`).join("")
+        : "<div class=\"empty-card\"><h3>No notifications</h3><p>You're all caught up!</p></div>";
+    }
+    
+    // Developer B: Mark all notifications as read
+    async function markAllNotificationsRead() {
+      if (!requireAuth("Please log in to update notifications.")) return;
+      try {
+        await apiRequest("/api/notifications/read-all", { method: "POST", auth: true });
+        state.notifications.forEach(n => n.read = true);
+        els.notificationBadge.textContent = "0";
+        renderNotificationList();
+        renderNotifications();
+        showToast("All notifications marked as read");
+      } catch (error) {
+        showToast(error.message || "Failed to update notifications.");
+      }
+    }
+
+    // Developer B: Render post detail view
+    function renderDetail(post) {
+      if (post.imageUrls?.length) {
+        els.detailHero.style.background = `url('${post.imageUrls[0]}') center / cover`;
+      } else {
+        els.detailHero.style.background = `${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
+      }
+      els.detailInfoPanel.innerHTML = `
+        <div class="detail-badges">
+          ${post.category ? `<button class="detail-badge">${post.category}</button>` : ""}
+          ${post.priceRange ? `<button class="detail-badge">${post.priceRange}</button>` : ""}
+        </div>
+        <h1>${post.title}</h1>
+        <p>${post.description}</p>
+        <div class="card-location">
+          ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
+          ${post.storeAddress ? `<span class="location-badge">📍 ${post.storeAddress}</span>` : ""}
+        </div>
+        <div class="detail-tag-row">
+          ${post.tags.map(tag => `<button class="tag-pill">${tag}</button>`).join("")}
+        </div>
+        <div class="detail-author-card">
+          <div class="meta-author">
+            <div class="avatar">${post.avatar}</div>
+            <div>
+              <strong>${post.authorName}</strong>
+              <span>${post.authorRole}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-action-row">
+          <button class="action-pill ${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
+            ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+          </button>
+          <button class="action-pill ${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
+            ⭐ ${post.saves}
+          </button>
+          <button class="action-pill" data-action="share">🔗 Share link</button>
+          ${post.editable ? `<button class="action-pill" data-action="edit">✏️ Edit</button>` : ""}
+        </div>
+        <div class="detail-metric-grid">
+          <div class="detail-metric"><small>Views</small><strong>${post.views.toLocaleString()}</strong></div>
+          <div class="detail-metric"><small>Shares</small><strong>${post.shares}</strong></div>
+        </div>
+        <div class="detail-footer-row">
+          <span>${post.createdLabel || "just now"}</span>
+          <div>
+            <button class="text-button" data-action="report">Report</button>
+            ${post.editable ? `<button class="text-button danger" data-action="delete">Delete</button>` : ""}
+          </div>
+        </div>
+      `;
+      els.detailInfoPanel.querySelectorAll("[data-action]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleDetailAction(btn.dataset.action, post).catch(error => showToast(error.message || "Action failed."));
+        });
+      });
+    }
+
+    // Developer B: Recursively render comment with replies
+    function renderComment(comment, depth = 0) {
+      if (depth > 2) return "";
+      if (comment.deleted) return "";
+      return `
+        <div class="comment-item ${comment.pinned ? "is-pinned" : ""} ${depth > 0 ? "is-nested" : ""}">
+          <div class="avatar small">${comment.avatar}</div>
+          <div class="comment-content">
+            <div><strong>${comment.userName}</strong><span class="comment-time"> ${comment.createdLabel}</span></div>
+            <p>${comment.text}</p>
+            <div class="comment-actions">
+              <button class="text-button" data-action="reply" data-comment-id="${comment.id}">Reply</button>
+              <button class="text-button ${comment.liked ? "is-active" : ""}" data-action="like-comment" data-comment-id="${comment.id}">
+                ${comment.liked ? "♥" : "♡"} ${comment.likes}
+              </button>
+              ${comment.pinnable ? `<button class="text-button" data-action="pin-comment" data-comment-id="${comment.id}">Pin</button>` : ""}
+              ${comment.deletable ? `<button class="text-button danger" data-action="delete-comment" data-comment-id="${comment.id}">Delete</button>` : ""}
+            </div>
+            ${comment.replies.length > 0 ? `
+              <div class="comment-thread">${comment.replies.map(c => renderComment(c, depth + 1)).join("")}</div>
+              ${depth === 0 && comment.replies.length > 3 ? `
+                <div class="show-more-replies"><button class="text-button" data-action="show-more-replies" data-comment-id="${comment.id}">Show all ${comment.replies.length} replies</button></div>
+              ` : ""}
+            ` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    // Developer A: Render feed with filtering support
+    function renderFeed() {
+      // First apply feed filters
+      let posts = [...state.posts];
+      if (state.filter === "bookmarked") posts = posts.filter(p => state.bookmarkedPostIds.includes(p.id));
+      if (state.filter === "uploaded") posts = posts.filter(p => p.authorId === state.user.id);
+      if (state.filter === "shared") posts = posts.filter(p => state.sharedPostIds.includes(p.id));
+      
+      // Then apply search on the filtered results
+      if (state.query) {
+        posts = filterPostsBySearch(posts, state.query);
+      }
+
+      if (posts.length === 0) {
+        els.dashboardContent.innerHTML = `<div class="empty-card"><h3>No content found</h3><p>Try adjusting your filters or search query.</p></div>`;
+        return;
+      }
+
+      const grid = document.createElement("div");
+      grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
+      posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
+      els.dashboardContent.innerHTML = "";
+      els.dashboardContent.appendChild(grid);
+    }
+
+    // Developer A: Render profile page
+    function renderProfile() {
+      els.dashboardTitle.textContent = `${state.user.name}`;
+      els.dashboardSubtitle.textContent = `@${state.user.username} — ${state.user.followers} followers, ${state.user.following} following`;
+      els.filterBar.innerHTML = `
+        <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
+        <button class="filter-chip ${state.profileTab === "likes" ? "is-active" : ""}" data-profile-tab="likes">Likes</button>
+        <button class="filter-chip ${state.profileTab === "bookmarks" ? "is-active" : ""}" data-profile-tab="bookmarks">Bookmarks</button>
+      `;
+      els.filterBar.querySelectorAll("[data-profile-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.profileTab = btn.dataset.profileTab;
+          renderProfile();
+        });
+      });
+
+      // First filter by profile tab
+      let posts = [...state.posts];
+      if (state.profileTab === "bookmarks") posts = posts.filter(p => state.bookmarkedPostIds.includes(p.id));
+      if (state.profileTab === "likes") posts = posts.filter(p => state.likedPostIds.includes(p.id));
+      
+      // Then apply search on the filtered results
+      if (state.query) {
+        posts = filterPostsBySearch(posts, state.query);
+      }
+
+      const grid = document.createElement("div");
+      grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
+      posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
+      els.dashboardContent.innerHTML = "";
+      els.dashboardContent.appendChild(grid);
+    }
+
+    // Developer A: Render analytics page
+    function renderAnalytics() {
+      els.dashboardTitle.textContent = "Analytics";
+      els.filterBar.innerHTML = "";
+      
+      if (state.user.role === "Guest") {
+        els.dashboardSubtitle.textContent = "";
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Analytics unavailable</h3>
+            <p>Analytics are only available for registered users. Log in or create an account to view your content performance.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      els.dashboardSubtitle.textContent = "Your content performance overview";
+      els.dashboardContent.innerHTML = `
+        <div class="detail-metric-grid">
+          <div class="detail-metric"><small>Total Views</small><strong>${state.analytics.totalViews.toLocaleString()}</strong></div>
+          <div class="detail-metric"><small>Total Likes</small><strong>${state.analytics.totalLikes}</strong></div>
+          <div class="detail-metric"><small>Total Comments</small><strong>${state.analytics.totalComments}</strong></div>
+          <div class="detail-metric"><small>Total Shares</small><strong>${state.analytics.totalShares}</strong></div>
+        </div>
+        <div class="empty-card"><h3>Content Insights</h3><p>Detailed analytics coming soon.</p></div>
+      `;
+    }
+
+    // Developer A: Filter posts by search query (reusable helper)
+    function filterPostsBySearch(posts, query) {
+      query = query.trim();
+      
+      // Check if it's a post link
+      const postIdMatch = query.match(/post\/(\d+)/);
+      if (postIdMatch) {
+        const postId = parseInt(postIdMatch[1]);
+        const foundPost = posts.find(p => p.id === postId);
+        return foundPost ? [foundPost] : [];
+      }
+      
+      // Check if it's a pure numeric ID
+      if (/^\d+$/.test(query)) {
+        const postId = parseInt(query);
+        const foundPost = posts.find(p => p.id === postId);
+        return foundPost ? [foundPost] : [];
+      }
+      
+      // If search starts with #, only search tags
+      if (query.startsWith('#')) {
+        const tagToSearch = query;
+        return posts.filter(p => p.tags.some(tag => tag.toLowerCase() === tagToSearch));
+      }
+      
+      // Otherwise search all fields
+      return posts.filter(p => {
+        // Check tags (including # prefix)
+        const hasTagMatch = p.tags.some(tag => {
+          const tagLower = tag.toLowerCase();
+          return tagLower.includes(query) || tagLower === `#${query}`;
+        });
+        
+        if (hasTagMatch) return true;
+        
+        // Check title
+        if (p.title.toLowerCase().includes(query)) return true;
+        
+        // Check description
+        if (p.description.toLowerCase().includes(query)) return true;
+        
+        // Check location
+        if (p.location && p.location.toLowerCase().includes(query)) return true;
+        
+        // Check store name
+        if (p.storeName && p.storeName.toLowerCase().includes(query)) return true;
+        
+        // Check category
+        if (p.category && p.category.toLowerCase().includes(query)) return true;
+        
+        // Check author name
+        if (p.authorName && p.authorName.toLowerCase().includes(query)) return true;
+        
+        return false;
+      }).sort((a, b) => {
+        // Tag matches come first
+        const aHasTag = a.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
+        const bHasTag = b.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
+        
+        if (aHasTag && !bHasTag) return -1;
+        if (!aHasTag && bHasTag) return 1;
+        return 0;
+      });
+    }
+
+    // Developer A: Render bookmarks page
+    function renderBookmarks() {
+      els.dashboardTitle.textContent = "Bookmarks";
+      els.dashboardSubtitle.textContent = "Saved posts for later";
+      els.filterBar.innerHTML = "";
+      
+      // First filter by bookmarked posts
+      let posts = state.posts.filter(p => state.bookmarkedPostIds.includes(p.id));
+      
+      // Then apply search on the filtered results
+      if (state.query) {
+        posts = filterPostsBySearch(posts, state.query);
+      }
+      
+      if (posts.length === 0) {
+        els.dashboardContent.innerHTML = `<div class="empty-card"><h3>No bookmarks found</h3><p>Try adjusting your search query or save more posts.</p></div>`;
+        return;
+      }
+      const grid = document.createElement("div");
+      grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
+      posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
+      els.dashboardContent.innerHTML = "";
+      els.dashboardContent.appendChild(grid);
+    }
+
+    // Developer A: Render shared posts page
+    function renderShared() {
+      els.dashboardTitle.textContent = "Shared";
+      els.dashboardSubtitle.textContent = "Content you've shared";
+      els.filterBar.innerHTML = "";
+      
+      // First filter by shared posts
+      let posts = state.posts.filter(p => state.sharedPostIds.includes(p.id));
+      
+      // Then apply search on the filtered results
+      if (state.query) {
+        posts = filterPostsBySearch(posts, state.query);
+      }
+      
+      if (posts.length === 0) {
+        els.dashboardContent.innerHTML = `<div class="empty-card"><h3>No shared posts found</h3><p>Try adjusting your search query.</p></div>`;
+        return;
+      }
+      const grid = document.createElement("div");
+      grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
+      posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
+      els.dashboardContent.innerHTML = "";
+      els.dashboardContent.appendChild(grid);
+    }
+
+    // Developer A: Render settings page
+    function renderSettings() {
+      els.dashboardTitle.textContent = "Settings";
+      els.dashboardSubtitle.textContent = "Manage your account";
+      els.filterBar.innerHTML = "";
+      
+      // Check if there's a saved avatar
+      const hasSavedAvatar = state.user.avatarUrls && state.user.avatarUrls.custom;
+      const avatarPreviewStyle = hasSavedAvatar 
+        ? `background: url(${state.user.avatarUrls.custom}); background-size: cover; background-position: center;`
+        : "background: linear-gradient(135deg, #493f62, #231e34);";
+      
+      els.dashboardContent.innerHTML = `
+        <div class="detail-info-panel">
+          <h3>Profile Picture</h3>
+          <div class="avatar-upload-container">
+            <div class="avatar-preview-large" id="avatar-preview" style="${avatarPreviewStyle}">
+              ${hasSavedAvatar ? "" : state.user.avatar}
+            </div>
+            <div class="avatar-upload-actions">
+              <input type="file" id="avatar-upload-input" accept="image/*" class="hidden" />
+              <button class="secondary-button" id="select-avatar-button">Choose New Avatar</button>
+              <button class="primary-button" id="save-avatar-button" disabled>Save Changes</button>
+              <button class="text-button" id="reset-avatar-button" ${hasSavedAvatar ? "" : "disabled"}>Reset to Initials</button>
+            </div>
+            <p class="avatar-hint">Upload a square image (minimum 200x200px). PNG, JPG, or GIF.</p>
+            <div class="image-preview-container hidden" id="avatar-temp-preview"></div>
+          </div>
+        </div>
+        <div class="detail-info-panel">
+          <h3>Account Settings</h3>
+          <div class="form-grid">
+            <label><span>Name</span><input type="text" id="setting-name" value="${state.user.name}" /></label>
+            <label><span>Username</span><input type="text" id="setting-username" value="${state.user.username}" /></label>
+            <label><span>Email</span><input type="email" id="setting-email" value="${state.user.email}" /></label>
+            <label><span>Role</span><input type="text" value="${state.user.role}" disabled /></label>
+          </div>
+          <label><span>Bio</span><textarea rows="3" id="setting-bio">${state.user.bio}</textarea></label>
+          <div class="form-actions">
+            <button class="secondary-button" id="save-account-button">Save Changes</button>
+          </div>
+        </div>
+      `;
+      attachSettingsEventListeners();
+    }
+
+    // Developer A: Attach settings event listeners
+    function attachSettingsEventListeners() {
+      const selectAvatarBtn = document.querySelector("#select-avatar-button");
+      const saveAvatarBtn = document.querySelector("#save-avatar-button");
+      const resetAvatarBtn = document.querySelector("#reset-avatar-button");
+      const avatarInput = document.querySelector("#avatar-upload-input");
+      const avatarPreview = document.querySelector("#avatar-preview");
+      const tempPreview = document.querySelector("#avatar-temp-preview");
+      const saveAccountBtn = document.querySelector("#save-account-button");
+      
+      let tempAvatarUrl = null;
+
+      selectAvatarBtn?.addEventListener("click", () => {
+        avatarInput?.click();
+      });
+
+      avatarInput?.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith("image/")) {
+          showToast("Please select an image file");
+          return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("File size too large (max 5MB)");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          tempAvatarUrl = event.target.result;
+          avatarPreview.style.background = `url(${tempAvatarUrl})`;
+          avatarPreview.style.backgroundSize = "cover";
+          avatarPreview.style.backgroundPosition = "center";
+          avatarPreview.textContent = "";
+          saveAvatarBtn.disabled = false;
+          resetAvatarBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      saveAvatarBtn?.addEventListener("click", () => {
+        if (tempAvatarUrl) {
+          // Save avatar to user state
+          if (!state.user.avatarUrls) state.user.avatarUrls = {};
+          state.user.avatarUrls.custom = tempAvatarUrl;
+          
+          // Save to localStorage for persistence
+          localStorage.setItem("curator_user_data", JSON.stringify(state.user));
+          
+          // Update sidebar avatar
+          els.sidebarAvatar.style.background = `url(${tempAvatarUrl})`;
+          els.sidebarAvatar.style.backgroundSize = "cover";
+          els.sidebarAvatar.style.backgroundPosition = "center";
+          els.sidebarAvatar.textContent = "";
+          
+          // Update detail page avatar
+          els.detailAvatar.style.background = `url(${tempAvatarUrl})`;
+          els.detailAvatar.style.backgroundSize = "cover";
+          els.detailAvatar.style.backgroundPosition = "center";
+          els.detailAvatar.textContent = "";
+          
+          // Update comment user avatar
+          els.commentUserAvatar.style.background = `url(${tempAvatarUrl})`;
+          els.commentUserAvatar.style.backgroundSize = "cover";
+          els.commentUserAvatar.style.backgroundPosition = "center";
+          els.commentUserAvatar.textContent = "";
+          
+          showToast("Avatar updated successfully!");
+          saveAvatarBtn.disabled = true;
+          resetAvatarBtn.disabled = false;
+          tempAvatarUrl = null;
+        }
+      });
+
+      resetAvatarBtn?.addEventListener("click", () => {
+        // Reset to initials
+        avatarPreview.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        avatarPreview.textContent = state.user.avatar;
+        
+        // Reset sidebar avatar
+        els.sidebarAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.sidebarAvatar.textContent = state.user.avatar;
+        
+        // Reset detail page avatar
+        els.detailAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.detailAvatar.textContent = state.user.avatar;
+        
+        // Reset comment user avatar
+        els.commentUserAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.commentUserAvatar.textContent = state.user.avatar;
+        
+        // Remove custom avatar from state
+        if (state.user.avatarUrls) {
+          delete state.user.avatarUrls.custom;
+        }
+        
+        // Save to localStorage for persistence
+        localStorage.setItem("curator_user_data", JSON.stringify(state.user));
+        
+        saveAvatarBtn.disabled = true;
+        resetAvatarBtn.disabled = true;
+        tempAvatarUrl = null;
+        if (avatarInput) avatarInput.value = "";
+        showToast("Avatar reset to initials");
+      });
+
+      saveAccountBtn?.addEventListener("click", () => {
+        const name = document.querySelector("#setting-name")?.value;
+        const username = document.querySelector("#setting-username")?.value;
+        const email = document.querySelector("#setting-email")?.value;
+        const bio = document.querySelector("#setting-bio")?.value;
+        
+        if (name) state.user.name = name;
+        if (username) state.user.username = username;
+        if (email) state.user.email = email;
+        if (bio) state.user.bio = bio;
+        
+        // Save to localStorage for persistence
+        localStorage.setItem("curator_user_data", JSON.stringify(state.user));
+        
+        els.sidebarName.textContent = state.user.name;
+        showToast("Account settings updated!");
+      });
+    }
+
+    // Developer A: Render explore page
+    function renderExplore() {
+      els.dashboardTitle.textContent = "Explore";
+      els.dashboardSubtitle.textContent = "Discover new finds from around the world";
+      renderFeed();
+    }
+
+    // Developer A: Navigate between routes
+    async function navigate(route) {
+      state.route = route;
+      els.routeButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.route === route));
+      document.body.classList.toggle("detail-mode", route === "detail");
+      if (route === "feed") { els.dashboardTitle.textContent = `Good morning, ${state.user.name.split(" ")[0] || state.user.name}.`; els.dashboardSubtitle.textContent = "Discover what people are finding in stores around you."; renderFeed(); }
+      if (route === "explore") renderExplore();
+      if (route === "profile") renderProfile();
+      if (route === "bookmarks") renderBookmarks();
+      if (route === "shared") renderShared();
+      if (route === "analytics") renderAnalytics();
+      if (route === "settings") renderSettings();
+      updateTrendingAndNotifications();
+      window.history.pushState({ route }, "", `#${route}`);
+    }
+
+    // Developer B: Update trending list and notifications
+    function updateTrendingAndNotifications() {
+      els.trendingList.innerHTML = "";
+      const trending = (state.trendingPosts?.length ? state.trendingPosts : [...state.posts].sort((a, b) => (b.likes + b.saves + b.shares) - (a.likes + a.saves + a.shares)).slice(0, 3));
+      trending.forEach((post, i) => {
+        els.trendingList.appendChild(renderTrendingItem(i, { title: post.title, volume: `${post.likes + post.saves + post.shares} interactions` }));
+      });
+
+      els.notificationPreview.innerHTML = "";
+      state.notifications.slice(0, 3).forEach(n => els.notificationPreview.appendChild(renderNotification(n)));
+      els.notificationBadge.textContent = state.notifications.filter(n => !n.read).length;
+    }
+
+    // Developer B: Open post detail view
+    async function openDetail(post) {
+      state.detailPost = post;
+      if (backendState.backendAvailable) {
+        try {
+          const [postData, commentsPage] = await Promise.all([
+            apiRequest(`/api/posts/${post.id}`, { auth: true }),
+            apiRequest(`/api/posts/${post.id}/comments?page=1&pageSize=50`, { auth: true }),
+          ]);
+          state.detailPost = { ...normalizePost(postData), comments: normalizeComments(commentsPage?.items || []) };
+        } catch (error) {
+          console.warn("Failed to load backend post detail.", error);
+        }
+      }
+      els.detailOverlay.classList.remove("hidden");
+      els.dashboardScreen.classList.add("hidden");
+      renderDetail(state.detailPost);
+      renderComments();
+    }
+
+    function normalizeComments(comments) {
+      return comments.map(comment => ({
+        id: comment.id,
+        authorId: comment.userId,
+        parentId: comment.parentId,
+        userName: comment.username || comment.authorUsername || "User",
+        avatar: getInitials(comment.username || comment.authorUsername || "CU"),
+        text: comment.content || "",
+        createdLabel: formatRelativeTime(comment.createdAt),
+        mine: Number(comment.userId) === Number(backendState.auth?.userId),
+        liked: Boolean(comment.likedByCurrentUser),
+        pinned: Boolean(comment.pinned),
+        pinnable: Boolean(state.detailPost?.editable),
+        deletable: Number(comment.userId) === Number(backendState.auth?.userId) || Boolean(state.detailPost?.editable),
+        deleted: Boolean(comment.deleted),
+        likes: Number(comment.likeCount || 0),
+        replies: normalizeComments(comment.replies || []),
+      }));
+    }
+
+    // Developer B: Close post detail view
+    function closeDetail() {
+      state.detailPost = null;
+      els.detailOverlay.classList.add("hidden");
+      els.dashboardScreen.classList.remove("hidden");
+      navigate("feed");
+    }
+
+    // Developer B: Count all comments including replies recursively
+    function countAllComments(comments) {
+      let count = 0;
+      for (const c of comments) {
+        count++;
+        if (c.replies && c.replies.length > 0) {
+          count += countAllComments(c.replies);
+        }
+      }
+      return count;
+    }
+    
+    // Developer B: Render comments for detail view
+    function renderComments() {
+      if (!state.detailPost) return;
+      els.commentCount.textContent = countAllComments(state.detailPost.comments);
+      els.commentThread.innerHTML = state.detailPost.comments.map(c => renderComment(c)).join("");
+      els.commentThread.querySelectorAll("[data-action]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleCommentAction(btn.dataset.action, btn.dataset.commentId).catch(error => showToast(error.message || "Comment action failed."));
+        });
+      });
+    }
+
+    // Developer B: Handle detail actions (like, bookmark, share, etc.)
+    async function handleDetailAction(action, post) {
+      if ((action === "like" || action === "bookmark" || action === "edit" || action === "delete" || action === "report") && !requireAuth()) return;
+      if (action === "like") {
+        const alreadyLiked = state.likedPostIds.includes(post.id);
+        await apiRequest(`/api/posts/${post.id}/like`, { method: alreadyLiked ? "DELETE" : "POST", auth: true }).catch(error => { throw error; });
+        if (alreadyLiked) {
+          state.likedPostIds = state.likedPostIds.filter(id => id !== post.id);
+          post.likes = Math.max(0, post.likes - 1);
+        } else {
+          state.likedPostIds.push(post.id);
+          post.likes++;
+        }
+        showToast(alreadyLiked ? "Unliked" : "Liked!");
+      }
+      if (action === "bookmark") {
+        const alreadySaved = state.bookmarkedPostIds.includes(post.id);
+        await apiRequest(`/api/posts/${post.id}/favorite`, { method: alreadySaved ? "DELETE" : "POST", auth: true }).catch(error => { throw error; });
+        if (alreadySaved) {
+          state.bookmarkedPostIds = state.bookmarkedPostIds.filter(id => id !== post.id);
+          post.saves = Math.max(0, post.saves - 1);
+        } else {
+          state.bookmarkedPostIds.push(post.id);
+          post.saves++;
+        }
+        showToast(alreadySaved ? "Removed from bookmarks" : "Saved!");
+      }
+      if (action === "share") {
+        const shareData = await apiRequest(`/api/posts/${post.id}/share`, { method: "POST", auth: Boolean(backendState.token) });
+        const shareUrl = shareData?.shareUrl || `${window.location.origin}${window.location.pathname}#post-${post.id}`;
+        if (navigator.share) {
+          navigator.share({ title: post.title, text: post.description, url: shareUrl }).catch(() => null);
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+        }
+        if (!state.sharedPostIds.includes(post.id)) state.sharedPostIds.push(post.id);
+        post.shares++;
+        showToast("Share link ready.");
+      }
+      if (action === "edit") {
+        openCreateModal(post);
+      }
+      if (action === "report") {
+        openReportModal(post.id, "post");
+      }
+      renderDetail(post);
+      renderFeed();
+    }
+
+    // Developer B: Handle comment actions (reply, like, pin, delete)
+    async function handleCommentAction(action, commentId) {
+      if (!state.detailPost) return;
+      const comment = findComment(state.detailPost.comments, commentId);
+      if (!comment) return;
+
+      if (action === "reply") {
+        state.replyParentId = commentId;
+        state.replyParentName = comment.userName;
+        els.replyBanner.classList.remove("hidden");
+        els.replyTarget.textContent = comment.userName;
+        els.commentInput.focus();
+      }
+      if (action === "like-comment") {
+        if (!requireAuth()) return;
+        const alreadyLiked = comment.liked;
+        await apiRequest(`/api/comments/${commentId}/like`, { method: alreadyLiked ? "DELETE" : "POST", auth: true });
+        comment.liked = !alreadyLiked;
+        comment.likes += comment.liked ? 1 : -1;
+        showToast(comment.liked ? "Liked!" : "Unliked");
+      }
+      if (action === "pin-comment") {
+        if (!requireAuth()) return;
+        await apiRequest(`/api/comments/${commentId}/pin`, { method: comment.pinned ? "DELETE" : "POST", auth: true });
+        comment.pinned = !comment.pinned;
+        showToast(comment.pinned ? "Pinned!" : "Unpinned");
+      }
+      if (action === "delete-comment") {
+        if (!requireAuth()) return;
+        await apiRequest(`/api/comments/${commentId}`, { method: "DELETE", auth: true }).catch(() => null);
+        if (state.detailPost) {
+          removeComment(state.detailPost.comments, commentId);
+        }
+        showToast("Comment deleted");
+      }
+      renderComments();
+    }
+
+    // Developer B: Recursively find comment by ID
+    function findComment(comments, id) {
+      for (const c of comments) {
+        if (c.id.toString() === id) return c;
+        if (c.replies) {
+          const found = findComment(c.replies, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    
+    // Developer B: Recursively remove comment from comments array
+    function removeComment(comments, id) {
+      for (let i = 0; i < comments.length; i++) {
+        if (comments[i].id.toString() === id) {
+          comments.splice(i, 1);
+          return true;
+        }
+        if (comments[i].replies) {
+          const removed = removeComment(comments[i].replies, id);
+          if (removed) return true;
+        }
+      }
+      return false;
+    }
+
+    // Developer B: Open create/edit post modal
+    function openCreateModal(post = null) {
+      if (post) {
+        state.composeMode = "edit";
+        state.editingPostId = post.id;
+        els.createModalLabel.textContent = "Edit Post";
+        els.createModalTitle.textContent = "Update your post";
+        els.editingPostId.value = post.id;
+        els.postTitle.value = post.title;
+        els.postCategory.value = post.category;
+        els.postPrice.value = post.priceRange;
+        els.postLocation.value = post.location;
+        els.postStoreName.value = post.storeName || "";
+        els.postStoreAddress.value = post.storeAddress || "";
+        els.postDescription.value = post.description;
+        els.postTags.value = post.tags.join(", ");
+      } else {
+        state.composeMode = "create";
+        state.editingPostId = null;
+        els.createModalLabel.textContent = "Create Post";
+        els.createModalTitle.textContent = "Upload a new local find";
+        els.createPostForm.reset();
+        els.editingPostId.value = "";
+        els.suggestedTags.innerHTML = "";
+        els.previewGrid.innerHTML = "";
+      }
+      els.createModal.classList.remove("hidden");
+    }
+
+    // Developer B: Close create post modal
+    function closeCreateModal() {
+      els.createModal.classList.add("hidden");
+      els.createPostForm.reset();
+      els.suggestedTags.innerHTML = "";
+      els.previewGrid.innerHTML = "";
+      els.createFormError.classList.add("hidden");
+    }
+
+    // Developer B: Handle AI tag suggestions
+    async function handleTagSuggestion() {
+      const title = els.postTitle.value;
+      const description = els.postDescription.value;
+      if (!title && !description) {
+        showToast("Please add a title or description first");
+        return;
+      }
+      try {
+        const query = new URLSearchParams({ title, description, category: els.postCategory.value || "" });
+        const response = await apiRequest(`/api/posts/tags/suggest?${query.toString()}`, { auth: Boolean(backendState.token) });
+        const suggestions = Array.isArray(response) ? response : (response?.tags || response?.items || []);
+        els.suggestedTags.innerHTML = suggestions.map(tag => `<button class="tag-pill suggested-tag" type="button">${tag.name || tag}</button>`).join("");
+        els.suggestedTags.querySelectorAll(".suggested-tag").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const value = btn.textContent.startsWith("#") ? btn.textContent : `#${btn.textContent}`;
+            const current = els.postTags.value;
+            els.postTags.value = current ? `${current}, ${value}` : value;
+          });
+        });
+        showToast(suggestions.length ? "Tag suggestions loaded" : "No tag suggestions found");
+      } catch (error) {
+        showToast(error.message || "Failed to load tag suggestions.");
+      }
+    }
+
+    // Developer B: Handle create post form submission
+    async function handleCreateSubmit(e) {
+      e.preventDefault();
+      if (!requireAuth("Please log in before creating posts.")) return;
+      if (!els.postTitle.value || !els.postCategory.value || !els.postLocation.value) {
+        els.createFormError.textContent = "Please fill in required fields (Title, Category, Location)";
+        els.createFormError.classList.remove("hidden");
+        return;
+      }
+
+      try {
+        showLoading();
+        const price = parsePriceInput(els.postPrice.value);
+        const images = await uploadSelectedImages();
+        const body = {
+          title: els.postTitle.value.trim(),
+          description: els.postDescription.value.trim(),
+          categoryId: resolveCategoryId(els.postCategory.value.trim()),
+          storeId: resolveStoreId(els.postStoreName.value.trim()),
+          priceMin: price.priceMin,
+          priceMax: price.priceMax,
+          currency: price.currency,
+          locationText: els.postLocation.value.trim(),
+          tagIds: resolveTagIds(els.postTags.value),
+          images,
+        };
+        const editingId = state.editingPostId;
+        await apiRequest(editingId ? `/api/posts/${editingId}` : "/api/posts", {
+          method: editingId ? "PUT" : "POST",
+          auth: true,
+          body,
+        });
+        await loadBackendData();
+        closeCreateModal();
+        navigate("feed");
+        showToast(editingId ? "Post updated!" : "Post submitted for review!");
+      } catch (error) {
+        els.createFormError.textContent = error.message || "Failed to save post.";
+        els.createFormError.classList.remove("hidden");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function uploadSelectedImages() {
+      const files = Array.from(els.postImages.files || []).slice(0, 9);
+      if (!files.length) return [];
+      const uploads = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await apiRequest("/api/files/images", { method: "POST", auth: true, formData });
+        uploads.push({
+          imageUrl: response.url,
+          imageKey: response.fileName,
+          thumbnailUrl: response.thumbnailUrl || response.url,
+          width: response.width,
+          height: response.height,
+          fileSize: response.size,
+          mimeType: response.contentType,
+        });
+      }
+      return uploads;
+    }
+
+    // Developer B: Open image search modal
+    function openImageSearch() {
+      els.imageSearchModal.classList.remove("hidden");
+      els.imageSearchFile.value = "";
+      els.imagePreviewContainer.classList.add("hidden");
+      els.searchStatus.classList.add("hidden");
+      els.searchResults.classList.add("hidden");
+      els.submitImageSearch.disabled = true;
+    }
+
+    // Developer B: Close image search modal
+    function closeImageSearch() {
+      els.imageSearchModal.classList.add("hidden");
+      els.imageSearchFile.value = "";
+      els.imagePreviewContainer.classList.add("hidden");
+      els.searchStatus.classList.add("hidden");
+      els.searchResults.classList.add("hidden");
+    }
+
+    // Developer B: Handle image search file selection
+    function handleImageSearchFile(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      backendState.selectedImageSearchFile = file;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        els.previewImage.style.backgroundImage = `url(${event.target.result})`;
+        els.imagePreviewContainer.classList.remove("hidden");
+        els.submitImageSearch.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Developer B: Remove image search preview
+    function removePreviewImage() {
+      els.imageSearchFile.value = "";
+      backendState.selectedImageSearchFile = null;
+      els.imagePreviewContainer.classList.add("hidden");
+      els.submitImageSearch.disabled = true;
+    }
+
+    // Developer B: Extract dominant colors from image
+    function extractColorsFromImage(imageSrc, callback) {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 100;
+        canvas.height = 100;
+        ctx.drawImage(img, 0, 0, 100, 100);
+        const imageData = ctx.getImageData(0, 0, 100, 100).data;
+        
+        // 简单的颜色提取：取图像的几个代表性点
+        const samplePoints = [
+          { x: 50, y: 50 },    // 中心
+          { x: 25, y: 25 },    // 左上角
+          { x: 75, y: 25 },    // 右上角
+          { x: 25, y: 75 },    // 左下角
+          { x: 75, y: 75 },    // 右下角
+        ];
+        
+        const colors = samplePoints.map(point => {
+          const i = (point.y * 100 + point.x) * 4;
+          return [imageData[i], imageData[i + 1], imageData[i + 2]];
+        });
+        
+        callback(colors);
+      };
+      img.onerror = () => {
+        // 如果加载失败，返回默认颜色
+        callback([[100, 100, 150], [150, 150, 200], [200, 200, 250]]);
+      };
+      img.src = imageSrc;
+    }
+
+    // Developer B: Parse gradient colors from visual styles
+    function parseGradientColors(gradient) {
+      // 提取渐变中的颜色值
+      const colors = [];
+      
+      // 匹配 rgb/rgba 颜色
+      const rgbRegex = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/gi;
+      let match;
+      while ((match = rgbRegex.exec(gradient)) !== null) {
+        colors.push({ r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) });
+      }
+      
+      // 如果没有找到 rgb，尝试匹配 hex 颜色
+      if (colors.length === 0) {
+        const hexRegex = /#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/gi;
+        while ((match = hexRegex.exec(gradient)) !== null) {
+          colors.push({ 
+            r: parseInt(match[1], 16), 
+            g: parseInt(match[2], 16), 
+            b: parseInt(match[3], 16) 
+          });
+        }
+      }
+      
+      return colors.length > 0 ? colors : [{ r: 180, g: 180, b: 200 }];
+    }
+
+    // Developer B: Calculate color similarity (0-441, lower = more similar)
+    function calculateColorDistance(color1, color2) {
+      const rDiff = color1[0] - color2.r;
+      const gDiff = color1[1] - color2.g;
+      const bDiff = color1[2] - color2.b;
+      return Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+    }
+
+    // Developer B: Handle image search execution with color matching
+    async function handleImageSearch() {
+      els.searchStatus.classList.remove("hidden");
+      els.searchResults.classList.add("hidden");
+      try {
+        if (!backendState.selectedImageSearchFile) throw new Error("Please choose an image first.");
+        const formData = new FormData();
+        formData.append("file", backendState.selectedImageSearchFile);
+        formData.append("page", "1");
+        formData.append("pageSize", "12");
+        const envelope = await apiRequest("/api/posts/search/image", { method: "POST", auth: Boolean(backendState.token), formData, returnEnvelope: true });
+        const results = normalizePosts(envelope?.data?.items || []);
+        els.searchStatus.classList.add("hidden");
+        els.searchResults.classList.remove("hidden");
+        if (!results.length) {
+          els.similarPostsGrid.innerHTML = `<div class="empty-card"><h3>No similar posts found</h3><p>${envelope?.message || "Try uploading a different image."}</p></div>`;
+          return;
+        }
+        els.similarPostsGrid.innerHTML = results.map(post => {
+          const style = post.imageUrls?.length ? `background-image:url('${post.imageUrls[0]}');background-size:cover;background-position:center;` : `background:${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
+          return `<div class="similar-post-card" style="${style}" data-post-id="${post.id}"><div class="similar-post-match-badge">AI match</div><div class="similar-post-title">${post.title}</div></div>`;
+        }).join("");
+        els.similarPostsGrid.querySelectorAll(".similar-post-card").forEach(card => {
+          card.addEventListener("click", () => {
+            const post = results.find(p => p.id === Number(card.dataset.postId));
+            if (post) {
+              closeImageSearch();
+              openDetail(post);
+            }
+          });
+        });
+      } catch (error) {
+        els.searchStatus.classList.add("hidden");
+        els.searchResults.classList.remove("hidden");
+        els.similarPostsGrid.innerHTML = `<div class="empty-card"><h3>Image search unavailable</h3><p>${error.message || "Please try again later."}</p></div>`;
+      }
+    }
+
+
+    // Developer B: Open report modal
+    function openReportModal(targetId, targetType) {
+      els.reportTargetId.value = targetId;
+      els.reportTargetType.value = targetType;
+      els.reportReasons.forEach(r => r.classList.remove("is-selected"));
+      els.reportCustomReason.classList.add("hidden");
+      els.submitReportButton.disabled = true;
+      els.reportMessage.value = "";
+      els.reportModal.classList.remove("hidden");
+    }
+
+    // Developer B: Close report modal
+    function closeReportModal() {
+      els.reportModal.classList.add("hidden");
+    }
+
+    // Developer B: Handle report reason selection
+    function handleReportReason(e) {
+      els.reportReasons.forEach(r => r.classList.remove("is-selected"));
+      e.target.closest(".report-reason").classList.add("is-selected");
+      els.reportCustomReason.classList.toggle("hidden", e.target.closest(".report-reason").dataset.reason !== "other");
+      els.submitReportButton.disabled = false;
+    }
+
+    // Developer B: Handle report submission
+    async function handleReportSubmit() {
+      const reason = document.querySelector(".report-reason.is-selected")?.dataset.reason;
+      const message = els.reportMessage.value;
+      if (!requireAuth("Please log in before reporting content.")) return;
+      try {
+        const targetType = els.reportTargetType.value;
+        const targetId = els.reportTargetId.value;
+        const path = targetType === "comment" ? `/api/comments/${targetId}/report` : `/api/posts/${targetId}/report`;
+        await apiRequest(path, {
+          method: "POST",
+          auth: true,
+          body: {
+            reasonType: mapReportReason(reason),
+            message: message || null,
+          },
+        });
+        showToast("Report submitted. Thank you for helping keep our community safe.");
+        closeReportModal();
+      } catch (error) {
+        showToast(error.message || "Failed to submit report.");
+      }
+    }
+
+    function mapReportReason(reason) {
+      if (reason === "spam") return "SPAM";
+      if (reason === "inappropriate") return "PORN";
+      if (reason === "harmful") return "ABUSE";
+      if (reason === "copyright") return "ILLEGAL";
+      return "OTHER";
+    }
+
+    // Developer B: Handle comment submission
+    async function handleCommentSubmit(e) {
+      e.preventDefault();
+      if (!requireAuth("Please log in before commenting.")) return;
+      const text = els.commentInput.value.trim();
+      if (!text) return;
+      try {
+        await apiRequest(`/api/posts/${state.detailPost.id}/comments`, {
+          method: "POST",
+          auth: true,
+          body: {
+            content: text,
+            parentId: state.replyParentId || null,
+          },
+        });
+        els.commentInput.value = "";
+        state.replyParentId = null;
+        state.replyParentName = "";
+        els.replyBanner.classList.add("hidden");
+        await openDetail(state.detailPost);
+        showToast("Comment posted!");
+      } catch (error) {
+        showToast(error.message || "Failed to post comment.");
+      }
+    }
+
+    // Developer A/B: Initialize application
+    async function init() {
+      await loadBackendData();
+      els.sidebarName.textContent = state.user.name;
+      els.sidebarRole.textContent = state.user.role;
+      
+      // Load saved avatar if exists
+      if (state.user.avatarUrls && state.user.avatarUrls.custom) {
+        els.sidebarAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
+        els.sidebarAvatar.style.backgroundSize = "cover";
+        els.sidebarAvatar.style.backgroundPosition = "center";
+        els.sidebarAvatar.textContent = "";
+        
+        els.detailAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
+        els.detailAvatar.style.backgroundSize = "cover";
+        els.detailAvatar.style.backgroundPosition = "center";
+        els.detailAvatar.textContent = "";
+        
+        els.commentUserAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
+        els.commentUserAvatar.style.backgroundSize = "cover";
+        els.commentUserAvatar.style.backgroundPosition = "center";
+        els.commentUserAvatar.textContent = "";
+      } else {
+        els.sidebarAvatar.textContent = state.user.avatar;
+        els.detailAvatar.textContent = state.user.avatar;
+        els.commentUserAvatar.textContent = state.user.avatar;
+      }
+
+      els.routeButtons.forEach(btn => btn.addEventListener("click", () => navigate(btn.dataset.route)));
+      els.filterButtons.forEach(btn => btn.addEventListener("click", () => {
+        els.filterButtons.forEach(b => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        state.filter = btn.dataset.filter;
+        renderFeed();
+      }));
+
+      els.globalSearch.addEventListener("input", (e) => {
+        state.query = e.target.value;
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(async () => {
+          if (!backendState.backendAvailable) {
+            renderFeed();
+            return;
+          }
+          try {
+            const keyword = state.query.trim();
+            const path = keyword
+              ? `/api/posts/search?keyword=${encodeURIComponent(keyword)}&page=1&pageSize=30`
+              : "/api/posts/published?page=1&pageSize=30";
+            const pageData = await apiRequest(path, { auth: Boolean(backendState.token) });
+            state.posts = normalizePosts(pageData?.items || []);
+            renderFeed();
+          } catch (error) {
+            showToast(error.message || "Search failed.");
+          }
+        }, 300);
+      });
+
+      els.closeDetail.addEventListener("click", closeDetail);
+      els.commentForm.addEventListener("submit", handleCommentSubmit);
+      els.cancelReply.addEventListener("click", () => {
+        state.replyParentId = null;
+        state.replyParentName = "";
+        els.replyBanner.classList.add("hidden");
+      });
+
+      els.openCreatePost.addEventListener("click", () => openCreateModal());
+      els.closeCreateMask.addEventListener("click", closeCreateModal);
+      els.closeCreateButton.addEventListener("click", closeCreateModal);
+      els.cancelCreateButton.addEventListener("click", closeCreateModal);
+      els.createPostForm.addEventListener("submit", handleCreateSubmit);
+      els.suggestTagsButton.addEventListener("click", handleTagSuggestion);
+
+      [els.openNotifications, els.openNotificationsAlt, els.detailOpenNotifications].forEach(btn => btn.addEventListener("click", openNotificationDrawer));
+      els.closeNotificationDrawer.addEventListener("click", closeNotificationDrawer);
+      els.closeNotificationButton.addEventListener("click", closeNotificationDrawer);
+      els.toggleNotificationFilter.addEventListener("click", () => {
+        state.notificationUnreadOnly = !state.notificationUnreadOnly;
+        els.toggleNotificationFilter.textContent = state.notificationUnreadOnly ? "Show all" : "Unread only";
+        renderNotificationList();
+      });
+      els.markAllRead.addEventListener("click", markAllNotificationsRead);
+
+      els.openImageSearch.addEventListener("click", openImageSearch);
+      els.closeImageSearchMask.addEventListener("click", closeImageSearch);
+      els.closeImageSearchButton.addEventListener("click", closeImageSearch);
+      els.cancelImageSearchButton.addEventListener("click", closeImageSearch);
+      els.imageSearchFile.addEventListener("change", handleImageSearchFile);
+      els.removePreviewImage.addEventListener("click", removePreviewImage);
+      els.submitImageSearch.addEventListener("click", handleImageSearch);
+
+      els.reportReasons.forEach(r => r.addEventListener("click", handleReportReason));
+      els.closeReportMask.addEventListener("click", closeReportModal);
+      els.closeReportButton.addEventListener("click", closeReportModal);
+      els.cancelReportButton.addEventListener("click", closeReportModal);
+      els.submitReportButton.addEventListener("click", handleReportSubmit);
+
+      if (backendState.token) {
+        navigate("feed");
+      }
+    }
+
+    window.addEventListener("popstate", (e) => {
+      if (e.state?.route) navigate(e.state.route);
+    });
+
+    init();
+  </script>
+</body>
+</html>

@@ -35,7 +35,7 @@ public class ReportServiceImpl implements ReportService {
     private final InteractionEventService interactionEventService;
 
     /**
-     * Author: Kaijie Zhu
+ * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Inject mapper and interaction event dependencies for report business logic.
      * Params:
@@ -59,7 +59,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Create one report against one published post while blocking self-reporting.
      * Params:
@@ -86,7 +86,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Create one report against one visible comment while blocking self-reporting.
      * Params:
@@ -111,7 +111,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Build and persist one normalized report entity and record the submission event.
      * Params:
@@ -152,7 +152,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Normalize one optional text field and convert blank to null.
      * Params:
@@ -170,7 +170,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Normalize one report reason type and validate it against shared allowed values.
      * Params:
@@ -189,7 +189,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-17
      * Purpose: Convert report entity to report response object with moderation audit fields.
      * Params:
@@ -220,7 +220,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Resolve the related post id for one report target so the event ledger can keep post context.
      * Params:
@@ -239,7 +239,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-16
      * Purpose: Build structured metadata for one report submission event.
      * Params:
@@ -259,7 +259,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-17
      * Purpose: Resolve the latest moderation-visible status of the report target for admin response rendering.
      * Params:
@@ -281,7 +281,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Resolve one short target summary string for report response display to reduce extra frontend lookups.
      * Params:

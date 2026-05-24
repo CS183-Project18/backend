@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
  * Implementation-specific tests should be in the implementation class test file.
  * </p>
  *
- * @author Kaijie Zhu
+ * @author Shuying Liang
  * @version 1.0
  * @since 2026-05-15
  */

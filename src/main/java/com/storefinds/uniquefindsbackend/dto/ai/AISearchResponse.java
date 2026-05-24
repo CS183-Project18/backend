@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Response DTO for AI semantic search and image search
  * Params: None

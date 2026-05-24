@@ -4,6 +4,7 @@ import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsDistributionResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsOverviewResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsTrendsResponse;
+import com.storefinds.uniquefindsbackend.dto.DataConsistencyResponse;
 import com.storefinds.uniquefindsbackend.service.AdminAnalyticsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/analytics")
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-18
  * Purpose: Expose read-only admin analytics endpoints for overview, trends, and distributions.
  * Params: None
@@ -25,7 +26,7 @@ public class AdminAnalyticsController {
     private final AdminAnalyticsService adminAnalyticsService;
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Inject admin analytics service for dashboard reporting endpoints.
      * Params:
@@ -39,7 +40,7 @@ public class AdminAnalyticsController {
 
     @GetMapping("/overview")
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Query aggregated overview counters for the admin dashboard.
      * Params: None
@@ -53,7 +54,7 @@ public class AdminAnalyticsController {
 
     @GetMapping("/trends")
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Query dated trend series for the requested admin analytics window.
      * Params:
@@ -68,7 +69,7 @@ public class AdminAnalyticsController {
 
     @GetMapping("/distribution")
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Query distribution and ranking datasets for admin analytics views.
      * Params: None
@@ -78,5 +79,19 @@ public class AdminAnalyticsController {
      */
     public Result<AnalyticsDistributionResponse> getDistribution() {
         return adminAnalyticsService.getDistribution();
+    }
+
+    @GetMapping("/consistency")
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Query lightweight data consistency counters for demo maintenance.
+     * Params: None
+     * Returns:
+     * - Result<DataConsistencyResponse>: consistency counters
+     * Throws: None
+     */
+    public Result<DataConsistencyResponse> getDataConsistency() {
+        return adminAnalyticsService.getDataConsistency();
     }
 }

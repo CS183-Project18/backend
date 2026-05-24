@@ -3,6 +3,7 @@ package com.storefinds.uniquefindsbackend.controller.admin;
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.AdminPostModerationResponse;
 import com.storefinds.uniquefindsbackend.dto.ModerationActionRequest;
+import com.storefinds.uniquefindsbackend.dto.ModerationLogResponse;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.ReportResponse;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
@@ -11,6 +12,7 @@ import com.storefinds.uniquefindsbackend.service.AdminModerationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 
 @Validated
 @RestController
@@ -60,6 +64,35 @@ public class AdminModerationController {
                                                            @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
                                                             @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize) {
         return adminModerationService.getReports(targetType, status, page, pageSize);
+    }
+
+    @GetMapping("/logs")
+    /**
+ * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Query one page of moderation audit logs matching admin filter conditions.
+     * Params:
+     * - targetType: optional moderation target type
+     * - targetId: optional target id
+     * - moderatorId: optional moderator id
+     * - action: optional moderation action
+     * - startTime: optional ISO lower created-at bound
+     * - endTime: optional ISO upper created-at bound
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * Returns:
+     * - Result<PageResponse<ModerationLogResponse>>: matched moderation log page
+     * Throws: None
+     */
+    public Result<PageResponse<ModerationLogResponse>> getModerationLogs(@RequestParam(required = false) String targetType,
+                                                                         @RequestParam(required = false) Long targetId,
+                                                                         @RequestParam(required = false) Long moderatorId,
+                                                                         @RequestParam(required = false) String action,
+                                                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+                                                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+                                                                         @RequestParam(defaultValue = "1") @Min(value = 1, message = "page must be greater than 0") Integer page,
+                                                                         @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize) {
+        return adminModerationService.getModerationLogs(targetType, targetId, moderatorId, action, startTime, endTime, page, pageSize);
     }
 
     @GetMapping("/posts/pending")

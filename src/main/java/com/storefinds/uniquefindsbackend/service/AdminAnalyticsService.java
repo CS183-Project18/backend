@@ -4,9 +4,10 @@ import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsDistributionResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsOverviewResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsTrendsResponse;
+import com.storefinds.uniquefindsbackend.dto.DataConsistencyResponse;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-18
  * Purpose: Define read-only admin analytics capabilities for overview, trends, and distributions.
  * Params: None
@@ -20,4 +21,6 @@ public interface AdminAnalyticsService {
     Result<AnalyticsTrendsResponse> getTrends(String window);
 
     Result<AnalyticsDistributionResponse> getDistribution();
+
+    Result<DataConsistencyResponse> getDataConsistency();
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Mapper
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-18
  * Purpose: Provide read-only aggregate queries for admin analytics, rankings, and governance statistics.
  * Params: None
@@ -22,6 +22,8 @@ public interface AnalyticsMapper {
 
     long countPublishedPosts();
 
+    long countCreatedPosts();
+
     long countVisibleComments();
 
     long countFavorites();
@@ -31,6 +33,12 @@ public interface AnalyticsMapper {
     long countPendingReports();
 
     Long averageReportResolutionHours();
+
+    long countInteractionEvents();
+
+    long countInteractionEventsByType(@Param("eventType") String eventType);
+
+    long countModerationLogsByAction(@Param("action") String action);
 
     List<Map<String, Object>> countPostCreatesByDay(@Param("startTime") LocalDateTime startTime);
 
@@ -49,4 +57,14 @@ public interface AnalyticsMapper {
     List<Map<String, Object>> topTags(@Param("limit") int limit);
 
     List<Map<String, Object>> topStores(@Param("limit") int limit);
+
+    long countOrphanPostImages();
+
+    long countOrphanPostTags();
+
+    long countPublishedPostsMissingActiveCategory();
+
+    long countPublishedPostsMissingActiveStore();
+
+    long countPublishedPostsWithoutImages();
 }

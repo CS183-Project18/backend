@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Data payload for build index response containing success status and count
  * Params: None

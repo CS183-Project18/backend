@@ -6,7 +6,7 @@ import com.storefinds.uniquefindsbackend.dto.TrendingPostsQuery;
 import com.storefinds.uniquefindsbackend.entity.Post;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-14
  * Purpose: Define the current concrete search backend used by discovery flows.
  * Params: None

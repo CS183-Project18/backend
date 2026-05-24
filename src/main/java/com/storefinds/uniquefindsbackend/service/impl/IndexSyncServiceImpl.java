@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Rebuild the full AI search indices from published posts when startup or searchable post lifecycle events require refresh.
  * Params: None
@@ -45,7 +45,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     private final AtomicLong lastRebuildScheduledAt = new AtomicLong(0L);
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Inject the published-post data sources and AI client used to rebuild search indices.
      * Params:
@@ -65,7 +65,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Schedule one asynchronous full rebuild while skipping duplicate rebuild requests inside the debounce window.
      * Params:
@@ -110,7 +110,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Build one fresh full published-post payload and send it to the ai-search index rebuild endpoint.
      * Params:
@@ -139,7 +139,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Group image URLs by post id so the full rebuild payload can describe both semantic and image-search candidates.
      * Params:
@@ -161,7 +161,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Check whether one post status participates in the searchable published-post index.
      * Params:

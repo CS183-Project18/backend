@@ -5,6 +5,7 @@ import com.storefinds.uniquefindsbackend.dto.CreatePostRequest;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
 import com.storefinds.uniquefindsbackend.dto.SharePostResponse;
+import com.storefinds.uniquefindsbackend.dto.TagResponse;
 import com.storefinds.uniquefindsbackend.dto.UpdatePostRequest;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.security.CurrentUser;
@@ -130,7 +131,7 @@ public class PostController {
 
     @GetMapping("/search")
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Search published posts by keyword, category, store, tags, price range, and sort option.
      * Params:
@@ -163,7 +164,7 @@ public class PostController {
 
     @PostMapping("/search/image")
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Search published posts by one uploaded image with optional structured filters.
      * Params:
@@ -211,6 +212,27 @@ public class PostController {
                                                                @RequestParam(defaultValue = "20") @Min(value = 1, message = "pageSize must be greater than 0") @Max(value = 100, message = "pageSize must be less than or equal to 100") Integer pageSize,
                                                                Authentication authentication) {
         return postService.getTrendingPosts(extractCurrentUserId(authentication), window, page, pageSize);
+    }
+
+    @GetMapping("/tags/suggest")
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Suggest existing tags for a draft post from title, description, and category context.
+     * Params:
+     * - title: draft title
+     * - description: draft description
+     * - categoryId: optional selected category id
+     * - limit: maximum returned tag count
+     * Returns:
+     * - Result<List<TagResponse>>: suggested existing tags
+     * Throws: None
+     */
+    public Result<List<TagResponse>> suggestTags(@RequestParam(required = false) String title,
+                                                 @RequestParam(required = false) String description,
+                                                 @RequestParam(required = false) Long categoryId,
+                                                 @RequestParam(defaultValue = "5") @Min(value = 1, message = "limit must be greater than 0") @Max(value = 10, message = "limit must be less than or equal to 10") Integer limit) {
+        return postService.suggestTags(title, description, categoryId, limit);
     }
 
     @PutMapping("/{postId}")

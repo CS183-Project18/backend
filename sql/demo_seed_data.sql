@@ -9,7 +9,7 @@ INSERT INTO users (
   (1002, 'demo_brian', 'brian@uniquefinds.demo', '$2a$10$Kyi0VpSyAqAiyiT5o.b4WuqS6.R1ekZpQ1GT4YiK2X9jJwo9M0Sr.', 'Brian Wu', 'https://picsum.photos/seed/demo-brian/200/200', 'Always looking for practical gadgets in local stores.', 'USER', 'ACTIVE', 1, '2026-05-10 19:00:00'),
   (1003, 'demo_cathy', 'cathy@uniquefinds.demo', '$2a$10$Kyi0VpSyAqAiyiT5o.b4WuqS6.R1ekZpQ1GT4YiK2X9jJwo9M0Sr.', 'Cathy Lin', 'https://picsum.photos/seed/demo-cathy/200/200', 'Focuses on aesthetic lifestyle products and stationery.', 'USER', 'ACTIVE', 1, '2026-05-09 21:30:00'),
   (1004, 'demo_derek', 'derek@uniquefinds.demo', '$2a$10$Kyi0VpSyAqAiyiT5o.b4WuqS6.R1ekZpQ1GT4YiK2X9jJwo9M0Sr.', 'Derek Sun', 'https://picsum.photos/seed/demo-derek/200/200', 'Enjoys digital accessories and useful travel finds.', 'USER', 'ACTIVE', 1, '2026-05-08 18:20:00'),
-  (1005, 'demo_admin', 'admin@uniquefinds.demo', '$2a$10$Kyi0VpSyAqAiyiT5o.b4WuqS6.R1ekZpQ1GT4YiK2X9jJwo9M0Sr.', 'Admin Demo', 'https://picsum.photos/seed/demo-admin/200/200', 'Admin account for moderation demo.', 'ADMIN', 'ACTIVE', 1, '2026-05-10 22:00:00')
+  (1005, 'demo_admin', '3040202533@qq.com', '$2a$10$Kyi0VpSyAqAiyiT5o.b4WuqS6.R1ekZpQ1GT4YiK2X9jJwo9M0Sr.', 'Admin Demo', 'https://picsum.photos/seed/demo-admin/200/200', 'Admin account for moderation demo.', 'ADMIN', 'ACTIVE', 1, '2026-05-10 22:00:00')
 ON DUPLICATE KEY UPDATE
   email = VALUES(email),
   password_hash = VALUES(password_hash),
@@ -76,9 +76,9 @@ INSERT INTO posts (
   price_min, price_max, currency, location_text, status, moderation_reason,
   view_count, like_count, favorite_count, comment_count, published_at, deleted_at, created_at, updated_at
 ) VALUES
-  (301, 1001, 205, 118, 'Hand-painted retro ceramic mug', 'Found a hand-painted ceramic mug with a warm retro palette. Great for a thoughtful housewarming gift and feels much more premium than its price.', 18.00, 24.00, 'USD', 'Noe Valley', 'PUBLISHED', NULL, 42, 0, 0, 0, '2026-05-10 10:00:00', NULL, '2026-05-10 09:30:00', '2026-05-10 10:00:00'),
-  (302, 1002, 203, 112, 'Foldable magnetic phone stand', 'Small metal stand that folds flat and sticks to the back of a phone case. Practical for travel and video calls.', 12.00, 16.00, 'USD', 'SoMa', 'PUBLISHED', NULL, 67, 0, 0, 0, '2026-05-10 11:00:00', NULL, '2026-05-10 10:40:00', '2026-05-10 11:00:00'),
-  (303, 1003, 202, 113, 'Floral weekly planner with thick paper', 'This planner uses thick paper that does not bleed through and has a gentle floral cover that feels gift-friendly.', 22.00, 28.00, 'USD', 'Hayes Valley', 'PUBLISHED', NULL, 38, 0, 0, 0, '2026-05-09 14:00:00', NULL, '2026-05-09 13:20:00', '2026-05-09 14:00:00'),
+  (301, 1001, 205, 118, 'Hand-painted retro ceramic mug', 'Found a hand-painted ceramic mug with a warm retro palette. Great for a thoughtful housewarming gift and feels much more premium than its price.', 18.00, 24.00, 'USD', 'Noe Valley', 'PUBLISHED', NULL, 42, 0, 0, 0, DATE_SUB(NOW(), INTERVAL 2 HOUR), NULL, DATE_SUB(NOW(), INTERVAL 3 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+  (302, 1002, 203, 112, 'Foldable magnetic phone stand', 'Small metal stand that folds flat and sticks to the back of a phone case. Practical for travel and video calls.', 12.00, 16.00, 'USD', 'SoMa', 'PUBLISHED', NULL, 67, 0, 0, 0, DATE_SUB(NOW(), INTERVAL 6 HOUR), NULL, DATE_SUB(NOW(), INTERVAL 7 HOUR), DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+  (303, 1003, 202, 113, 'Floral weekly planner with thick paper', 'This planner uses thick paper that does not bleed through and has a gentle floral cover that feels gift-friendly.', 22.00, 28.00, 'USD', 'Hayes Valley', 'PUBLISHED', NULL, 38, 0, 0, 0, DATE_SUB(NOW(), INTERVAL 18 HOUR), NULL, DATE_SUB(NOW(), INTERVAL 19 HOUR), DATE_SUB(NOW(), INTERVAL 18 HOUR)),
   (304, 1004, 204, 114, 'Compact lavender sleep spray gift set', 'A small wellness gift set with lavender spray and eye mask. Suitable for older family members or coworkers.', 26.00, 32.00, 'USD', 'Sunset', 'PUBLISHED', NULL, 49, 0, 0, 0, '2026-05-09 16:30:00', NULL, '2026-05-09 16:00:00', '2026-05-09 16:30:00'),
   (305, 1001, 201, 115, 'Mini mushroom table lamp', 'A tiny mushroom-shaped lamp with a soft glow. Works well for dorm desks and cozy bedside corners.', 29.00, 35.00, 'USD', 'Mission', 'PUBLISHED', NULL, 54, 0, 0, 0, '2026-05-08 19:20:00', NULL, '2026-05-08 18:50:00', '2026-05-08 19:20:00'),
   (306, 1002, 203, 112, 'Cable organizer pouch for travel', 'Slim pouch with elastic loops for chargers, earphones, and adapters. Great for practical travelers.', 15.00, 19.00, 'USD', 'SoMa', 'PUBLISHED', NULL, 24, 0, 0, 0, '2026-05-08 12:00:00', NULL, '2026-05-08 11:30:00', '2026-05-08 12:00:00'),
@@ -115,18 +115,19 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO post_images (
   id, post_id, image_url, image_key, thumbnail_url, width, height, file_size, mime_type, sort_order, is_cover
 ) VALUES
-  (401, 301, 'https://picsum.photos/seed/uf-mug/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (402, 302, 'https://picsum.photos/seed/uf-stand/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (403, 303, 'https://picsum.photos/seed/uf-planner/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (404, 304, 'https://picsum.photos/seed/uf-sleep-spray/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (405, 305, 'https://picsum.photos/seed/uf-lamp/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (406, 308, 'https://picsum.photos/seed/uf-massager/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (407, 314, 'https://picsum.photos/seed/uf-riser/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (408, 320, 'https://picsum.photos/seed/uf-incense/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 0, 1),
-  (409, 301, 'https://picsum.photos/seed/uf-mug-side/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 1, 0),
-  (410, 305, 'https://picsum.photos/seed/uf-lamp-glow/960/720', NULL, NULL, 960, 720, 0, 'image/jpeg', 1, 0)
+  (401, 301, 'https://picsum.photos/seed/uf-mug/960/720', NULL, 'https://picsum.photos/seed/uf-mug/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (402, 302, 'https://picsum.photos/seed/uf-stand/960/720', NULL, 'https://picsum.photos/seed/uf-stand/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (403, 303, 'https://picsum.photos/seed/uf-planner/960/720', NULL, 'https://picsum.photos/seed/uf-planner/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (404, 304, 'https://picsum.photos/seed/uf-sleep-spray/960/720', NULL, 'https://picsum.photos/seed/uf-sleep-spray/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (405, 305, 'https://picsum.photos/seed/uf-lamp/960/720', NULL, 'https://picsum.photos/seed/uf-lamp/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (406, 308, 'https://picsum.photos/seed/uf-massager/960/720', NULL, 'https://picsum.photos/seed/uf-massager/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (407, 314, 'https://picsum.photos/seed/uf-riser/960/720', NULL, 'https://picsum.photos/seed/uf-riser/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (408, 320, 'https://picsum.photos/seed/uf-incense/960/720', NULL, 'https://picsum.photos/seed/uf-incense/480/360', 960, 720, 0, 'image/jpeg', 0, 1),
+  (409, 301, 'https://picsum.photos/seed/uf-mug-side/960/720', NULL, 'https://picsum.photos/seed/uf-mug-side/480/360', 960, 720, 0, 'image/jpeg', 1, 0),
+  (410, 305, 'https://picsum.photos/seed/uf-lamp-glow/960/720', NULL, 'https://picsum.photos/seed/uf-lamp-glow/480/360', 960, 720, 0, 'image/jpeg', 1, 0)
 ON DUPLICATE KEY UPDATE
   image_url = VALUES(image_url),
+  thumbnail_url = VALUES(thumbnail_url),
   sort_order = VALUES(sort_order),
   is_cover = VALUES(is_cover);
 
@@ -189,7 +190,52 @@ INSERT INTO moderation_logs (
   id, target_type, target_id, moderator_id, action, reason, created_at
 ) VALUES
   (701, 'POST', 322, 1005, 'REJECT', 'Seed moderation log for rejected demo post.', '2026-05-10 21:00:00'),
-  (702, 'POST', 323, 1005, 'HIDE', 'Seed moderation log for hidden demo post.', '2026-05-10 21:05:00')
+  (702, 'POST', 323, 1005, 'HIDE', 'Seed moderation log for hidden demo post.', '2026-05-10 21:05:00'),
+  (703, 'POST', 301, 1005, 'APPROVE', 'Seed moderation log for approved demo post.', DATE_SUB(NOW(), INTERVAL 2 HOUR))
 ON DUPLICATE KEY UPDATE
   reason = VALUES(reason),
   created_at = VALUES(created_at);
+
+INSERT INTO notifications (
+  id, recipient_user_id, actor_user_id, event_type, target_type, target_id, post_id, metadata, is_read, created_at
+) VALUES
+  (801, 1001, 1002, 'POST_LIKED', 'POST', 301, 301, JSON_OBJECT('source', 'demo_seed'), 0, DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+  (802, 1001, 1003, 'POST_FAVORITED', 'POST', 301, 301, JSON_OBJECT('source', 'demo_seed'), 0, DATE_SUB(NOW(), INTERVAL 80 MINUTE)),
+  (803, 1002, 1001, 'COMMENT_REPLIED', 'COMMENT', 501, 301, JSON_OBJECT('source', 'demo_seed'), 0, DATE_SUB(NOW(), INTERVAL 70 MINUTE)),
+  (804, 1002, 1005, 'REPORT_REJECTED', 'COMMENT', 507, 308, JSON_OBJECT('reportId', 602), 1, DATE_SUB(NOW(), INTERVAL 60 MINUTE)),
+  (805, 1001, 1005, 'POST_MODERATED', 'POST', 321, 321, JSON_OBJECT('status', 'PENDING_REVIEW'), 1, DATE_SUB(NOW(), INTERVAL 50 MINUTE))
+ON DUPLICATE KEY UPDATE
+  metadata = VALUES(metadata),
+  is_read = VALUES(is_read),
+  created_at = VALUES(created_at);
+
+INSERT INTO interaction_events (
+  id, event_type, user_id, post_id, comment_id, target_type, target_id, store_id, category_id, event_value, metadata, event_time
+) VALUES
+  (901, 'SEARCH_REQUEST', 1001, NULL, NULL, NULL, NULL, NULL, NULL, 1, JSON_OBJECT('keyword', 'mug'), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+  (902, 'SEARCH_REQUEST', 1002, NULL, NULL, NULL, NULL, NULL, NULL, 1, JSON_OBJECT('keyword', 'gift'), DATE_SUB(NOW(), INTERVAL 90 MINUTE)),
+  (903, 'SHARE_LINK_CREATE', 1003, 301, NULL, 'POST', 301, 205, 118, 1, JSON_OBJECT('source', 'demo_seed'), DATE_SUB(NOW(), INTERVAL 80 MINUTE)),
+  (904, 'REPORT_SUBMIT', 1002, 308, 507, 'COMMENT', 507, 204, 114, 1, JSON_OBJECT('reportId', 602), DATE_SUB(NOW(), INTERVAL 70 MINUTE)),
+  (905, 'REPORT_CLOSE', 1005, 322, NULL, 'POST', 322, 203, 112, 1, JSON_OBJECT('reportId', 601, 'status', 'RESOLVED'), DATE_SUB(NOW(), INTERVAL 60 MINUTE))
+ON DUPLICATE KEY UPDATE
+  metadata = VALUES(metadata),
+  event_time = VALUES(event_time);
+
+UPDATE posts p
+SET p.like_count = (
+      SELECT COUNT(1)
+      FROM post_likes pl
+      WHERE pl.post_id = p.id
+    ),
+    p.favorite_count = (
+      SELECT COUNT(1)
+      FROM post_favorites pf
+      WHERE pf.post_id = p.id
+    ),
+    p.comment_count = (
+      SELECT COUNT(1)
+      FROM comments c
+      WHERE c.post_id = p.id
+        AND c.status = 'VISIBLE'
+    )
+WHERE p.id BETWEEN 301 AND 325;

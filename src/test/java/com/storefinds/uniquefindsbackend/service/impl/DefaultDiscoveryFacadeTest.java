@@ -50,6 +50,7 @@ class DefaultDiscoveryFacadeTest {
         PageResponse<Post> result = facade.searchPublishedPosts(query);
 
         assertEquals(1L, result.getTotal());
+        assertEquals("SQL_FALLBACK", result.getMetadata().get("searchSource"));
         verify(sqlPostSearchService).searchPublishedPosts(query);
     }
 
@@ -70,6 +71,7 @@ class DefaultDiscoveryFacadeTest {
         PageResponse<Post> result = facade.searchPublishedPosts(query);
 
         assertEquals(List.of(9L, 3L), result.getItems().stream().map(Post::getId).toList());
+        assertEquals("AI_SEMANTIC", result.getMetadata().get("searchSource"));
         verify(sqlPostSearchService, never()).searchPublishedPosts(query);
     }
 

@@ -3,7 +3,7 @@ package com.storefinds.uniquefindsbackend.common;
 import java.util.Set;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-14
  * Purpose: Define supported report reason values in one shared location for report validation logic.
  * Params: None
@@ -32,7 +32,7 @@ public final class ReportReasonType {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Check whether one report reason type is supported.
      * Params:

@@ -10,6 +10,7 @@ public class ModerationLog {
     private String targetType;
     private Long targetId;
     private Long moderatorId;
+    private String moderatorUsername;
     private String action;
     private String reason;
     private LocalDateTime createdAt;

@@ -216,12 +216,14 @@ public class PostServiceImpl implements PostService {
                 )
         );
         PageResponse<Post> postPage = discoveryFacade.searchPublishedPosts(query);
-        return Result.success(buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId));
+        PageResponse<PostResponse> response = buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId);
+        response.setMetadata(postPage.getMetadata());
+        return Result.success(response);
     }
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Search published posts by one uploaded image and gracefully degrade when AI image search is unavailable.
      * Params:
@@ -251,12 +253,16 @@ public class PostServiceImpl implements PostService {
         PostSearchQuery query = searchQueryParser.parsePostSearchQuery(null, categoryId, storeId, tagIds, priceMin, priceMax, null, page, pageSize);
         try {
             PageResponse<Post> postPage = discoveryFacade.searchPublishedPostsByImage(query, file);
-            return Result.success(buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId));
+            PageResponse<PostResponse> response = buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId);
+            response.setMetadata(postPage.getMetadata());
+            return Result.success(response);
         } catch (RuntimeException ex) {
             if (!(ex instanceof AIServiceException)) {
                 throw ex;
             }
-            return Result.success("image search is temporarily unavailable", buildPostPage(0L, page, pageSize, List.of(), userId));
+            PageResponse<PostResponse> emptyPage = buildPostPage(0L, page, pageSize, List.of(), userId);
+            emptyPage.setMetadata(Map.of("searchSource", "IMAGE_SEARCH", "degraded", true));
+            return Result.success("image search is temporarily unavailable", emptyPage);
         }
     }
 
@@ -267,7 +273,47 @@ public class PostServiceImpl implements PostService {
                                                                int pageSize) {
         TrendingPostsQuery query = searchQueryParser.parseTrendingPostsQuery(window, page, pageSize);
         PageResponse<Post> postPage = discoveryFacade.getTrendingPosts(query);
-        return Result.success(buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId));
+        PageResponse<PostResponse> response = buildPostPage(postPage.getTotal(), postPage.getPage(), postPage.getPageSize(), postPage.getItems(), userId);
+        response.setMetadata(postPage.getMetadata());
+        return Result.success(response);
+    }
+
+    @Override
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Suggest existing tags for post creation without depending on the external AI service.
+     * Params:
+     * - title: draft post title
+     * - description: draft post description
+     * - categoryId: optional selected category id
+     * - limit: maximum returned tag count
+     * Returns:
+     * - Result<List<TagResponse>>: suggested existing tags
+     * Throws: None
+     */
+    public Result<List<TagResponse>> suggestTags(String title, String description, Long categoryId, int limit) {
+        String context = buildTagSuggestionContext(title, description, categoryId);
+        List<TagResponse> suggestions = tagMapper.selectAll().stream()
+                .filter(tag -> tag.getName() != null)
+                .sorted((left, right) -> {
+                    int leftScore = scoreTagSuggestion(left, context);
+                    int rightScore = scoreTagSuggestion(right, context);
+                    if (leftScore != rightScore) {
+                        return Integer.compare(rightScore, leftScore);
+                    }
+                    BigDecimal leftHeat = left.getHeatScore() == null ? BigDecimal.ZERO : left.getHeatScore();
+                    BigDecimal rightHeat = right.getHeatScore() == null ? BigDecimal.ZERO : right.getHeatScore();
+                    int heatCompare = rightHeat.compareTo(leftHeat);
+                    if (heatCompare != 0) {
+                        return heatCompare;
+                    }
+                    return left.getName().compareToIgnoreCase(right.getName());
+                })
+                .limit(Math.max(1, Math.min(limit, MAX_TAGS_PER_POST)))
+                .map(this::toTagResponse)
+                .toList();
+        return Result.success(suggestions);
     }
 
     @Override
@@ -342,7 +388,7 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Validate one uploaded image file for AI image-search usage with the supported size and MIME constraints.
      * Params:
@@ -382,6 +428,22 @@ public class PostServiceImpl implements PostService {
         }
         String normalized = value.trim();
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Keep media response fields stable by falling back to the original image URL.
+     * Params:
+     * - value: candidate value
+     * - fallback: fallback value
+     * Returns:
+     * - String: normalized value or fallback
+     * Throws: None
+     */
+    private String defaultIfBlank(String value, String fallback) {
+        String normalized = normalizeOptionalText(value);
+        return normalized == null ? fallback : normalized;
     }
 
     private String normalizeCurrency(String currency) {
@@ -435,9 +497,10 @@ public class PostServiceImpl implements PostService {
             PostImageRequest request = imageRequests.get(i);
             PostImage image = new PostImage();
             image.setPostId(postId);
-            image.setImageUrl(normalizeRequiredText(request.getImageUrl(), "imageUrl is required"));
+            String imageUrl = normalizeRequiredText(request.getImageUrl(), "imageUrl is required");
+            image.setImageUrl(imageUrl);
             image.setImageKey(normalizeOptionalText(request.getImageKey()));
-            image.setThumbnailUrl(normalizeOptionalText(request.getThumbnailUrl()));
+            image.setThumbnailUrl(defaultIfBlank(request.getThumbnailUrl(), imageUrl));
             image.setWidth(request.getWidth());
             image.setHeight(request.getHeight());
             image.setFileSize(request.getFileSize());
@@ -574,7 +637,7 @@ public class PostServiceImpl implements PostService {
         response.setId(image.getId());
         response.setImageUrl(image.getImageUrl());
         response.setImageKey(image.getImageKey());
-        response.setThumbnailUrl(image.getThumbnailUrl());
+        response.setThumbnailUrl(defaultIfBlank(image.getThumbnailUrl(), image.getImageUrl()));
         response.setWidth(image.getWidth());
         response.setHeight(image.getHeight());
         response.setFileSize(image.getFileSize());
@@ -591,6 +654,37 @@ public class PostServiceImpl implements PostService {
         response.setHeatScore(tag.getHeatScore());
         response.setCreatedAt(tag.getCreatedAt());
         return response;
+    }
+
+    private String buildTagSuggestionContext(String title, String description, Long categoryId) {
+        StringBuilder context = new StringBuilder();
+        if (title != null) {
+            context.append(title).append(' ');
+        }
+        if (description != null) {
+            context.append(description).append(' ');
+        }
+        if (categoryId != null) {
+            CategorySummaryResponse category = categoryService.getCategorySummaryMap(List.of(categoryId)).get(categoryId);
+            if (category != null && category.getName() != null) {
+                context.append(category.getName());
+            }
+        }
+        return context.toString().toLowerCase(Locale.ROOT);
+    }
+
+    private int scoreTagSuggestion(Tag tag, String context) {
+        String name = tag.getName().toLowerCase(Locale.ROOT);
+        if (context.contains(name)) {
+            return 100;
+        }
+        int score = 0;
+        for (String token : name.split("[^a-z0-9]+")) {
+            if (!token.isBlank() && context.contains(token)) {
+                score += 20;
+            }
+        }
+        return score;
     }
 
     @Override

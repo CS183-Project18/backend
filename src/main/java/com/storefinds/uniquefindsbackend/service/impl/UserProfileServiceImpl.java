@@ -1,5 +1,6 @@
 package com.storefinds.uniquefindsbackend.service.impl;
 
+import com.storefinds.uniquefindsbackend.common.ErrorCode;
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.PostResponse;
@@ -46,7 +47,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public Result<UserProfileResponse> getPublicProfile(String username) {
         User user = userMapper.selectPublicByUsername(normalizeRequiredText(username, "username is required"));
         if (user == null) {
-            throw new BusinessException("user not found");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "user not found");
         }
         return Result.success(toUserProfileResponse(user));
     }
@@ -55,7 +56,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public Result<PageResponse<PostResponse>> getPublicPosts(String username, int page, int pageSize) {
         User user = userMapper.selectPublicByUsername(normalizeRequiredText(username, "username is required"));
         if (user == null) {
-            throw new BusinessException("user not found");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "user not found");
         }
         PageResponse<PostResponse> response = new PageResponse<>();
         response.setTotal(postMapper.countPublishedByUserId(user.getId()));
@@ -82,7 +83,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private User requireUser(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            throw new BusinessException("user not found");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "user not found");
         }
         return user;
     }
@@ -98,7 +99,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private String normalizeRequiredText(String value, String errorMessage) {
         String normalized = normalizeOptionalText(value);
         if (normalized == null) {
-            throw new BusinessException(errorMessage);
+            throw new BusinessException(ErrorCode.INVALID_ARGUMENT, errorMessage);
         }
         return normalized;
     }

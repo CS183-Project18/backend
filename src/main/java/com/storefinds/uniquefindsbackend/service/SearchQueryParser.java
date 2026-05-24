@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-14
  * Purpose: Normalize and validate discovery query inputs before SQL execution.
  * Params: None
@@ -24,7 +24,7 @@ import java.util.List;
 public class SearchQueryParser {
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Normalize published-post search inputs including structured filters and price range constraints.
      * Params:
@@ -70,7 +70,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-14
      * Purpose: Normalize trending-post query inputs and resolve the corresponding time window start.
      * Params:
@@ -97,7 +97,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Normalize one optional text value by trimming whitespace and collapsing blank to null.
      * Params:
@@ -115,7 +115,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Normalize and validate supported search sort options for discovery queries.
      * Params:
@@ -146,7 +146,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Determine whether the caller explicitly supplied one supported sort option.
      * Params:
@@ -160,7 +160,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Normalize tag filter ids by removing nulls, invalid values, and duplicates.
      * Params:
@@ -184,7 +184,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-18
      * Purpose: Validate that the optional price range is logically ordered.
      * Params:
@@ -201,7 +201,7 @@ public class SearchQueryParser {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-14
      * Purpose: Convert one page request to SQL offset form.
      * Params:

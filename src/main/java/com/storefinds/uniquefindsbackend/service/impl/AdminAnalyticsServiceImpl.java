@@ -1,12 +1,15 @@
 package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.common.ErrorCode;
+import com.storefinds.uniquefindsbackend.common.InteractionEventType;
+import com.storefinds.uniquefindsbackend.common.ModerationActionType;
 import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsDistributionItemResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsDistributionResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsOverviewResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsTrendPointResponse;
 import com.storefinds.uniquefindsbackend.dto.AnalyticsTrendsResponse;
+import com.storefinds.uniquefindsbackend.dto.DataConsistencyResponse;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.mapper.AnalyticsMapper;
 import com.storefinds.uniquefindsbackend.service.AdminAnalyticsService;
@@ -18,7 +21,7 @@ import java.util.Map;
 
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-18
  * Purpose: Implement read-only analytics aggregation for admin overview, trends, and rankings.
  * Params: None
@@ -35,7 +38,7 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Aggregate top-level overview counters for admin analytics dashboards.
      * Params: None
@@ -46,17 +49,25 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
     public Result<AnalyticsOverviewResponse> getOverview() {
         AnalyticsOverviewResponse response = new AnalyticsOverviewResponse();
         response.setActiveUserCount(analyticsMapper.countActiveUsers());
+        response.setPostCreateCount(analyticsMapper.countCreatedPosts());
         response.setPublishedPostCount(analyticsMapper.countPublishedPosts());
         response.setVisibleCommentCount(analyticsMapper.countVisibleComments());
         response.setFavoriteCount(analyticsMapper.countFavorites());
         response.setTotalReportCount(analyticsMapper.countReports());
         response.setPendingReportCount(analyticsMapper.countPendingReports());
+        response.setSearchRequestCount(analyticsMapper.countInteractionEventsByType(InteractionEventType.SEARCH_REQUEST));
+        response.setShareCount(analyticsMapper.countInteractionEventsByType(InteractionEventType.SHARE_LINK_CREATE));
+        response.setInteractionEventCount(analyticsMapper.countInteractionEvents());
+        response.setAverageReportResolutionHours(analyticsMapper.averageReportResolutionHours());
+        response.setApprovedModerationCount(analyticsMapper.countModerationLogsByAction(ModerationActionType.APPROVE));
+        response.setRejectedModerationCount(analyticsMapper.countModerationLogsByAction(ModerationActionType.REJECT));
+        response.setHiddenModerationCount(analyticsMapper.countModerationLogsByAction(ModerationActionType.HIDE));
         return Result.success(response);
     }
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Aggregate dated activity trends for posts, comments, favorites, and reports.
      * Params:
@@ -79,7 +90,7 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Aggregate distribution-style analytics for report reasons and top structured content dimensions.
      * Params: None
@@ -94,6 +105,26 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
         response.setTopTags(toDistributionItems(analyticsMapper.topTags(10)));
         response.setTopStores(toDistributionItems(analyticsMapper.topStores(10)));
         response.setAvgReportResolutionHours(analyticsMapper.averageReportResolutionHours());
+        return Result.success(response);
+    }
+
+    @Override
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Aggregate lightweight consistency counters for admin maintenance checks.
+     * Params: None
+     * Returns:
+     * - Result<DataConsistencyResponse>: consistency counters
+     * Throws: None
+     */
+    public Result<DataConsistencyResponse> getDataConsistency() {
+        DataConsistencyResponse response = new DataConsistencyResponse();
+        response.setOrphanPostImageCount(analyticsMapper.countOrphanPostImages());
+        response.setOrphanPostTagCount(analyticsMapper.countOrphanPostTags());
+        response.setMissingActiveCategoryPostCount(analyticsMapper.countPublishedPostsMissingActiveCategory());
+        response.setMissingActiveStorePostCount(analyticsMapper.countPublishedPostsMissingActiveStore());
+        response.setPublishedPostWithoutImageCount(analyticsMapper.countPublishedPostsWithoutImages());
         return Result.success(response);
     }
 

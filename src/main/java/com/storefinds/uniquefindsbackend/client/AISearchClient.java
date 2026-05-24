@@ -45,7 +45,7 @@ import java.util.List;
  * Implementations must be thread-safe as they will be used as Spring singleton beans.
  * </p>
  *
- * @author Kaijie Zhu
+ * @author Shuying Liang
  * @version 1.0
  * @since 2026-05-15
  */

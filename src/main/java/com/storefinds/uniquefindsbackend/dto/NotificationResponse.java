@@ -3,10 +3,11 @@ package com.storefinds.uniquefindsbackend.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-10
  * Purpose: Transfer notification data required by the notification list API.
  * Params: None
@@ -21,6 +22,9 @@ public class NotificationResponse {
     private String targetType;
     private Long targetId;
     private Long postId;
+    private String message;
+    private String targetSummary;
+    private Map<String, Object> metadata;
     private Boolean read;
     private LocalDateTime createdAt;
 }

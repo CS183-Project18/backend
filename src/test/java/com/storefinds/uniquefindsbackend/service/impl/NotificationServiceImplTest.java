@@ -1,8 +1,11 @@
 package com.storefinds.uniquefindsbackend.service.impl;
 
 import com.storefinds.uniquefindsbackend.entity.Notification;
+import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
+import com.storefinds.uniquefindsbackend.mapper.CommentMapper;
 import com.storefinds.uniquefindsbackend.mapper.NotificationMapper;
+import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.service.NotificationEventFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,12 @@ class NotificationServiceImplTest {
 
     @Mock
     private NotificationEventFactory notificationEventFactory;
+
+    @Mock
+    private PostMapper postMapper;
+
+    @Mock
+    private CommentMapper commentMapper;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
@@ -70,5 +79,32 @@ class NotificationServiceImplTest {
         when(notificationMapper.countUnreadByRecipientUserId(5L)).thenReturn(4L);
 
         assertEquals(4L, notificationService.getUnreadCount(5L).data().getUnreadCount());
+    }
+
+    @Test
+    void notificationListIncludesDisplayMessageSummaryAndMetadata() {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setRecipientUserId(5L);
+        notification.setActorUserId(8L);
+        notification.setActorUsername("alice");
+        notification.setEventType("POST_LIKED");
+        notification.setTargetType("POST");
+        notification.setTargetId(9L);
+        notification.setPostId(9L);
+        notification.setMetadata("{\"source\":\"feed\"}");
+        notification.setIsRead(0);
+        Post post = new Post();
+        post.setId(9L);
+        post.setTitle("Vintage Lamp");
+        when(notificationMapper.countByRecipientUserId(5L)).thenReturn(1L);
+        when(notificationMapper.selectByRecipientUserId(5L, 0, 20)).thenReturn(java.util.List.of(notification));
+        when(postMapper.selectById(9L)).thenReturn(post);
+
+        var item = notificationService.getMyNotifications(5L, null, 1, 20).data().getItems().get(0);
+
+        assertEquals("alice liked your post.", item.getMessage());
+        assertEquals("Vintage Lamp", item.getTargetSummary());
+        assertEquals("feed", item.getMetadata().get("source"));
     }
 }

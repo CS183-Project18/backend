@@ -6,30 +6,24 @@
     <title>The Curator | Social Discovery Platform</title>
     <meta
       name="description"
-      content="A social discovery platform prototype for posting, searching, saving, commenting on, and reposting unique store finds."
+      content="The Curator is a social discovery platform with a Xiaohongshu-style masonry feed, threaded comments, notifications, and real media uploads."
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <!-- Ambient background effects -->
     <div class="ambient ambient-a"></div>
     <div class="ambient ambient-b"></div>
 
-   
-    <!-- ================= Chenqian Fu' s part ================== -->
-    <!-- ========== Authentication & Main App ==========-->
-
-    <!-- Authentication Screen (Login / Register) -->
-    <section class="screen auth-screen" id="auth-screen">
+    <section class="screen auth-screen is-active" id="auth-screen">
       <div class="auth-visual">
-        <div class="auth-visual-overlay"></div>
+        <div class="auth-overlay"></div>
         <div class="auth-copy">
           <span class="capsule">✦ The Curator</span>
-          <h1>Design your digital legacy.</h1>
+          <h1>Turn offline finds into shared discovery.</h1>
           <p>
-            Join an elite circle of visionaries. The Curator is where aesthetic
-            discovery meets sophisticated networking. Experience a platform that
-            values depth over noise.
+            Capture memorable products from stores, markets, and local boutiques.
+            The Curator helps people post, search, save, and revisit useful
+            real-world discoveries together.
           </p>
 
           <div class="author-card">
@@ -42,52 +36,55 @@
         </div>
       </div>
 
-      <!-- Sign-up form -->
       <div class="auth-panel">
         <div class="auth-panel-inner">
-          <h2>Create your account</h2>
-          <p>Enter your details to start your journey.</p>
+          <div class="auth-mode-toggle">
+            <button class="mode-chip is-active" data-auth-mode="register" type="button">
+              Create account
+            </button>
+            <button class="mode-chip" data-auth-mode="login" type="button">
+              Log in
+            </button>
+          </div>
+
+          <h2 id="auth-title">Create your account</h2>
+          <p id="auth-subtitle">Enter your details to start your journey.</p>
 
           <form id="auth-form" class="auth-form">
-            <label>
+            <label class="auth-register-only">
               <span>Full name</span>
-              <input id="signup-name" type="text" placeholder="Julian Vane" required />
-            </label>
-            <label>
-              <span>Email address</span>
-              <input
-                id="signup-email"
-                type="email"
-                placeholder="curator@agency.com"
-                required
-              />
+              <input id="auth-name" type="text" placeholder="Julian Vane" />
             </label>
             <label>
               <span>Username</span>
-              <input id="signup-username" type="text" placeholder="the_architect" required />
+              <input id="auth-username" type="text" placeholder="the_architect" required />
+            </label>
+            <label class="auth-register-only">
+              <span>Email address</span>
+              <input id="auth-email" type="email" placeholder="hello@storefinds.com" />
             </label>
             <label>
               <span>Password</span>
               <div class="password-row">
                 <input
-                  id="signup-password"
+                  id="auth-password"
                   type="password"
                   placeholder="••••••••"
                   minlength="6"
                   required
                 />
-                <button id="toggle-password" type="button" class="ghost-icon">
+                <button class="ghost-button" id="toggle-password" type="button">
                   Show
                 </button>
               </div>
             </label>
 
-            <label class="checkbox-row">
-              <input id="signup-agree" type="checkbox" required />
+            <label class="checkbox-row auth-register-only">
+              <input id="auth-agree" type="checkbox" />
               <span>I agree to the Terms of Service and Privacy Policy.</span>
             </label>
 
-            <button class="primary-button auth-submit" type="submit">
+            <button class="primary-button wide" id="auth-submit" type="submit">
               Create Account
             </button>
           </form>
@@ -95,26 +92,27 @@
           <div class="divider"><span>Or continue with</span></div>
 
           <div class="oauth-row">
-            <button class="oauth-button" type="button">Google</button>
-            <button class="oauth-button" type="button">Apple</button>
+            <button class="secondary-button wide oauth-button" data-oauth="Google" type="button">Google</button>
+            <button class="secondary-button wide oauth-button" data-oauth="Apple" type="button">Apple</button>
           </div>
 
-          <div class="auth-footer">
-            Already a curator?
-            <button id="demo-login" type="button" class="text-button">Log In</button>
+          <div class="auth-helper">
+            Need a fast preview?
+            <button class="text-button" id="demo-login" type="button">
+              Use the seeded demo account
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Main Application Layout -->
-    <section class="screen app-screen hidden" id="app-screen">
-      <!-- Left Sidebar Navigation -->
+    <section class="screen dashboard-screen hidden" id="dashboard-screen">
+      <!-- Developer A: Sidebar navigation -->
       <aside class="sidebar">
         <div class="brand">The Curator</div>
+        <div class="demo-mode-badge" id="demo-mode-badge">Offline demo mode</div>
 
-        <!-- User profile preview -->
-        <div class="profile-mini">
+        <div class="profile-card">
           <div class="avatar" id="sidebar-avatar">AR</div>
           <div>
             <strong id="sidebar-name">Alex Rivera</strong>
@@ -122,313 +120,341 @@
           </div>
         </div>
 
-        <!-- Main navigation menu -->
-        <nav class="main-nav">
-          <button class="nav-link is-active" data-view="feed" type="button">Feed</button>
-          <button class="nav-link" data-view="explore" type="button">Explore</button>
-          <button class="nav-link" data-view="bookmarks" type="button">Bookmarks</button>
-          <button class="nav-link" data-view="analytics" type="button">Analytics</button>
-          <button class="nav-link" data-view="settings" type="button">Settings</button>
+        <!-- Developer A: Navigation buttons -->
+        <nav class="sidebar-nav">
+          <button class="nav-item is-active" data-route="feed" type="button">Feed</button>
+          <button class="nav-item" data-route="explore" type="button">Explore</button>
+          <button class="nav-item" data-route="profile" type="button">Profile</button>
+          <button class="nav-item" data-route="bookmarks" type="button">Bookmarks</button>
+          <button class="nav-item" data-route="shared" type="button">Shared</button>
+          <button class="nav-item" data-route="analytics" type="button">Analytics</button>
+          <button class="nav-item" data-route="settings" type="button">Settings</button>
         </nav>
 
-        <!-- Create new post button -->
-        <button class="primary-button create-button" id="open-create-post" type="button">
-          Create Post
-        </button>
+        <!-- Developer B: Create Post button (opens modal) -->
+        <button class="primary-button wide" id="open-create-post" type="button">Create Post</button>
       </aside>
 
-      <!-- Main Dashboard Content -->
-      <main class="dashboard">
-        <!-- Top header with greeting and search -->
+      <!-- Developer A: Main content area -->
+      <main class="dashboard-main">
+        <div class="loading-overlay hidden" id="loading-overlay">
+          <div class="loading-content">
+            <div class="loading-spinner large"></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+
+        <!-- Developer A: Dashboard header with title and search -->
         <header class="dashboard-topbar">
           <div>
-            <h1 id="greeting-title">Good morning, Alex.</h1>
-            <p id="greeting-subtitle">
-              Discover what’s trending in your curation circles.
-            </p>
+            <h1 id="dashboard-title">Good morning, Alex.</h1>
+            <p id="dashboard-subtitle">Discover what people are finding in stores around you.</p>
           </div>
 
-          <!-- Global search bar -->
-          <div class="search-cluster">
+          <div class="topbar-actions">
             <label class="search-shell">
               <span>✦</span>
-              <input
-                id="global-search"
-                type="search"
-                placeholder="semantic & multi-modal search..."
-              />
+              <input id="global-search" type="search" placeholder="semantic & multi-modal search..." />
+              <button class="ghost-button search-camera" id="open-image-search" type="button">📷</button>
               <small>AI powered</small>
             </label>
-            <button id="image-search-trigger" class="secondary-button" type="button">
-              Image Search
+            <button class="icon-pill" id="open-notifications" type="button">
+              Notifications
+              <strong id="notification-badge">0</strong>
             </button>
-            <input id="image-search-input" type="file" accept="image/png,image/jpeg,image/webp" hidden />
           </div>
         </header>
 
-        <!-- Feed View -->
-        <section class="view is-visible" id="view-feed">
-          <div class="cards-grid" id="feed-grid"></div>
-          <section class="community-section panel">
-            <div class="panel-title-row">
-              <div>
-                <span class="micro-label">Curated stream</span>
-                <h2>Latest community finds</h2>
-              </div>
-              <div class="filter-row">
-                <button class="filter-chip is-active" data-feed="all" type="button">All</button>
-                <button class="filter-chip" data-feed="uploaded" type="button">Uploaded</button>
-                <button class="filter-chip" data-feed="reposted" type="button">Reposted</button>
-              </div>
-            </div>
-            <div class="community-list" id="community-list"></div>
-          </section>
-        </section>
+        <!-- Developer A: Filter bar with consistent width buttons -->
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-chip is-active" data-filter="all" type="button">All</button>
+          <button class="filter-chip" data-filter="uploaded" type="button">Uploaded</button>
+          <button class="filter-chip" data-filter="shared" type="button">Shared</button>
+          <button class="filter-chip" data-filter="bookmarked" type="button">Bookmarked</button>
+          <button class="filter-chip" data-filter="following" type="button">Following</button>
+        </div>
 
-        <!-- Explore View -->
-        <section class="view" id="view-explore">
-          <section class="panel">
-            <div class="panel-title-row">
-              <div>
-                <span class="micro-label">Explore</span>
-                <h2>Search and discover more collections</h2>
-              </div>
-            </div>
-            <div class="explore-grid" id="explore-grid"></div>
-          </section>
-        </section>
-
-        <!-- Bookmarks View -->
-        <section class="view" id="view-bookmarks">
-          <section class="panel">
-            <div class="panel-title-row">
-              <div>
-                <span class="micro-label">Bookmarks</span>
-                <h2>Your saved finds</h2>
-              </div>
-            </div>
-            <div class="bookmark-grid" id="bookmark-grid"></div>
-          </section>
-        </section>
-
-        <!-- Analytics View -->
-        <section class="view" id="view-analytics">
-          <section class="panel analytics-panel">
-            <div class="panel-title-row">
-              <div>
-                <span class="micro-label">Analytics</span>
-                <h2>Audience and content performance</h2>
-              </div>
-            </div>
-            <div class="analytics-grid" id="analytics-grid"></div>
-          </section>
-        </section>
-
-        <!-- Settings View -->
-        <section class="view" id="view-settings">
-          <section class="panel settings-panel">
-            <div class="panel-title-row">
-              <div>
-                <span class="micro-label">Settings</span>
-                <h2>Profile and account preferences</h2>
-              </div>
-            </div>
-            <form class="settings-form" id="settings-form">
-              <label>
-                <span>Display name</span>
-                <input id="settings-name" type="text" />
-              </label>
-              <label>
-                <span>Username</span>
-                <input id="settings-username" type="text" />
-              </label>
-              <label>
-                <span>Email</span>
-                <input id="settings-email" type="email" />
-              </label>
-              <label>
-                <span>Bio</span>
-                <textarea id="settings-bio" rows="4"></textarea>
-              </label>
-              <div class="settings-actions">
-                <button class="primary-button" type="submit">Save Changes</button>
-                <button class="secondary-button" id="logout-button" type="button">
-                  Log Out
-                </button>
-              </div>
-            </form>
-          </section>
-        </section>
+        <!-- Developer A: Content display area -->
+        <section id="dashboard-content"></section>
       </main>
 
-      <!-- Right sidebar: Trending & Upgrade -->
+      <!-- Developer B: Right rail with trending, notifications, and upgrade card -->
       <aside class="right-rail">
-        <section class="trending-card panel">
-          <div class="panel-title-row compact">
-            <h3>Trending</h3>
+        <section class="panel trending-panel">
+          <div class="panel-header">
+            <h2>Trending</h2>
             <span>✦</span>
           </div>
-          <div class="trend-tabs">
-            <button class="trend-tab is-active" data-trend="daily" type="button">Daily</button>
-            <button class="trend-tab" data-trend="weekly" type="button">Weekly</button>
-            <button class="trend-tab" data-trend="monthly" type="button">Monthly</button>
-          </div>
           <div id="trending-list" class="trending-list"></div>
-          <button class="outline-button" id="open-analytics" type="button">
-            View All Analytics
-          </button>
         </section>
 
-        <!-- Pro upgrade card -->
+        <section class="panel notification-summary">
+          <div class="panel-header">
+            <h2>Notification Center</h2>
+            <button class="text-button" id="open-notifications-alt" type="button">Open</button>
+          </div>
+          <div id="notification-preview" class="notification-preview"></div>
+        </section>
+
         <section class="upgrade-card">
           <span class="micro-label light">Curator Pro</span>
           <h3>Unlock advanced audience insights.</h3>
-          <p>
-            Get detailed breakdowns of who is interacting with your curated
-            collections.
-          </p>
-          <button class="upgrade-button" type="button">Upgrade Now</button>
+          <p>Get detailed breakdowns of who is interacting with your shared local finds.</p>
+          <button class="secondary-inverse" type="button">Upgrade Now</button>
         </section>
       </aside>
     </section>
-    
-    <!-- ================== Xuehan Wang' s part =================-->
-    <!--======= Detail Page + Modal + Comments =======-->
 
-    <!-- Post Detail Screen -->
-    <section class="screen detail-screen hidden" id="detail-screen">
-      <!-- Top navigation bar -->
-      <header class="detail-topbar">
-        <div class="detail-brand-row">
-          <div class="brand small">The Curator</div>
-          <label class="detail-search">
-            <span>⌕</span>
-            <input id="detail-search-input" type="search" placeholder="Search inspiration..." />
-          </label>
-        </div>
-        <div class="detail-actions">
-          <button class="icon-button" type="button">•</button>
-          <button class="icon-button" type="button">+</button>
-          <div class="avatar small" id="detail-user-avatar">AR</div>
-        </div>
-      </header>
+    <!-- Developer B: Detail overlay for post detail view -->
+    <section class="detail-overlay hidden" id="detail-overlay">
+      <div class="detail-shell">
+        <header class="detail-topbar">
+          <button class="back-button" id="close-detail" type="button">← Back to Feed</button>
+          <div class="detail-topbar-actions">
+            <button class="ghost-button" id="detail-open-notifications" type="button">Notifications</button>
+            <div class="avatar small" id="detail-avatar">AR</div>
+          </div>
+        </header>
 
-      <div class="detail-body">
-        <!-- Back button -->
-        <div class="back-row">
-          <button id="back-to-feed" class="back-button" type="button">← Back to Feed</button>
-        </div>
-
-        <!-- Detail layout: image gallery + info card -->
         <div class="detail-layout">
-          <!-- Image gallery -->
-          <section class="gallery-panel">
+          <section class="detail-visual-panel">
             <div class="detail-hero" id="detail-hero"></div>
             <div class="thumbnail-row" id="thumbnail-row"></div>
           </section>
-
-          <!-- Post information card -->
-          <aside class="detail-info-card" id="detail-info-card"></aside>
+          <aside class="detail-info-panel" id="detail-info-panel"></aside>
         </div>
 
-        <!-- Comment section -->
+        <!-- Developer B: Comments panel -->
         <section class="comments-panel">
-          <div class="comments-title">
+          <div class="comments-header">
             <h2>Thoughts & Feedback</h2>
             <span id="comment-count">0</span>
           </div>
 
-          <!-- Comment input form -->
-          <form id="comment-form" class="comment-input-row">
+          <div class="reply-banner hidden" id="reply-banner">
+            Replying to <strong id="reply-target">comment</strong>
+            <button class="text-button" id="cancel-reply" type="button">Cancel</button>
+          </div>
+
+          <form id="comment-form" class="comment-form">
             <div class="avatar small" id="comment-user-avatar">AR</div>
-            <input
-              id="comment-input"
-              type="text"
-              placeholder="Add to the conversation..."
-            />
+            <input id="comment-input" type="text" placeholder="Add to the conversation..." />
             <button class="send-button" type="submit">➜</button>
           </form>
 
-          <!-- Comment list -->
-          <div id="comment-list" class="comment-list"></div>
-
-          <!-- Load more comments button -->
-          <button class="outline-button wide" id="load-more-comments" type="button">
-            Load more comments
-          </button>
+          <div id="comment-thread" class="comment-thread"></div>
         </section>
       </div>
     </section>
 
-    <!-- Create Post Modal -->
-    <div class="modal hidden" id="create-modal">
-      <div class="modal-backdrop" id="close-modal-backdrop"></div>
+    <aside class="notification-drawer hidden" id="notification-drawer">
+      <div class="drawer-mask" id="close-notification-drawer"></div>
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <div>
+            <span class="micro-label">Inbox</span>
+            <h2>Notification Center</h2>
+          </div>
+          <div class="drawer-header-actions">
+            <button class="ghost-button" id="toggle-notification-filter" type="button">Unread only</button>
+            <button class="ghost-button" id="mark-all-read" type="button">Mark all read</button>
+            <button class="ghost-button" id="close-notification-button" type="button">Close</button>
+          </div>
+        </div>
+        <div id="notification-list" class="notification-list"></div>
+      </div>
+    </aside>
+
+    <!-- Developer B: Create post modal -->
+    <section class="modal hidden" id="create-modal">
+      <div class="modal-mask" id="close-create-mask"></div>
       <div class="modal-panel">
         <div class="modal-header">
           <div>
-            <span class="micro-label">Create post</span>
-            <h2>Upload a new curated find</h2>
+            <span class="micro-label" id="create-modal-label">Create Post</span>
+            <h2 id="create-modal-title">Upload a new local find</h2>
           </div>
-          <button class="ghost-icon" id="close-create-modal" type="button">Close</button>
+          <button class="ghost-button" id="close-create-button" type="button">Close</button>
         </div>
 
-        <!-- Create post form -->
         <form id="create-post-form" class="create-form">
+          <input id="editing-post-id" type="hidden" />
           <div class="form-grid">
             <label>
               <span>Title</span>
-              <input id="post-title" type="text" placeholder="The Ethereal Pavilion: A Study in Light & Glass" required />
+              <input id="post-title" type="text" placeholder="A luminous forest-facing living room" required />
             </label>
             <label>
               <span>Category</span>
               <input id="post-category" type="text" placeholder="Interior Design" required />
             </label>
             <label>
-              <span>Price</span>
+              <span>Price Range</span>
               <input id="post-price" type="text" placeholder="$1,450 / hr" />
             </label>
             <label>
               <span>Location</span>
               <input id="post-location" type="text" placeholder="Zurich, CH" required />
             </label>
+            <label>
+              <span>Store Name</span>
+              <input id="post-store-name" type="text" placeholder="Quiet Clay Corner" />
+            </label>
+            <label>
+              <span>Store Address</span>
+              <input id="post-store-address" type="text" placeholder="17 Via Foscolo, Milan, IT" />
+            </label>
           </div>
 
           <label>
             <span>Description</span>
-            <textarea
-              id="post-description"
-              rows="4"
-              placeholder="Describe why this find is special, how it feels, and why other users should discover it."
-              required
-            ></textarea>
+            <textarea id="post-description" rows="5" placeholder="Describe why this find matters and what makes it worth sharing." required></textarea>
           </label>
 
           <label>
-            <span>Associated tags</span>
+            <span>Tags</span>
             <input id="post-tags" type="text" placeholder="#minimalism, #glasshouse, #nature" />
           </label>
 
-          <!-- Image upload area -->
-          <label class="upload-zone">
-            <span>Upload images</span>
+          <div class="ai-tag-row">
+            <button class="secondary-button" id="suggest-tags-button" type="button">AI tag suggestions</button>
+            <div id="suggested-tags" class="suggested-tags"></div>
+          </div>
+
+          <label class="upload-field">
+            <span>Upload Images</span>
             <input id="post-images" type="file" accept="image/*" multiple />
-            <small>Choose up to 4 images. Uploaded images will appear in feed and detail view.</small>
+            <small>最多 4 张，单张 16MB。图片会上传到 Flask 媒体服务并真实存储在磁盘。</small>
           </label>
 
-          <!-- Upload preview area -->
-          <div class="upload-preview" id="upload-preview"></div>
+          <div class="preview-grid" id="preview-grid"></div>
+          <div class="upload-progress hidden" id="upload-progress">
+            <div class="upload-progress-bar" id="upload-progress-bar"></div>
+          </div>
+          <div class="form-error hidden" id="create-form-error"></div>
 
           <div class="form-actions">
-            <button class="secondary-button" id="cancel-create-post" type="button">
-              Cancel
-            </button>
-            <button class="primary-button" type="submit">Publish Post</button>
+            <button class="secondary-button" id="cancel-create-button" type="button">Cancel</button>
+            <button class="primary-button" id="submit-create-button" type="submit">Publish Post</button>
           </div>
         </form>
       </div>
-    </div>
+    </section>
 
-    <!-- Toast notification -->
+    <!-- Developer B: Image search modal -->
+    <section class="modal hidden" id="image-search-modal">
+      <div class="modal-mask" id="close-image-search-mask"></div>
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <span class="micro-label">Visual Search</span>
+            <h2>Find similar posts by image</h2>
+          </div>
+          <button class="ghost-button" id="close-image-search-button" type="button">Close</button>
+        </div>
+
+        <div class="image-search-content">
+          <div class="image-upload-area" id="image-upload-area">
+            <input id="image-search-file" type="file" accept="image/*" />
+            <div class="upload-hint">
+              <span class="upload-icon">📷</span>
+              <p>Upload an image to find visually similar posts</p>
+              <small>AI powered visual search</small>
+            </div>
+          </div>
+
+          <div class="image-preview-container hidden" id="image-preview-container">
+            <div class="preview-image" id="preview-image"></div>
+            <button class="ghost-button" id="remove-preview-image" type="button">Remove image</button>
+          </div>
+
+          <div class="search-status hidden" id="search-status">
+            <div class="loading-spinner"></div>
+            <p>Searching for visually similar posts...</p>
+          </div>
+
+          <div class="search-results hidden" id="search-results">
+            <h3>Similar Posts</h3>
+            <div class="similar-posts-grid" id="similar-posts-grid"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="secondary-button" id="cancel-image-search-button" type="button">Cancel</button>
+            <button class="primary-button" id="submit-image-search" type="button" disabled>Search</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Developer B: Report modal -->
+    <section class="modal hidden" id="report-modal">
+      <div class="modal-mask" id="close-report-mask"></div>
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <span class="micro-label">Report Content</span>
+            <h2>Why are you reporting this?</h2>
+          </div>
+          <button class="ghost-button" id="close-report-button" type="button">Close</button>
+        </div>
+
+        <div class="report-content">
+          <input id="report-target-id" type="hidden" />
+          <input id="report-target-type" type="hidden" />
+
+          <div class="report-reasons">
+            <button class="report-reason" data-reason="spam" type="button">
+              <span class="reason-icon">🚫</span>
+              <div>
+                <strong>Spam or misleading</strong>
+                <small>This looks like spam, phishing, or misleading content.</small>
+              </div>
+            </button>
+            <button class="report-reason" data-reason="inappropriate" type="button">
+              <span class="reason-icon">🔞</span>
+              <div>
+                <strong>Inappropriate content</strong>
+                <small>This contains nudity, violence, or other inappropriate material.</small>
+              </div>
+            </button>
+            <button class="report-reason" data-reason="harmful" type="button">
+              <span class="reason-icon">⚠️</span>
+              <div>
+                <strong>Harmful or dangerous</strong>
+                <small>This promotes harm, self-harm, or dangerous activities.</small>
+              </div>
+            </button>
+            <button class="report-reason" data-reason="copyright" type="button">
+              <span class="reason-icon">©️</span>
+              <div>
+                <strong>Copyright infringement</strong>
+                <small>This violates copyright or intellectual property laws.</small>
+              </div>
+            </button>
+            <button class="report-reason" data-reason="other" type="button">
+              <span class="reason-icon">📝</span>
+              <div>
+                <strong>Other</strong>
+                <small>Something else is wrong with this content.</small>
+              </div>
+            </button>
+          </div>
+
+          <div class="report-custom-reason hidden" id="report-custom-reason">
+            <label>
+              <span>Additional details</span>
+              <textarea id="report-message" rows="3" placeholder="Please provide more details about why you're reporting this."></textarea>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="secondary-button" id="cancel-report-button" type="button">Cancel</button>
+            <button class="primary-button" id="submit-report-button" type="button" disabled>Submit Report</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="toast hidden" id="toast"></div>
 
     <script src="./script.js"></script>

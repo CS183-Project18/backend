@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-14
  * Purpose: Verify moderation flows emit the expected structured notification events.
  * Params: None
@@ -60,7 +60,7 @@ class AdminModerationServiceImplTest {
 
     @Test
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Verify rejecting a post produces one post moderation notification for the author.
      * Params: None
@@ -85,7 +85,7 @@ class AdminModerationServiceImplTest {
 
     @Test
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Verify hiding a comment produces one comment moderation notification for the author.
      * Params: None
@@ -111,7 +111,7 @@ class AdminModerationServiceImplTest {
 
     @Test
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Verify report listing responses expose target summary text for post and comment targets.
      * Params: None
@@ -166,5 +166,47 @@ class AdminModerationServiceImplTest {
                 () -> adminModerationService.resolveReport(1L, 6L, null));
 
         assertEquals("report status does not allow resolve", ex.getMessage());
+    }
+
+    @Test
+    void resolveReportCreatesReporterNotification() {
+        Report report = new Report();
+        report.setId(6L);
+        report.setReporterId(2L);
+        report.setTargetType("POST");
+        report.setTargetId(5L);
+        report.setStatus("PENDING");
+        when(reportMapper.selectById(6L)).thenReturn(report);
+        when(reportMapper.updateStatus(6L, "RESOLVED", 1L, "APPROVE", null)).thenReturn(1);
+
+        adminModerationService.resolveReport(1L, 6L, null);
+
+        verify(notificationService).createNotification(2L, 1L, "REPORT_RESOLVED", "POST", 5L, 5L);
+    }
+
+    @Test
+    void getModerationLogsIncludesModeratorAndTargetSummary() {
+        com.storefinds.uniquefindsbackend.entity.ModerationLog log = new com.storefinds.uniquefindsbackend.entity.ModerationLog();
+        log.setId(11L);
+        log.setTargetType("POST");
+        log.setTargetId(5L);
+        log.setModeratorId(1L);
+        log.setModeratorUsername("admin");
+        log.setAction("APPROVE");
+        Post post = new Post();
+        post.setId(5L);
+        post.setTitle("Vintage Lamp");
+        when(moderationLogMapper.selectByFilter("POST", 5L, 1L, "APPROVE", null, null, 0, 20))
+                .thenReturn(java.util.List.of(log));
+        when(moderationLogMapper.countByFilter("POST", 5L, 1L, "APPROVE", null, null)).thenReturn(1L);
+        when(postMapper.selectById(5L)).thenReturn(post);
+
+        var item = adminModerationService.getModerationLogs("post", 5L, 1L, "approve", null, null, 1, 20)
+                .data()
+                .getItems()
+                .get(0);
+
+        assertEquals("admin", item.getModeratorUsername());
+        assertEquals("Vintage Lamp", item.getTargetSummary());
     }
 }

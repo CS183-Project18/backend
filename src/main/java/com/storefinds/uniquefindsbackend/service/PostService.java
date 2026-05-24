@@ -49,6 +49,11 @@ public interface PostService {
                                                         int page,
                                                         int pageSize);
 
+    Result<List<TagResponse>> suggestTags(String title,
+                                          String description,
+                                          Long categoryId,
+                                          int limit);
+
     Result<PostResponse> updatePost(Long userId, Long postId, UpdatePostRequest request);
 
     Result<Void> deletePost(Long userId, Long postId);

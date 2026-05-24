@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-12
  * Purpose: Provide notification persistence operations for notification query and write flows.
  * Params: None

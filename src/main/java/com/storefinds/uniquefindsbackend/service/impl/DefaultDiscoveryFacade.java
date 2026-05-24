@@ -15,10 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Orchestrate AI-first discovery flows while preserving the existing SQL search fallback behavior.
  * Params: None
@@ -35,7 +36,7 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
     private final PostMapper postMapper;
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Inject the SQL discovery backend, AI search client, and post mapper used by discovery orchestration.
      * Params:
@@ -55,7 +56,7 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Execute one published-post search using AI semantic ranking first and SQL fallback on failures.
      * Params:
@@ -69,20 +70,20 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
             return sqlPostSearchService.searchPublishedPosts(query);
         }
         if (!aiSearchClient.isHealthy()) {
-            return sqlPostSearchService.searchPublishedPosts(query);
+            return withSearchSource(sqlPostSearchService.searchPublishedPosts(query), "SQL_FALLBACK", "ai-health-check-failed");
         }
         try {
             List<Long> postIds = aiSearchClient.semanticSearch(query.keyword(), AI_SEARCH_TOP_K);
-            return buildAiOrderedPage(query, postIds);
+            return withSearchSource(buildAiOrderedPage(query, postIds), "AI_SEMANTIC", null);
         } catch (AIServiceException ex) {
             log.warn("ai semantic search failed, falling back to sql search: keyword={}", query.keyword(), ex);
-            return sqlPostSearchService.searchPublishedPosts(query);
+            return withSearchSource(sqlPostSearchService.searchPublishedPosts(query), "SQL_FALLBACK", ex.getClass().getSimpleName());
         }
     }
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Execute one image-based published-post search and propagate AI unavailability so callers can return the agreed degraded response.
      * Params:
@@ -97,12 +98,12 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
             throw new AIServiceUnavailableException(503, "ai-search service is temporarily unavailable");
         }
         List<Long> postIds = aiSearchClient.imageSearch(file, AI_SEARCH_TOP_K);
-        return buildAiOrderedPage(query, postIds);
+        return withSearchSource(buildAiOrderedPage(query, postIds), "IMAGE_SEARCH", null);
     }
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-14
      * Purpose: Delegate one trending-post query to the current SQL discovery backend.
      * Params:
@@ -116,7 +117,7 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Resolve one post page from AI-returned candidate ids while preserving AI order unless explicit SQL sort is requested.
      * Params:
@@ -149,7 +150,7 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Slice one full matched result list into the requested page window after AI ordering and filtering are applied.
      * Params:
@@ -169,7 +170,7 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Build one empty page response for degraded image-search scenarios.
      * Params:
@@ -186,5 +187,14 @@ public class DefaultDiscoveryFacade implements DiscoveryFacade {
         response.setPageSize(pageSize);
         response.setItems(List.of());
         return response;
+    }
+
+    private PageResponse<Post> withSearchSource(PageResponse<Post> page, String source, String fallbackReason) {
+        if (fallbackReason == null) {
+            page.setMetadata(Map.of("searchSource", source));
+        } else {
+            page.setMetadata(Map.of("searchSource", source, "fallbackReason", fallbackReason));
+        }
+        return page;
     }
 }

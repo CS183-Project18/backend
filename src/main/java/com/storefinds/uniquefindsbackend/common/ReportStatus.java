@@ -1,7 +1,7 @@
 package com.storefinds.uniquefindsbackend.common;
 
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-14
  * Purpose: Define stable report workflow status values for moderation and reporting flows.
  * Params: None

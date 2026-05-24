@@ -6,17 +6,26 @@ import com.storefinds.uniquefindsbackend.common.Result;
 import com.storefinds.uniquefindsbackend.dto.NotificationResponse;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.UnreadNotificationCountResponse;
+import com.storefinds.uniquefindsbackend.entity.Comment;
 import com.storefinds.uniquefindsbackend.entity.Notification;
+import com.storefinds.uniquefindsbackend.entity.Post;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
+import com.storefinds.uniquefindsbackend.mapper.CommentMapper;
 import com.storefinds.uniquefindsbackend.mapper.NotificationMapper;
+import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.service.NotificationEventFactory;
 import com.storefinds.uniquefindsbackend.service.NotificationService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-13
  * Purpose: Implement notification pagination, read-state updates, and structured notification creation.
  * Params: None
@@ -27,9 +36,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final NotificationEventFactory notificationEventFactory;
+    private final PostMapper postMapper;
+    private final CommentMapper commentMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-13
      * Purpose: Inject notification mapper for notification persistence operations.
      * Params:
@@ -38,14 +50,18 @@ public class NotificationServiceImpl implements NotificationService {
      * Throws: None
      */
     public NotificationServiceImpl(NotificationMapper notificationMapper,
-                                   NotificationEventFactory notificationEventFactory) {
+                                   NotificationEventFactory notificationEventFactory,
+                                   PostMapper postMapper,
+                                   CommentMapper commentMapper) {
         this.notificationMapper = notificationMapper;
         this.notificationEventFactory = notificationEventFactory;
+        this.postMapper = postMapper;
+        this.commentMapper = commentMapper;
     }
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-13
      * Purpose: Query one page of notifications owned by a user.
      * Params:
@@ -83,7 +99,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-13
      * Purpose: Mark one notification as read after verifying ownership.
      * Params:
@@ -106,7 +122,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Mark all notifications owned by one user as read.
      * Params:
@@ -123,7 +139,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Persist one notification record while skipping self-triggered events.
      * Params:
@@ -170,9 +186,74 @@ public class NotificationServiceImpl implements NotificationService {
         response.setTargetType(notification.getTargetType());
         response.setTargetId(notification.getTargetId());
         response.setPostId(notification.getPostId());
+        response.setMessage(buildMessage(notification));
+        response.setTargetSummary(resolveTargetSummary(notification));
+        response.setMetadata(parseMetadata(notification.getMetadata()));
         response.setRead(notification.getIsRead() != null && notification.getIsRead() == 1);
         response.setCreatedAt(notification.getCreatedAt());
         return response;
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Build one English notification sentence that the frontend can display directly.
+     * Params:
+     * - notification: source notification entity
+     * Returns:
+     * - String: display-ready notification message
+     * Throws: None
+     */
+    private String buildMessage(Notification notification) {
+        String actor = notification.getActorUsername() == null || notification.getActorUsername().isBlank()
+                ? "Someone"
+                : notification.getActorUsername();
+        return switch (notification.getEventType()) {
+            case NotificationEventType.POST_LIKED -> actor + " liked your post.";
+            case NotificationEventType.POST_FAVORITED -> actor + " saved your post.";
+            case NotificationEventType.COMMENT_REPLIED -> actor + " replied to your comment.";
+            case NotificationEventType.COMMENT_LIKED -> actor + " liked your comment.";
+            case NotificationEventType.COMMENT_PINNED -> actor + " pinned your comment.";
+            case NotificationEventType.POST_MODERATED -> "Your post moderation status was updated.";
+            case NotificationEventType.COMMENT_MODERATED -> "Your comment moderation status was updated.";
+            case NotificationEventType.REPORT_RESOLVED -> "Your report was resolved.";
+            case NotificationEventType.REPORT_REJECTED -> "Your report was rejected.";
+            default -> "You have a new notification.";
+        };
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Resolve a compact target summary for notification cards without extra frontend requests.
+     * Params:
+     * - notification: source notification entity
+     * Returns:
+     * - String: target title or content summary
+     * Throws: None
+     */
+    private String resolveTargetSummary(Notification notification) {
+        if ("POST".equalsIgnoreCase(notification.getTargetType())) {
+            Post post = postMapper.selectById(notification.getTargetId());
+            return post == null ? null : post.getTitle();
+        }
+        if ("COMMENT".equalsIgnoreCase(notification.getTargetType())) {
+            Comment comment = commentMapper.selectById(notification.getTargetId());
+            return comment == null ? null : comment.getContent();
+        }
+        return null;
+    }
+
+    private Map<String, Object> parseMetadata(String metadata) {
+        if (metadata == null || metadata.isBlank()) {
+            return Collections.emptyMap();
+        }
+        try {
+            return objectMapper.readValue(metadata, new TypeReference<>() {
+            });
+        } catch (Exception ex) {
+            return Map.of("raw", metadata);
+        }
     }
 
     private String normalizeEventType(String eventType) {

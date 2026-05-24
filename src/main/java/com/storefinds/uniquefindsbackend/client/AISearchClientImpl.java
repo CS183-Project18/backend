@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Shuying Liang
  * Date: 2026-05-22
  * Purpose: Call the internal ai-search service with timeout handling, response parsing, and lightweight failure backoff.
  * Params: None
@@ -56,7 +56,7 @@ public class AISearchClientImpl implements AISearchClient {
     private final AtomicLong lastKnownHealthValue = new AtomicLong(0L);
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Inject HTTP client builder, JSON mapper, and ai-search configuration.
      * Params:
@@ -76,7 +76,7 @@ public class AISearchClientImpl implements AISearchClient {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Check whether the ai-search service is healthy while caching recent health results and respecting circuit cooldown.
      * Params: None
@@ -122,7 +122,7 @@ public class AISearchClientImpl implements AISearchClient {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Execute one semantic search request against the ai-search service and return ordered post ids.
      * Params:
@@ -161,7 +161,7 @@ public class AISearchClientImpl implements AISearchClient {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Execute one image search request against the ai-search service and return ordered post ids.
      * Params:
@@ -208,7 +208,7 @@ public class AISearchClientImpl implements AISearchClient {
 
     @Override
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Trigger one full ai-search index rebuild with the provided published post payload.
      * Params:
@@ -253,7 +253,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Build one RestClient with the configured base URL and timeout pair for the current AI request type.
      * Params:
@@ -273,7 +273,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Parse one JSON response body into the target DTO type and convert malformed payloads into AI parse exceptions.
      * Params:
@@ -298,7 +298,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Extract post ids from one ai-search response and validate the stable response shape expected by the backend.
      * Params:
@@ -325,7 +325,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Convert one uploaded multipart file into a Spring ByteArrayResource with a stable filename for multipart forwarding.
      * Params:
@@ -345,7 +345,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Map one low-level RestClient exception into the project-level AI exception hierarchy and record failure state.
      * Params:
@@ -373,7 +373,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Validate one semantic query before calling the ai-search service.
      * Params:
@@ -391,7 +391,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Validate one requested AI top-k value before forwarding it to ai-search.
      * Params:
@@ -407,7 +407,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Reset lightweight failure tracking after one successful ai-search interaction.
      * Params: None
@@ -420,7 +420,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Increase lightweight failure tracking and open the temporary circuit when repeated failures reach the configured threshold.
      * Params: None
@@ -435,7 +435,7 @@ public class AISearchClientImpl implements AISearchClient {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Shuying Liang
      * Date: 2026-05-22
      * Purpose: Determine whether repeated recent AI failures should short-circuit new outbound AI calls for a cooldown window.
      * Params: None

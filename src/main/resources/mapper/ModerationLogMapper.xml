@@ -12,4 +12,49 @@
         )
     </insert>
 
+    <sql id="LogFilterWhere">
+        <where>
+            <if test="targetType != null">
+                AND ml.target_type = #{targetType}
+            </if>
+            <if test="targetId != null">
+                AND ml.target_id = #{targetId}
+            </if>
+            <if test="moderatorId != null">
+                AND ml.moderator_id = #{moderatorId}
+            </if>
+            <if test="action != null">
+                AND ml.action = #{action}
+            </if>
+            <if test="startTime != null">
+                AND ml.created_at &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ml.created_at &lt;= #{endTime}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countByFilter" resultType="long">
+        SELECT COUNT(1)
+        FROM moderation_logs ml
+        <include refid="LogFilterWhere"/>
+    </select>
+
+    <select id="selectByFilter" resultType="com.storefinds.uniquefindsbackend.entity.ModerationLog">
+        SELECT ml.id,
+               ml.target_type AS targetType,
+               ml.target_id AS targetId,
+               ml.moderator_id AS moderatorId,
+               u.username AS moderatorUsername,
+               ml.action,
+               ml.reason,
+               ml.created_at AS createdAt
+        FROM moderation_logs ml
+        LEFT JOIN users u ON u.id = ml.moderator_id
+        <include refid="LogFilterWhere"/>
+        ORDER BY ml.created_at DESC, ml.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
 </mapper>

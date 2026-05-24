@@ -30,14 +30,18 @@ Unique Finds is a discovery and sharing platform for interesting products found 
 
 ### 1. Prepare database
 
-For a brand-new database, import the full schema and demo seed data first:
+For a brand-new database, import the full schema first:
 
 ```bash
 mysql -u <username> -p < sql/unique_finds_full_schema.sql
-mysql -u <username> -p < sql/demo_seed_data.sql
 ```
 
 Then start the backend once so Flyway can register and validate incremental migrations from `src/main/resources/db/migration`.
+After Flyway finishes, import the demo seed data:
+
+```bash
+mysql -u <username> -p unique_finds < sql/demo_seed_data.sql
+```
 
 The current backend also expects Flyway to apply the latest governance/event migration so that:
 
@@ -125,6 +129,7 @@ Password123
 - `GET /api/posts/search`
 - `POST /api/posts/search/image`
 - `GET /api/posts/trending`
+- `GET /api/posts/tags/suggest`
 - `GET /api/posts/{postId}/comments`
 - `POST /api/comments/{commentId}/like`
 - `POST /api/comments/{commentId}/pin`
@@ -134,14 +139,25 @@ Password123
 - `GET /api/notifications/unread-count`
 - `POST /api/files/images`
 - `GET /api/admin/moderation/reports`
+- `GET /api/admin/moderation/logs`
 - `GET /api/admin/moderation/posts/pending`
+- `GET /api/admin/analytics/overview`
+- `GET /api/admin/analytics/consistency`
 
 ## Moderation and Audit Notes
 
 - Guest users can read public post detail and public share metadata, but hidden, rejected, or deleted content is still blocked.
-- Report responses now expose `resolutionAction`, `resolutionNote`, and `targetStatus`.
+- Report responses now expose `resolutionAction`, `resolutionNote`, `targetStatus`, and `targetSummary`.
+- `GET /api/admin/moderation/logs` returns audit rows with `moderatorUsername`, `targetSummary`, `reason`, and `createdAt`, and supports `targetType`, `targetId`, `moderatorId`, `action`, `startTime`, and `endTime` filters.
 - User profile responses now expose `postCount`, `publishedPostCount`, `commentCount`, and `favoriteCount`.
 - Uploads require both an allowed image MIME type and a matching filename extension.
+
+## Media and Edit Policy
+
+- Image upload responses include `url`, `thumbnailUrl`, `contentType`, `size`, `width`, and `height` when dimensions can be read by the JDK image readers.
+- The backend keeps `thumbnailUrl` stable. If a real thumbnail is not generated, it falls back to the original image URL.
+- Each post supports up to 9 images. The first image is treated as the cover, and post updates replace the full image list and sort order.
+- Editing a `PUBLISHED` post keeps it published and immediately triggers search index sync. Editing `PENDING_REVIEW`, `REJECTED`, or `HIDDEN` posts keeps their existing moderation state.
 
 ## Interaction API Contract
 
@@ -163,6 +179,7 @@ Password123
 - `POST /api/notifications/read-all`
 
 `GET /api/notifications` also supports the optional query parameter `eventType`.
+Notification items include `message`, `targetSummary`, and `metadata` so the frontend can render cards without extra lookups.
 
 ### Post owner or admin endpoints
 
@@ -174,6 +191,7 @@ Password123
 - Post response: `shareUrl`
 - Comment response: `likeCount`, `likedByCurrentUser`, `pinned`
 - Common result wrapper: `code`
+- Page response: optional `metadata` for search source, trending fallback window, and image-search degradation details
 
 ### Notification event types
 
@@ -184,6 +202,15 @@ Password123
 - `COMMENT_PINNED`
 - `POST_MODERATED`
 - `COMMENT_MODERATED`
+- `REPORT_RESOLVED`
+- `REPORT_REJECTED`
+
+## Analytics Notes
+
+- `GET /api/admin/analytics/overview` returns real database counters for users, created posts, published posts, comments, favorites, reports, pending reports, search requests, share events, interaction events, report resolution hours, and moderation action counts.
+- `GET /api/admin/analytics/trends` and `GET /api/admin/analytics/distribution` keep the existing trend and ranking contract.
+- `GET /api/admin/analytics/consistency` exposes lightweight data-quality counters for orphan images/tags and missing public content references.
+- `GET /api/posts/tags/suggest` is a rule-based backend suggestion endpoint for V2. It is intentionally not presented as AI image/text understanding; a future version can connect it to an AI model.
 
 ## AI Search Notes
 

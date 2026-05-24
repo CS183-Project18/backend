@@ -16,6 +16,12 @@
         WHERE status = 'PUBLISHED'
     </select>
 
+    <select id="countCreatedPosts" resultType="long">
+        SELECT COUNT(1)
+        FROM posts
+        WHERE status != 'DELETED'
+    </select>
+
     <select id="countVisibleComments" resultType="long">
         SELECT COUNT(1)
         FROM comments
@@ -42,6 +48,23 @@
         SELECT CAST(AVG(TIMESTAMPDIFF(HOUR, created_at, handled_at)) AS SIGNED)
         FROM reports
         WHERE handled_at IS NOT NULL
+    </select>
+
+    <select id="countInteractionEvents" resultType="long">
+        SELECT COUNT(1)
+        FROM interaction_events
+    </select>
+
+    <select id="countInteractionEventsByType" resultType="long">
+        SELECT COUNT(1)
+        FROM interaction_events
+        WHERE event_type = #{eventType}
+    </select>
+
+    <select id="countModerationLogsByAction" resultType="long">
+        SELECT COUNT(1)
+        FROM moderation_logs
+        WHERE action = #{action}
     </select>
 
     <select id="countPostCreatesByDay" resultType="map">
@@ -123,6 +146,49 @@
         GROUP BY s.id, s.name, s.branch_name
         ORDER BY count DESC, s.name ASC
         LIMIT #{limit}
+    </select>
+
+    <select id="countOrphanPostImages" resultType="long">
+        SELECT COUNT(1)
+        FROM post_images pi
+        LEFT JOIN posts p ON p.id = pi.post_id
+        WHERE p.id IS NULL
+    </select>
+
+    <select id="countOrphanPostTags" resultType="long">
+        SELECT COUNT(1)
+        FROM post_tags pt
+        LEFT JOIN posts p ON p.id = pt.post_id
+        LEFT JOIN tags t ON t.id = pt.tag_id
+        WHERE p.id IS NULL
+           OR t.id IS NULL
+    </select>
+
+    <select id="countPublishedPostsMissingActiveCategory" resultType="long">
+        SELECT COUNT(1)
+        FROM posts p
+        LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.status = 'PUBLISHED'
+          AND (c.id IS NULL OR c.is_active = 0)
+    </select>
+
+    <select id="countPublishedPostsMissingActiveStore" resultType="long">
+        SELECT COUNT(1)
+        FROM posts p
+        LEFT JOIN stores s ON s.id = p.store_id
+        WHERE p.status = 'PUBLISHED'
+          AND (s.id IS NULL OR s.status != 'ACTIVE')
+    </select>
+
+    <select id="countPublishedPostsWithoutImages" resultType="long">
+        SELECT COUNT(1)
+        FROM posts p
+        WHERE p.status = 'PUBLISHED'
+          AND NOT EXISTS (
+              SELECT 1
+              FROM post_images pi
+              WHERE pi.post_id = p.id
+          )
     </select>
 
 </mapper>

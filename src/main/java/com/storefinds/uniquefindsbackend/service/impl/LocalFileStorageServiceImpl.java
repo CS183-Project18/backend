@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,7 +98,31 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
         response.setContentType(file.getContentType());
         response.setSize(file.getSize());
         response.setUrl(buildPublicUrl(storedFileName));
+        response.setThumbnailUrl(response.getUrl());
+        applyImageDimensions(response, targetPath);
         return response;
+    }
+
+    /**
+     * Author: Kaijie Zhu
+     * Date: 2026-05-22
+     * Purpose: Read local image dimensions when the JDK image readers support the uploaded format.
+     * Params:
+     * - response: upload response to enrich
+     * - targetPath: stored image path
+     * Returns: None
+     * Throws: None
+     */
+    private void applyImageDimensions(ImageUploadResponse response, Path targetPath) {
+        try {
+            BufferedImage image = ImageIO.read(targetPath.toFile());
+            if (image != null) {
+                response.setWidth(image.getWidth());
+                response.setHeight(image.getHeight());
+            }
+        } catch (IOException ex) {
+            log.warn("failed to read uploaded image dimensions: path={}", targetPath, ex);
+        }
     }
 
     /**

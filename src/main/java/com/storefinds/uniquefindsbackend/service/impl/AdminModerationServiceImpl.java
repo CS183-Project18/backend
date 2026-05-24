@@ -12,6 +12,7 @@ import com.storefinds.uniquefindsbackend.common.ReportStatus;
 import com.storefinds.uniquefindsbackend.common.ReportTargetType;
 import com.storefinds.uniquefindsbackend.dto.AdminPostModerationResponse;
 import com.storefinds.uniquefindsbackend.dto.ModerationActionRequest;
+import com.storefinds.uniquefindsbackend.dto.ModerationLogResponse;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
 import com.storefinds.uniquefindsbackend.dto.ReportResponse;
 import com.storefinds.uniquefindsbackend.entity.Comment;
@@ -33,12 +34,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 @Service
 /**
- * Author: Kaijie Zhu
+ * Author: Enqi Guo
  * Date: 2026-05-14
  * Purpose: Implement moderation workflows for posts, comments, reports, and related moderation notifications.
  * Params: None
@@ -87,6 +89,59 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     }
 
     @Override
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Query moderation audit logs with optional target, moderator, action, and time filters.
+     * Params:
+     * - targetType: optional target type
+     * - targetId: optional target id
+     * - moderatorId: optional moderator id
+     * - action: optional moderation action
+     * - startTime: optional created-at lower bound
+     * - endTime: optional created-at upper bound
+     * - page: target page number starting from 1
+     * - pageSize: target page size
+     * Returns:
+     * - Result<PageResponse<ModerationLogResponse>>: matched moderation log page
+     * Throws: None
+     */
+    public Result<PageResponse<ModerationLogResponse>> getModerationLogs(String targetType,
+                                                                         Long targetId,
+                                                                         Long moderatorId,
+                                                                         String action,
+                                                                         LocalDateTime startTime,
+                                                                         LocalDateTime endTime,
+                                                                         int page,
+                                                                         int pageSize) {
+        String normalizedTargetType = normalizeTargetType(targetType);
+        String normalizedAction = normalizeOptionalUpper(action);
+        List<ModerationLog> logs = moderationLogMapper.selectByFilter(
+                normalizedTargetType,
+                targetId,
+                moderatorId,
+                normalizedAction,
+                startTime,
+                endTime,
+                toOffset(page, pageSize),
+                pageSize
+        );
+        PageResponse<ModerationLogResponse> response = new PageResponse<>();
+        response.setTotal(moderationLogMapper.countByFilter(
+                normalizedTargetType,
+                targetId,
+                moderatorId,
+                normalizedAction,
+                startTime,
+                endTime
+        ));
+        response.setPage(page);
+        response.setPageSize(pageSize);
+        response.setItems(logs.stream().map(this::toModerationLogResponse).toList());
+        return Result.success(response);
+    }
+
+    @Override
     public Result<PageResponse<AdminPostModerationResponse>> getPendingPosts(int page, int pageSize) {
         List<Post> posts = postMapper.selectPendingReviewPosts(toOffset(page, pageSize), pageSize);
         PageResponse<AdminPostModerationResponse> response = new PageResponse<>();
@@ -118,7 +173,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Reject one pending post and notify the author about the moderation outcome.
      * Params:
@@ -174,7 +229,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Hide one visible comment and notify the comment author about the moderation outcome.
      * Params:
@@ -209,7 +264,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Override
     @Transactional
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-14
      * Purpose: Delete one comment through moderation flow and notify the comment author.
      * Params:
@@ -259,6 +314,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
                 report.getTargetId(),
                 Map.of("reportId", reportId, "status", ReportStatus.RESOLVED, "resolutionAction", ModerationActionType.APPROVE)
         );
+        notifyReporter(report, adminUserId, NotificationEventType.REPORT_RESOLVED);
         log.info("report resolved: reportId={}, adminUserId={}", reportId, adminUserId);
         return Result.success("report resolved", null);
     }
@@ -284,8 +340,31 @@ public class AdminModerationServiceImpl implements AdminModerationService {
                 report.getTargetId(),
                 Map.of("reportId", reportId, "status", ReportStatus.REJECTED, "resolutionAction", ModerationActionType.UNHIDE)
         );
+        notifyReporter(report, adminUserId, NotificationEventType.REPORT_REJECTED);
         log.info("report rejected: reportId={}, adminUserId={}", reportId, adminUserId);
         return Result.success("report rejected", null);
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Notify the original reporter when a moderation report is closed.
+     * Params:
+     * - report: closed report entity
+     * - adminUserId: moderator user id
+     * - eventType: report closure notification event type
+     * Returns: None
+     * Throws: None
+     */
+    private void notifyReporter(Report report, Long adminUserId, String eventType) {
+        notificationService.createNotification(
+                report.getReporterId(),
+                adminUserId,
+                eventType,
+                report.getTargetType(),
+                report.getTargetId(),
+                resolveRelatedPostId(report)
+        );
     }
 
     private Report requireReport(Long reportId) {
@@ -366,6 +445,11 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         };
     }
 
+    private String normalizeOptionalUpper(String value) {
+        String normalized = normalizeOptionalText(value);
+        return normalized == null ? null : normalized.toUpperCase();
+    }
+
     private boolean isOpenReportStatus(String status) {
         return ReportStatus.PENDING.equalsIgnoreCase(status) || ReportStatus.PROCESSING.equalsIgnoreCase(status);
     }
@@ -408,6 +492,20 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         return response;
     }
 
+    private ModerationLogResponse toModerationLogResponse(ModerationLog log) {
+        ModerationLogResponse response = new ModerationLogResponse();
+        response.setId(log.getId());
+        response.setTargetType(log.getTargetType());
+        response.setTargetId(log.getTargetId());
+        response.setModeratorId(log.getModeratorId());
+        response.setModeratorUsername(log.getModeratorUsername());
+        response.setAction(log.getAction());
+        response.setReason(log.getReason());
+        response.setTargetSummary(resolveTargetSummary(log.getTargetType(), log.getTargetId()));
+        response.setCreatedAt(log.getCreatedAt());
+        return response;
+    }
+
     private Long resolveRelatedPostId(Report report) {
         if (ReportTargetType.POST.equals(report.getTargetType())) {
             return report.getTargetId();
@@ -429,7 +527,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     }
 
     /**
-     * Author: Kaijie Zhu
+     * Author: Enqi Guo
      * Date: 2026-05-18
      * Purpose: Resolve one short target summary string for admin report lists to reduce extra frontend lookups.
      * Params:
@@ -439,12 +537,27 @@ public class AdminModerationServiceImpl implements AdminModerationService {
      * Throws: None
      */
     private String resolveTargetSummary(Report report) {
-        if (ReportTargetType.POST.equals(report.getTargetType())) {
-            Post post = postMapper.selectById(report.getTargetId());
+        return resolveTargetSummary(report.getTargetType(), report.getTargetId());
+    }
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-22
+     * Purpose: Resolve one short target summary string for report and audit log responses.
+     * Params:
+     * - targetType: target type
+     * - targetId: target id
+     * Returns:
+     * - String: target summary text or null
+     * Throws: None
+     */
+    private String resolveTargetSummary(String targetType, Long targetId) {
+        if (ReportTargetType.POST.equals(targetType)) {
+            Post post = postMapper.selectById(targetId);
             return post == null ? null : post.getTitle();
         }
-        if (ReportTargetType.COMMENT.equals(report.getTargetType())) {
-            Comment comment = commentMapper.selectById(report.getTargetId());
+        if (ReportTargetType.COMMENT.equals(targetType)) {
+            Comment comment = commentMapper.selectById(targetId);
             return comment == null ? null : comment.getContent();
         }
         return null;

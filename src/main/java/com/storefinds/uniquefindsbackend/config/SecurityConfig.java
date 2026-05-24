@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/posts/search").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/search/image").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/trending").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/tags/suggest").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/*/share").permitAll()
