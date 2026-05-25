@@ -1,7 +1,8 @@
-﻿const API_BASE = window.CURATOR_API_BASE || localStorage.getItem("curator_api_base") || "http://localhost:8080";
+const API_BASE = window.CURATOR_API_BASE || "http://localhost:8080";
 const STORAGE_KEYS = {
   token: "curator_token_v1",
   auth: "curator_auth_v1",
+  isGuest: "curator_guest_v1",
 };
 
 const state = {
@@ -16,16 +17,12 @@ const authModeButtons = document.querySelectorAll("[data-auth-mode]");
 const registerOnlyFields = document.querySelectorAll(".auth-register-only");
 const togglePassword = document.querySelector("#toggle-password");
 const passwordInput = document.querySelector("#auth-password");
-const demoLogin = document.querySelector("#demo-login");
+const guestLogin = document.querySelector("#guest-login");
 const toast = document.querySelector("#toast");
 
 initialize();
 
 function initialize() {
-  if (localStorage.getItem(STORAGE_KEYS.token)) {
-    window.location.href = "./dashboard.html";
-    return;
-  }
   bindEvents();
   switchAuthMode("register");
 }
@@ -36,7 +33,7 @@ function bindEvents() {
     button.addEventListener("click", () => switchAuthMode(button.dataset.authMode || "register"));
   });
   togglePassword?.addEventListener("click", togglePasswordVisibility);
-  demoLogin?.addEventListener("click", handleDemoLogin);
+  guestLogin?.addEventListener("click", handleGuestLogin);
   document.querySelectorAll("[data-oauth]").forEach((button) => {
     button.addEventListener("click", () => showToast(`${button.dataset.oauth} login is not configured for this demo.`));
   });
@@ -58,7 +55,7 @@ async function handleAuthSubmit(event) {
   try {
     const response = state.authMode === "login" ? await login() : await register();
     saveSession(response);
-    window.location.href = "./dashboard.html";
+    window.location.href = `./dashboard.html?v=${Date.now()}#feed`;
   } catch (error) {
     showToast(error.message || "Authentication failed.");
   }
@@ -97,26 +94,11 @@ async function login() {
   });
 }
 
-async function handleDemoLogin() {
-  const candidates = [
-    { account: "demo_alice", password: "password123" },
-    { account: "admin", password: "password123" },
-    { account: "demo_user", password: "password123" },
-  ];
-  for (const candidate of candidates) {
-    try {
-      const response = await apiRequest("/api/auth/login/password", {
-        method: "POST",
-        body: candidate,
-      });
-      saveSession(response);
-      window.location.href = "./dashboard.html";
-      return;
-    } catch (error) {
-      // Try the next seeded account name.
-    }
-  }
-  showToast("Seeded demo login failed. Please register or use your own account.");
+function handleGuestLogin() {
+  localStorage.removeItem(STORAGE_KEYS.token);
+  localStorage.removeItem(STORAGE_KEYS.auth);
+  localStorage.setItem(STORAGE_KEYS.isGuest, "true");
+  window.location.href = `./dashboard.html?v=${Date.now()}#feed`;
 }
 
 function saveSession(loginResponse) {
@@ -127,6 +109,7 @@ function saveSession(loginResponse) {
     role: loginResponse.role,
     email: loginResponse.email,
   };
+  localStorage.removeItem(STORAGE_KEYS.isGuest);
   localStorage.setItem(STORAGE_KEYS.token, loginResponse.token);
   localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(auth));
 }
@@ -144,7 +127,7 @@ async function apiRequest(path, options = {}) {
     const token = localStorage.getItem(STORAGE_KEYS.token);
     if (token) headers.Authorization = `Bearer ${token}`;
   }
-  if (!options.formData) headers["Content-Type"] = "application/json";
+  if (!options.formData && options.body) headers["Content-Type"] = "application/json";
   const response = await fetch(`${API_BASE}${path}`, {
     method: options.method || "GET",
     headers,
@@ -152,6 +135,10 @@ async function apiRequest(path, options = {}) {
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok || payload?.success === false) {
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem(STORAGE_KEYS.token);
+      localStorage.removeItem(STORAGE_KEYS.auth);
+    }
     throw new Error(payload?.message || `Request failed with status ${response.status}.`);
   }
   return payload?.data;

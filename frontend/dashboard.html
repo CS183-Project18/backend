@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Curator | Dashboard</title>
   <style>
@@ -26,8 +30,14 @@
       --shell: min(1600px, calc(100vw - 28px));
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -38,8 +48,16 @@
         radial-gradient(circle at 92% 14%, rgba(116, 102, 255, 0.18), transparent 18%),
         linear-gradient(180deg, #fcfbff 0%, var(--bg) 45%, #f6f2ff 100%);
     }
-    button, input, textarea { font: inherit; }
-    button { border: 0; }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
 
     .ambient {
       position: fixed;
@@ -51,10 +69,22 @@
       pointer-events: none;
       z-index: 0;
     }
-    .ambient-a { top: -5rem; left: -6rem; background: rgba(110, 92, 255, 0.34); }
-    .ambient-b { right: -8rem; bottom: -8rem; background: rgba(196, 126, 255, 0.24); }
 
-    .hidden { display: none !important; }
+    .ambient-a {
+      top: -5rem;
+      left: -6rem;
+      background: rgba(110, 92, 255, 0.34);
+    }
+
+    .ambient-b {
+      right: -8rem;
+      bottom: -8rem;
+      background: rgba(196, 126, 255, 0.24);
+    }
+
+    .hidden {
+      display: none !important;
+    }
 
     .dashboard-screen {
       position: relative;
@@ -85,9 +115,15 @@
       gap: 24px;
     }
 
-    .sidebar-nav { display: grid; gap: 10px; }
+    .sidebar-nav {
+      display: grid;
+      gap: 10px;
+    }
 
-    .nav-item, .filter-chip, .primary-button, .secondary-button {
+    .nav-item,
+    .filter-chip,
+    .primary-button,
+    .secondary-button {
       min-height: 48px;
       padding: 0 18px;
       border-radius: 16px;
@@ -95,24 +131,34 @@
       transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
     }
 
-    .nav-item, .filter-chip, .secondary-button {
+    .nav-item,
+    .filter-chip,
+    .secondary-button {
       color: var(--text-strong);
       background: rgba(255, 255, 255, 0.82);
       border: 1px solid var(--line);
     }
 
-    .nav-item.is-active, .filter-chip.is-active, .primary-button {
+    .nav-item.is-active,
+    .filter-chip.is-active,
+    .primary-button {
       color: white;
       background: linear-gradient(135deg, var(--accent), var(--accent-soft));
       border-color: transparent;
       box-shadow: 0 14px 34px rgba(103, 88, 255, 0.24);
     }
 
-    .nav-item:hover, .filter-chip:hover, .primary-button:hover, .secondary-button:hover {
+    .nav-item:hover,
+    .filter-chip:hover,
+    .primary-button:hover,
+    .secondary-button:hover {
       transform: translateY(-1px);
     }
 
-    .primary-button.wide, .secondary-button.wide { width: 100%; }
+    .primary-button.wide,
+    .secondary-button.wide {
+      width: 100%;
+    }
 
     .profile-card {
       display: flex;
@@ -141,8 +187,15 @@
       font-size: 0.76rem;
     }
 
-    .profile-card strong, .meta-author strong { display: block; }
-    .profile-card span, .meta-author span { color: var(--muted); }
+    .profile-card strong,
+    .meta-author strong {
+      display: block;
+    }
+
+    .profile-card span,
+    .meta-author span {
+      color: var(--muted);
+    }
 
     /* Developer A: Main dashboard layout - Tight spacing between elements */
     .dashboard-main {
@@ -178,9 +231,16 @@
       animation: spin 1s linear infinite;
     }
 
-    .loading-spinner.large { width: 64px; height: 64px; }
+    .loading-spinner.large {
+      width: 64px;
+      height: 64px;
+    }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     .dashboard-topbar {
       display: flex;
@@ -206,13 +266,14 @@
 
     .topbar-actions {
       display: flex;
+      flex-direction: column;
       gap: 12px;
-      align-items: center;
+      align-items: flex-end;
     }
 
     .search-shell {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
       gap: 12px;
       min-height: 72px;
@@ -222,7 +283,9 @@
       box-shadow: 0 14px 36px rgba(103, 88, 255, 0.08);
     }
 
-    .search-shell span { color: var(--accent); }
+    .search-shell span {
+      color: var(--accent);
+    }
 
     .search-shell small {
       color: var(--accent-soft);
@@ -232,7 +295,10 @@
       letter-spacing: 0.12em;
     }
 
-    .search-camera { font-size: 1.2rem; padding: 0 8px; }
+    .search-camera {
+      font-size: 1.2rem;
+      padding: 0 8px;
+    }
 
     .icon-pill {
       display: inline-flex;
@@ -351,7 +417,9 @@
       background: rgba(255, 255, 255, 0.22);
     }
 
-    .card-body { padding: 18px; }
+    .card-body {
+      padding: 18px;
+    }
 
     .card-body h3 {
       margin: 0;
@@ -378,7 +446,8 @@
       margin-bottom: 12px;
     }
 
-    .store-badge, .location-badge {
+    .store-badge,
+    .location-badge {
       padding: 4px 10px;
       border-radius: 999px;
       font-size: 0.74rem;
@@ -400,7 +469,9 @@
       background: rgba(103, 88, 255, 0.08);
     }
 
-    .compact-tags { margin-bottom: 14px; }
+    .compact-tags {
+      margin-bottom: 14px;
+    }
 
     .post-stats {
       display: grid;
@@ -449,9 +520,12 @@
       align-items: center;
     }
 
-    .panel-header h2 { font-size: 1.5rem; }
+    .panel-header h2 {
+      font-size: 1.5rem;
+    }
 
-    .trending-list, .notification-preview {
+    .trending-list,
+    .notification-preview {
       display: grid;
       gap: 14px;
     }
@@ -486,8 +560,13 @@
       box-shadow: inset 0 0 0 1px rgba(103, 88, 255, 0.1);
     }
 
-    .notification-item strong { display: block; }
-    .notification-item span { color: var(--muted); }
+    .notification-item strong {
+      display: block;
+    }
+
+    .notification-item span {
+      color: var(--muted);
+    }
 
     .upgrade-card {
       padding: 26px;
@@ -595,8 +674,8 @@
     }
 
     .detail-topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
       gap: 18px;
     }
@@ -644,7 +723,9 @@
       cursor: pointer;
     }
 
-    .thumbnail.is-active { border-color: var(--accent); }
+    .thumbnail.is-active {
+      border-color: var(--accent);
+    }
 
     .detail-info-panel {
       padding: 22px;
@@ -741,7 +822,9 @@
       background: transparent;
     }
 
-    .detail-footer-row .danger { color: var(--danger); }
+    .detail-footer-row .danger {
+      color: var(--danger);
+    }
 
     /* Developer B: Comments panel */
     .comments-panel {
@@ -756,8 +839,14 @@
       align-items: center;
     }
 
-    .comments-header h2 { font-size: 1.5rem; }
-    .comments-header span { color: var(--accent-soft); font-size: 1.5rem; }
+    .comments-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .comments-header span {
+      color: var(--accent-soft);
+      font-size: 1.5rem;
+    }
 
     .comment-form {
       display: grid;
@@ -810,8 +899,15 @@
       line-height: 1.65;
     }
 
-    .comment-thread { display: grid; gap: 14px; }
-    .comment-thread .comment-thread { margin-top: 12px; margin-left: 18px; }
+    .comment-thread {
+      display: grid;
+      gap: 14px;
+    }
+
+    .comment-thread .comment-thread {
+      margin-top: 12px;
+      margin-left: 18px;
+    }
 
     .comment-time {
       font-size: 0.76rem;
@@ -834,7 +930,9 @@
       padding-left: 14px;
     }
 
-    .comment-item.is-nested { margin-left: 18px; }
+    .comment-item.is-nested {
+      margin-left: 18px;
+    }
 
     .show-more-replies {
       margin-top: 8px;
@@ -897,7 +995,8 @@
       color: var(--muted);
     }
 
-    .create-form input, .create-form textarea {
+    .create-form input,
+    .create-form textarea {
       width: 100%;
       min-height: 54px;
       padding: 0 18px;
@@ -914,7 +1013,8 @@
       resize: vertical;
     }
 
-    .create-form input:focus, .create-form textarea:focus {
+    .create-form input:focus,
+    .create-form textarea:focus {
       border-color: rgba(103, 88, 255, 0.3);
       box-shadow: 0 0 0 4px rgba(103, 88, 255, 0.08);
     }
@@ -932,7 +1032,9 @@
       background: rgba(244, 240, 255, 0.78);
     }
 
-    .upload-field small { color: var(--muted); }
+    .upload-field small {
+      color: var(--muted);
+    }
 
     .preview-grid {
       display: flex;
@@ -976,7 +1078,8 @@
       z-index: 40;
     }
 
-    .ai-tag-row, .suggested-tags {
+    .ai-tag-row,
+    .suggested-tags {
       display: flex;
       gap: 10px;
       align-items: center;
@@ -1006,12 +1109,19 @@
       font-size: 0.92rem;
     }
 
-    .text-button.is-active { color: var(--danger); }
+    .text-button.is-active {
+      color: var(--danger);
+    }
 
-    .danger { color: var(--danger); }
+    .danger {
+      color: var(--danger);
+    }
 
     /* Image Search Styles */
-    .image-search-content { display: grid; gap: 20px; }
+    .image-search-content {
+      display: grid;
+      gap: 20px;
+    }
 
     .image-upload-area {
       position: relative;
@@ -1045,7 +1155,9 @@
       gap: 12px;
     }
 
-    .upload-icon { font-size: 3rem; }
+    .upload-icon {
+      font-size: 3rem;
+    }
 
     .image-preview-container {
       display: flex;
@@ -1195,7 +1307,10 @@
     }
 
     /* Report Modal Styles */
-    .report-content { display: grid; gap: 20px; }
+    .report-content {
+      display: grid;
+      gap: 20px;
+    }
 
     .report-reasons {
       display: flex;
@@ -1225,7 +1340,9 @@
       background: rgba(103, 88, 255, 0.08);
     }
 
-    .reason-icon { font-size: 1.4rem; }
+    .reason-icon {
+      font-size: 1.4rem;
+    }
 
     .report-reason strong {
       display: block;
@@ -1245,7 +1362,9 @@
       background: rgba(215, 66, 97, 0.08);
     }
 
-    .error-state h3 { color: var(--danger); }
+    .error-state h3 {
+      color: var(--danger);
+    }
 
     .unauthorized-state {
       padding: 40px;
@@ -1254,33 +1373,72 @@
       background: rgba(103, 88, 255, 0.08);
     }
 
-    .unauthorized-state h3 { color: var(--accent); }
+    .unauthorized-state h3 {
+      color: var(--accent);
+    }
 
     @media (max-width: 1360px) {
-      .dashboard-screen { grid-template-columns: 220px minmax(0, 1fr); }
-      .right-rail { display: none; }
-      .detail-layout { grid-template-columns: 1fr; }
+      .dashboard-screen {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .right-rail {
+        display: none;
+      }
+
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 980px) {
-      .dashboard-screen { grid-template-columns: 1fr; }
-      .dashboard-topbar { grid-template-columns: 1fr; display: grid; }
-      .topbar-actions { flex-direction: column; align-items: stretch; }
-      .form-grid, .detail-metric-grid { grid-template-columns: 1fr; }
+      .dashboard-screen {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-topbar {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .topbar-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-grid,
+      .detail-metric-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 720px) {
-      .dashboard-screen, .detail-shell {
+
+      .dashboard-screen,
+      .detail-shell {
         width: min(calc(100vw - 12px), 100%);
         margin: 6px auto;
       }
-      .dashboard-topbar h1 { font-size: 2.2rem; }
-      .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-      .similar-posts-grid { grid-template-columns: repeat(2, 1fr); }
-      .detail-topbar { grid-template-columns: 1fr; }
+
+      .dashboard-topbar h1 {
+        font-size: 2.2rem;
+      }
+
+      .masonry-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+
+      .similar-posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .detail-topbar {
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="ambient ambient-a"></div>
   <div class="ambient ambient-b"></div>
@@ -1308,6 +1466,7 @@
         <button class="nav-item" data-route="bookmarks" type="button">Bookmarks</button>
         <button class="nav-item" data-route="shared" type="button">Shared</button>
         <button class="nav-item" data-route="analytics" type="button">Analytics</button>
+        <button class="nav-item" data-route="admin" type="button">Admin</button>
         <button class="nav-item" data-route="settings" type="button">Settings</button>
       </nav>
 
@@ -1323,7 +1482,7 @@
           <p>Loading...</p>
         </div>
       </div>
-      
+
       <!-- Developer A: Dashboard header with title and search -->
       <header class="dashboard-topbar">
         <div>
@@ -1352,6 +1511,21 @@
         <button class="filter-chip" data-filter="shared" type="button">Shared</button>
         <button class="filter-chip" data-filter="bookmarked" type="button">Bookmarked</button>
         <button class="filter-chip" data-filter="following" type="button">Following</button>
+      </div>
+
+      <!-- Search filters bar -->
+      <div class="filter-bar" id="search-filter-bar" style="display: none;">
+        <select class="filter-chip" id="filter-category" style="min-width: 120px; max-width: 180px;">
+          <option value="">All Categories</option>
+        </select>
+        <select class="filter-chip" id="filter-store" style="min-width: 120px; max-width: 180px;">
+          <option value="">All Stores</option>
+        </select>
+        <select class="filter-chip" id="filter-sort" style="min-width: 100px; max-width: 140px;">
+          <option value="latest">Latest</option>
+          <option value="popular">Popular</option>
+        </select>
+        <button class="filter-chip" id="clear-filters" type="button">Clear Filters</button>
       </div>
 
       <!-- Developer A: Content display area -->
@@ -1489,7 +1663,8 @@
 
         <label>
           <span>Description</span>
-          <textarea id="post-description" rows="5" placeholder="Describe why this find matters and what makes it worth sharing." required></textarea>
+          <textarea id="post-description" rows="5"
+            placeholder="Describe why this find matters and what makes it worth sharing." required></textarea>
         </label>
 
         <label>
@@ -1616,7 +1791,8 @@
         <div class="report-custom-reason hidden" id="report-custom-reason">
           <label>
             <span>Additional details</span>
-            <textarea id="report-message" rows="3" placeholder="Please provide more details about why you're reporting this."></textarea>
+            <textarea id="report-message" rows="3"
+              placeholder="Please provide more details about why you're reporting this."></textarea>
           </label>
         </div>
         <div class="form-actions">
@@ -1643,7 +1819,7 @@
           console.warn("Failed to load user from login, checking saved data");
         }
       }
-      
+
       const saved = localStorage.getItem("curator_user_data");
       if (saved) {
         try {
@@ -1653,15 +1829,15 @@
         }
       }
       return {
-        id: 11,
-        name: "Alex Rivera",
-        username: "alexrivera",
-        email: "alex@curator.gold",
-        role: "Curator Gold",
-        bio: "Exploring thoughtful offline finds from boutique stores, design markets, and neighborhood spaces.",
-        avatar: "AR",
-        followers: 182,
-        following: 54,
+        id: null,
+        name: "Curator",
+        username: "",
+        email: "",
+        role: "USER",
+        bio: "",
+        avatar: "CU",
+        followers: 0,
+        following: 0,
       };
     }
 
@@ -1846,12 +2022,13 @@
     // Developer A: Global state management
     const state = {
       user: OFFLINE_DEMO.user,
-      posts: [...OFFLINE_DEMO.posts],
-      notifications: [...OFFLINE_DEMO.notifications],
-      analytics: OFFLINE_DEMO.analytics,
-      bookmarkedPostIds: OFFLINE_DEMO.posts.filter(p => p.bookmarked).map(p => p.id),
-      likedPostIds: OFFLINE_DEMO.posts.filter(p => p.liked).map(p => p.id),
-      sharedPostIds: OFFLINE_DEMO.posts.filter(p => p.shared).map(p => p.id),
+      posts: [],
+      trendingPosts: [],
+      notifications: [],
+      analytics: { totalViews: 0, totalLikes: 0, totalComments: 0, totalShares: 0 },
+      bookmarkedPostIds: [],
+      likedPostIds: [],
+      sharedPostIds: [],
       route: "feed",
       filter: "all",
       query: "",
@@ -1863,7 +2040,20 @@
       editingPostId: null,
       profileTab: "posts",
       profileUserId: OFFLINE_DEMO.user.id,
+      visitedUser: null,  // 访问的公开用户资料
+      visitedUsername: null,  // 访问的用户名
       notificationUnreadOnly: false,
+      // Admin state
+      isAdmin: false,
+      adminProfile: null,
+      adminActiveTab: "moderation",  // moderation, reports, logs, categories, stores, tags, analytics
+      // Search filters
+      filterCategory: null,
+      filterStore: null,
+      filterTags: [],
+      filterPriceMin: null,
+      filterPriceMax: null,
+      sortOrder: "latest",
     };
 
     // Developer A: DOM element references
@@ -1931,6 +2121,11 @@
       submitCreateButton: document.querySelector("#submit-create-button"),
       toast: document.querySelector("#toast"),
       filterBar: document.querySelector("#filter-bar"),
+      searchFilterBar: document.querySelector("#search-filter-bar"),
+      filterCategorySelect: document.querySelector("#filter-category"),
+      filterStoreSelect: document.querySelector("#filter-store"),
+      filterSortSelect: document.querySelector("#filter-sort"),
+      clearFiltersButton: document.querySelector("#clear-filters"),
       demoModeBadge: document.querySelector("#demo-mode-badge"),
       openImageSearch: document.querySelector("#open-image-search"),
       imageSearchModal: document.querySelector("#image-search-modal"),
@@ -1959,14 +2154,18 @@
       loadingOverlay: document.querySelector("#loading-overlay"),
     };
 
-    const API_BASE = window.CURATOR_API_BASE || localStorage.getItem("curator_api_base") || "http://localhost:8080";
+    const API_BASE = window.CURATOR_API_BASE || "http://localhost:8080";
     const STORAGE_KEYS = {
       token: "curator_token_v1",
       auth: "curator_auth_v1",
+      isGuest: "curator_guest_v1",
     };
+    localStorage.removeItem(STORAGE_KEYS.isGuest);
+    localStorage.removeItem("curator_api_base");
     const backendState = {
       token: localStorage.getItem(STORAGE_KEYS.token) || "",
       auth: readJsonStorage(STORAGE_KEYS.auth),
+      isGuest: false,
       categories: [],
       tags: [],
       stores: [],
@@ -1977,6 +2176,10 @@
 
     function requireAuth(message = "Please log in first.") {
       if (backendState.token) return true;
+      if (backendState.isGuest) {
+        showToast(message);
+        return false;
+      }
       showToast(message);
       window.setTimeout(() => { window.location.href = "./index.html"; }, 900);
       return false;
@@ -1991,10 +2194,18 @@
       }
     }
 
+    function getInitials(value) {
+      const words = String(value || "CU").trim().split(/\s+/).filter(Boolean);
+      const initials = words.length > 1
+        ? `${words[0][0] || ""}${words[1][0] || ""}`
+        : String(words[0] || "CU").slice(0, 2);
+      return initials.toUpperCase();
+    }
+
     async function apiRequest(path, options = {}) {
       const headers = {};
       if (options.auth && backendState.token) headers.Authorization = `Bearer ${backendState.token}`;
-      if (!options.formData) headers["Content-Type"] = "application/json";
+      if (!options.formData && options.body) headers["Content-Type"] = "application/json";
       const response = await fetch(`${API_BASE}${path}`, {
         method: options.method || "GET",
         headers,
@@ -2002,55 +2213,112 @@
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok || payload?.success === false) {
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem(STORAGE_KEYS.token);
+          localStorage.removeItem(STORAGE_KEYS.auth);
+          localStorage.removeItem(STORAGE_KEYS.isGuest);
+          backendState.token = "";
+          backendState.auth = null;
+        }
         throw new Error(payload?.message || `Request failed with status ${response.status}.`);
       }
       return options.returnEnvelope ? payload : payload?.data;
     }
 
+    async function optionalApiRequest(path, options = {}, fallback = null) {
+      try {
+        return await apiRequest(path, options);
+      } catch (error) {
+        console.warn(`Optional backend request failed: ${path}`, error);
+        return fallback;
+      }
+    }
+
     async function loadBackendData() {
-      if (!backendState.token) {
+      if (!backendState.token && !backendState.isGuest) {
         showLoggedOutState();
         return;
       }
       try {
         showLoading();
-        const [authInfo, profile, postsPage, myPostsPage, favoritesPage, trendingPage, notificationsPage, unreadCount, categories, tags, stores] = await Promise.all([
-          apiRequest("/api/auth/me", { auth: true }),
-          apiRequest("/api/users/me/profile", { auth: true }).catch(() => null),
-          apiRequest("/api/posts/published?page=1&pageSize=30", { auth: true }),
-          apiRequest("/api/posts/mine?page=1&pageSize=30", { auth: true }).catch(() => null),
-          apiRequest("/api/posts/favorites/mine?page=1&pageSize=30", { auth: true }).catch(() => null),
-          apiRequest("/api/posts/trending?window=daily&page=1&pageSize=8", { auth: true }).catch(() => null),
-          apiRequest("/api/notifications?page=1&pageSize=20", { auth: true }).catch(() => null),
-          apiRequest("/api/notifications/unread-count", { auth: true }).catch(() => 0),
-          apiRequest("/api/categories").catch(() => []),
-          apiRequest("/api/tags").catch(() => []),
-          apiRequest("/api/stores").catch(() => []),
-        ]);
-        backendState.auth = authInfo;
-        backendState.categories = Array.isArray(categories) ? categories : [];
-        backendState.tags = Array.isArray(tags) ? tags : [];
-        backendState.stores = Array.isArray(stores) ? stores : [];
-        localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(authInfo));
-        state.user = normalizeUser(authInfo, profile);
-        const publishedPosts = normalizePosts(postsPage?.items || []);
-        const myPosts = normalizePosts(myPostsPage?.items || []).map(post => ({ ...post, editable: true }));
-        const favoriteIds = new Set((favoritesPage?.items || []).map(post => Number(post.id)));
-        const merged = mergeUniquePosts(myPosts.concat(publishedPosts));
-        state.posts = merged.map(post => ({ ...post, bookmarked: post.bookmarked || favoriteIds.has(Number(post.id)) }));
-        state.bookmarkedPostIds = state.posts.filter(post => post.bookmarked).map(post => post.id);
-        state.likedPostIds = state.posts.filter(post => post.liked).map(post => post.id);
-        state.sharedPostIds = state.posts.filter(post => post.shared).map(post => post.id);
-        state.trendingPosts = normalizePosts(trendingPage?.items || []);
-        state.notifications = normalizeNotifications(notificationsPage?.items || []);
-        state.analytics = buildAnalytics(state.posts);
-        els.notificationBadge.textContent = String(Number(unreadCount?.count ?? unreadCount ?? state.notifications.filter(n => !n.read).length));
-        els.demoModeBadge.textContent = "Backend connected";
-        backendState.backendAvailable = true;
+        if (backendState.token) {
+          const authInfo = await apiRequest("/api/auth/me", { auth: true });
+          const [
+            profile,
+            postsPage,
+            myPostsPage,
+            favoritesPage,
+            trendingPage,
+            notificationsPage,
+            unreadCount,
+            categories,
+            tags,
+            stores,
+          ] = await Promise.all([
+            optionalApiRequest("/api/users/me/profile", { auth: true }, null),
+            optionalApiRequest("/api/posts/published?page=1&pageSize=30", {}, { items: [] }),
+            optionalApiRequest("/api/posts/mine?page=1&pageSize=30", { auth: true }, { items: [] }),
+            optionalApiRequest("/api/posts/favorites/mine?page=1&pageSize=30", { auth: true }, { items: [] }),
+            optionalApiRequest("/api/posts/trending?window=daily&page=1&pageSize=8", {}, { items: [] }),
+            optionalApiRequest("/api/notifications?page=1&pageSize=20", { auth: true }, { items: [] }),
+            optionalApiRequest("/api/notifications/unread-count", { auth: true }, { unreadCount: 0 }),
+            optionalApiRequest("/api/categories", {}, []),
+            optionalApiRequest("/api/tags", {}, []),
+            optionalApiRequest("/api/stores", {}, []),
+          ]);
+          backendState.auth = authInfo;
+          backendState.categories = Array.isArray(categories) ? categories : [];
+          backendState.tags = Array.isArray(tags) ? tags : [];
+          backendState.stores = Array.isArray(stores) ? stores : [];
+          localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(authInfo));
+          state.user = normalizeUser(authInfo, profile);
+          const publishedPosts = normalizePosts(postsPage?.items || []);
+          const myPosts = normalizePosts(myPostsPage?.items || []).map(post => ({ ...post, editable: true }));
+          const favoriteIds = new Set((favoritesPage?.items || []).map(post => Number(post.id)));
+          const merged = mergeUniquePosts(myPosts.concat(publishedPosts));
+          state.posts = merged.map(post => ({ ...post, bookmarked: post.bookmarked || favoriteIds.has(Number(post.id)) }));
+          state.bookmarkedPostIds = state.posts.filter(post => post.bookmarked).map(post => post.id);
+          state.likedPostIds = state.posts.filter(post => post.liked).map(post => post.id);
+          state.sharedPostIds = state.posts.filter(post => post.shared).map(post => post.id);
+          state.trendingPosts = normalizePosts(trendingPage?.items || []);
+          state.notifications = normalizeNotifications(notificationsPage?.items || []);
+          state.analytics = buildAnalytics(state.posts);
+          els.notificationBadge.textContent = String(Number(unreadCount?.unreadCount ?? unreadCount?.count ?? unreadCount ?? state.notifications.filter(n => !n.read).length));
+          els.demoModeBadge.textContent = "Backend connected";
+          backendState.backendAvailable = true;
+        } else if (backendState.isGuest) {
+          const [postsPage, trendingPage, categories, tags, stores] = await Promise.all([
+            apiRequest("/api/posts/published?page=1&pageSize=30"),
+            apiRequest("/api/posts/trending?window=daily&page=1&pageSize=8").catch(() => null),
+            apiRequest("/api/categories").catch(() => []),
+            apiRequest("/api/tags").catch(() => []),
+            apiRequest("/api/stores").catch(() => []),
+          ]);
+          backendState.categories = Array.isArray(categories) ? categories : [];
+          backendState.tags = Array.isArray(tags) ? tags : [];
+          backendState.stores = Array.isArray(stores) ? stores : [];
+          state.posts = normalizePosts(postsPage?.items || []);
+          state.trendingPosts = normalizePosts(trendingPage?.items || []);
+          els.demoModeBadge.textContent = "Guest mode";
+          backendState.backendAvailable = true;
+        }
       } catch (error) {
         console.warn("Backend dashboard load failed.", error);
-        els.demoModeBadge.textContent = "Backend unavailable, showing demo data";
-        showToast("Backend unavailable, showing demo data.");
+        state.posts = [];
+        state.trendingPosts = [];
+        state.notifications = [];
+        state.bookmarkedPostIds = [];
+        state.likedPostIds = [];
+        state.sharedPostIds = [];
+        if (!backendState.token) {
+          showLoggedOutState();
+          showToast("Login expired. Please log in again.");
+          window.setTimeout(() => { window.location.href = "./index.html"; }, 900);
+        } else {
+          els.demoModeBadge.textContent = "Backend connection failed";
+          els.dashboardContent.innerHTML = `<div class="empty-card"><h3>Backend connection failed</h3><p>The dashboard could not load backend data. Please confirm Spring Boot is running on ${API_BASE} and refresh this page.</p></div>`;
+          showToast(error.message || "Backend connection failed.");
+        }
         backendState.backendAvailable = false;
       } finally {
         hideLoading();
@@ -2109,6 +2377,7 @@
         bookmarked: Boolean(post.favoritedByCurrentUser),
         shared: Boolean(post.sharedByCurrentUser),
         editable: Boolean(backendState.auth?.userId && Number(post.userId) === Number(backendState.auth.userId)),
+        status: post.status || "PUBLISHED",
         visibility: post.status || "PUBLISHED",
         createdLabel: formatRelativeTime(post.createdAt || post.publishedAt),
         comments: [],
@@ -2219,12 +2488,15 @@
         ? `background-image:url('${post.imageUrls[0]}');background-size:cover;background-position:center;`
         : `background: ${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
       card.innerHTML = `
-        <div class="card-media ${getMediaHeight(post)}" style="${mediaStyle}"></div>
+        <div class="card-media ${getMediaHeight(post)}" style="${mediaStyle}">
+          ${post.status === "PENDING_REVIEW" ? `<div class="category-pill" style="background: rgba(255, 165, 0, 0.8);">⏳ Pending</div>` : ""}
+          ${post.status === "DRAFT" ? `<div class="category-pill" style="background: rgba(128, 128, 128, 0.8);">📝 Draft</div>` : ""}
+        </div>
         <div class="card-body">
           <div class="meta-author">
             <div class="avatar small">${post.avatar}</div>
             <div>
-              <strong>${post.authorName}</strong>
+              <strong class="author-name" data-username="${post.authorUsername || post.authorName}">${post.authorName}</strong>
               <span>${post.createdLabel || "now"}</span>
             </div>
           </div>
@@ -2250,13 +2522,13 @@
           </div>
         </div>
       `;
-      
+
       // Add card click event handlers
       const clickableElements = card.querySelectorAll('.card-media, h3, p');
       clickableElements.forEach(el => {
         el.addEventListener('click', () => openDetail(post));
       });
-      
+
       // Add button event handlers
       card.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -2269,7 +2541,16 @@
           }
         });
       });
-      
+
+      // Add author click handler
+      card.querySelector('.author-name')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const username = e.target.dataset.username;
+        if (username) {
+          openUserProfile(username);
+        }
+      });
+
       return card;
     }
 
@@ -2294,18 +2575,18 @@
       el.innerHTML = `<strong>${item.message}</strong><span>${item.createdLabel}</span>`;
       return el;
     }
-    
+
     // Developer B: Open notification drawer
     function openNotificationDrawer() {
       els.notificationDrawer.classList.remove("hidden");
       renderNotificationList();
     }
-    
+
     // Developer B: Close notification drawer
     function closeNotificationDrawer() {
       els.notificationDrawer.classList.add("hidden");
     }
-    
+
     // Developer B: Render notification list
     function renderNotificationList() {
       const items = state.notificationUnreadOnly
@@ -2315,7 +2596,7 @@
         ? items.map(n => `<article class="notification-item ${n.read ? "" : "unread"}"><strong>${n.message}</strong><span>${n.createdLabel}</span></article>`).join("")
         : "<div class=\"empty-card\"><h3>No notifications</h3><p>You're all caught up!</p></div>";
     }
-    
+
     // Developer B: Mark all notifications as read
     async function markAllNotificationsRead() {
       if (!requireAuth("Please log in to update notifications.")) return;
@@ -2342,6 +2623,8 @@
         <div class="detail-badges">
           ${post.category ? `<button class="detail-badge">${post.category}</button>` : ""}
           ${post.priceRange ? `<button class="detail-badge">${post.priceRange}</button>` : ""}
+          ${post.status === "PENDING_REVIEW" ? `<button class="detail-badge" style="background: rgba(255, 165, 0, 0.2); color: orange;"> Pending Review</button>` : ""}
+          ${post.status === "DRAFT" ? `<button class="detail-badge" style="background: rgba(128, 128, 128, 0.2); color: gray;">📝 Draft</button>` : ""}
         </div>
         <h1>${post.title}</h1>
         <p>${post.description}</p>
@@ -2356,7 +2639,7 @@
           <div class="meta-author">
             <div class="avatar">${post.avatar}</div>
             <div>
-              <strong>${post.authorName}</strong>
+              <strong class="author-name" data-username="${post.authorUsername || post.authorName}">${post.authorName}</strong>
               <span>${post.authorRole}</span>
             </div>
           </div>
@@ -2388,6 +2671,15 @@
           e.stopPropagation();
           handleDetailAction(btn.dataset.action, post).catch(error => showToast(error.message || "Action failed."));
         });
+      });
+
+      // Add author click handler
+      els.detailInfoPanel.querySelector('.author-name')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const username = e.target.dataset.username;
+        if (username) {
+          openUserProfile(username);
+        }
       });
     }
 
@@ -2427,7 +2719,7 @@
       if (state.filter === "bookmarked") posts = posts.filter(p => state.bookmarkedPostIds.includes(p.id));
       if (state.filter === "uploaded") posts = posts.filter(p => p.authorId === state.user.id);
       if (state.filter === "shared") posts = posts.filter(p => state.sharedPostIds.includes(p.id));
-      
+
       // Then apply search on the filtered results
       if (state.query) {
         posts = filterPostsBySearch(posts, state.query);
@@ -2465,8 +2757,52 @@
       let posts = [...state.posts];
       if (state.profileTab === "bookmarks") posts = posts.filter(p => state.bookmarkedPostIds.includes(p.id));
       if (state.profileTab === "likes") posts = posts.filter(p => state.likedPostIds.includes(p.id));
-      
+
       // Then apply search on the filtered results
+      if (state.query) {
+        posts = filterPostsBySearch(posts, state.query);
+      }
+
+      const grid = document.createElement("div");
+      grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
+      posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
+      els.dashboardContent.innerHTML = "";
+      els.dashboardContent.appendChild(grid);
+    }
+
+    // Developer A: Render public user profile page
+    function renderUserProfile() {
+      const user = state.visitedUser;
+      const username = state.visitedUsername;
+
+      els.dashboardTitle.textContent = user?.nickname || username || "User";
+      els.dashboardSubtitle.textContent = `@${username}${user ? ` — ${user.postCount || 0} posts${user.favoriteCount ? `, ${user.favoriteCount} favorites` : ''}` : ''}`;
+      els.filterBar.innerHTML = `
+        <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
+        <button class="filter-chip" id="back-to-my-profile" type="button">← Back to My Profile</button>
+      `;
+
+      // Back to my profile button
+      els.filterBar.querySelector("#back-to-my-profile")?.addEventListener("click", () => {
+        state.visitedUser = null;
+        state.visitedUsername = null;
+        navigate("profile");
+      });
+
+      els.filterBar.querySelectorAll("[data-profile-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.profileTab = btn.dataset.profileTab;
+          renderUserProfile();
+        });
+      });
+
+      // Filter posts for the visited user
+      let posts = [...state.posts].filter(p =>
+        p.authorUsername === username ||
+        p.authorName.toLowerCase() === username.toLowerCase()
+      );
+
+      // Apply search
       if (state.query) {
         posts = filterPostsBySearch(posts, state.query);
       }
@@ -2482,7 +2818,7 @@
     function renderAnalytics() {
       els.dashboardTitle.textContent = "Analytics";
       els.filterBar.innerHTML = "";
-      
+
       if (state.user.role === "Guest") {
         els.dashboardSubtitle.textContent = "";
         els.dashboardContent.innerHTML = `
@@ -2493,7 +2829,7 @@
         `;
         return;
       }
-      
+
       els.dashboardSubtitle.textContent = "Your content performance overview";
       els.dashboardContent.innerHTML = `
         <div class="detail-metric-grid">
@@ -2506,10 +2842,473 @@
       `;
     }
 
+    // Developer A: Admin Panel - Check admin status
+    async function checkAdminStatus() {
+      if (!backendState.token) {
+        state.isAdmin = false;
+        state.adminProfile = null;
+        return false;
+      }
+      try {
+        const adminInfo = await apiRequest("/api/admin/auth/me", { auth: true });
+        if (adminInfo) {
+          state.isAdmin = true;
+          state.adminProfile = adminInfo;
+          return true;
+        }
+      } catch (error) {
+        state.isAdmin = false;
+        state.adminProfile = null;
+      }
+      return false;
+    }
+
+    // Developer A: Admin Panel - Render admin page
+    async function renderAdmin() {
+      if (!backendState.token) {
+        els.dashboardTitle.textContent = "Admin Panel";
+        els.dashboardSubtitle.textContent = "Please log in to access admin features.";
+        els.filterBar.innerHTML = "";
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Access Denied</h3>
+            <p>You need to be logged in as an administrator to access this page.</p>
+            <button class="primary-button" onclick="window.location.href='./index.html'">Go to Login</button>
+          </div>
+        `;
+        return;
+      }
+
+      const isAdmin = await checkAdminStatus();
+
+      if (!isAdmin) {
+        els.dashboardTitle.textContent = "Admin Panel";
+        els.dashboardSubtitle.textContent = "Access denied";
+        els.filterBar.innerHTML = "";
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Access Denied</h3>
+            <p>Your account does not have administrator privileges.</p>
+            <p>Please use an admin account (demo_admin / Password123)</p>
+            <button class="primary-button" onclick="window.location.href='./index.html'">Go to Login</button>
+          </div>
+        `;
+        return;
+      }
+
+      els.dashboardTitle.textContent = "Admin Panel";
+      els.dashboardSubtitle.textContent = `Welcome, ${state.adminProfile?.username || "Admin"}`;
+
+      // Admin tabs
+      els.filterBar.innerHTML = `
+        <button class="filter-chip ${state.adminActiveTab === "moderation" ? "is-active" : ""}" data-admin-tab="moderation">Moderation</button>
+        <button class="filter-chip ${state.adminActiveTab === "reports" ? "is-active" : ""}" data-admin-tab="reports">Reports</button>
+        <button class="filter-chip ${state.adminActiveTab === "logs" ? "is-active" : ""}" data-admin-tab="logs">Logs</button>
+        <button class="filter-chip ${state.adminActiveTab === "categories" ? "is-active" : ""}" data-admin-tab="categories">Categories</button>
+        <button class="filter-chip ${state.adminActiveTab === "stores" ? "is-active" : ""}" data-admin-tab="stores">Stores</button>
+        <button class="filter-chip ${state.adminActiveTab === "tags" ? "is-active" : ""}" data-admin-tab="tags">Tags</button>
+        <button class="filter-chip ${state.adminActiveTab === "analytics" ? "is-active" : ""}" data-admin-tab="analytics">Analytics</button>
+      `;
+
+      els.filterBar.querySelectorAll("[data-admin-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.adminActiveTab = btn.dataset.adminTab;
+          renderAdmin();
+        });
+      });
+
+      // Render active tab content
+      switch (state.adminActiveTab) {
+        case "moderation":
+          await renderAdminModeration();
+          break;
+        case "reports":
+          await renderAdminReports();
+          break;
+        case "logs":
+          await renderAdminLogs();
+          break;
+        case "categories":
+          await renderAdminCategories();
+          break;
+        case "stores":
+          await renderAdminStores();
+          break;
+        case "tags":
+          await renderAdminTags();
+          break;
+        case "analytics":
+          await renderAdminAnalytics();
+          break;
+      }
+    }
+
+    // Developer A: Admin - Render moderation panel
+    async function renderAdminModeration() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const pendingPosts = await apiRequest("/api/admin/moderation/posts/pending?page=1&pageSize=20", { auth: true });
+        const posts = normalizePosts(pendingPosts?.items || []);
+
+        if (!posts.length) {
+          els.dashboardContent.innerHTML = `
+            <div class="empty-card">
+              <h3>No pending posts</h3>
+              <p>All posts have been reviewed.</p>
+            </div>
+          `;
+          return;
+        }
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <h3>Pending Posts (${posts.length})</h3>
+            <div class="moderation-list">
+              ${posts.map(post => `
+                <div class="moderation-item">
+                  <div class="moderation-preview" style="background-image:url('${post.imageUrls?.[0] || ''}');"></div>
+                  <div class="moderation-content">
+                    <h4>${post.title}</h4>
+                    <p>${post.description.slice(0, 100)}...</p>
+                    <div class="moderation-meta">
+                      <span>by @${post.authorUsername || post.authorName}</span>
+                      <span>${post.createdLabel}</span>
+                    </div>
+                    <div class="moderation-actions">
+                      <button class="primary-button small" data-action="approve-post" data-post-id="${post.id}">Approve</button>
+                      <button class="secondary-button small" data-action="reject-post" data-post-id="${post.id}">Reject</button>
+                      <button class="ghost-button small" data-action="hide-post" data-post-id="${post.id}">Hide</button>
+                    </div>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+
+        // Add action handlers
+        els.dashboardContent.querySelectorAll("[data-action]").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            const action = btn.dataset.action;
+            const postId = btn.dataset.postId;
+            await handleAdminAction(action, postId);
+            renderAdmin();
+          });
+        });
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading pending posts</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render reports panel
+    async function renderAdminReports() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const reports = await apiRequest("/api/admin/moderation/reports?status=PENDING&page=1&pageSize=20", { auth: true });
+        const reportList = reports?.items || [];
+
+        if (!reportList.length) {
+          els.dashboardContent.innerHTML = `
+            <div class="empty-card">
+              <h3>No pending reports</h3>
+              <p>All reports have been resolved.</p>
+            </div>
+          `;
+          return;
+        }
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <h3>Pending Reports (${reportList.length})</h3>
+            <div class="report-list">
+              ${reportList.map(report => `
+                <div class="report-item">
+                  <div class="report-header">
+                    <span class="report-type">${report.targetType || 'POST'}</span>
+                    <span class="report-reason">${report.reasonType}</span>
+                  </div>
+                  <div class="report-content">
+                    <p>${report.reasonDetail || 'No details provided'}</p>
+                    <div class="report-meta">
+                      <span>Reported by: ${report.reporterUsername || 'Anonymous'}</span>
+                      <span>${formatRelativeTime(report.createdAt)}</span>
+                    </div>
+                  </div>
+                  <div class="report-actions">
+                    <button class="primary-button small" data-action="resolve-report" data-report-id="${report.id}">Resolve</button>
+                    <button class="secondary-button small" data-action="reject-report" data-report-id="${report.id}">Reject</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+
+        els.dashboardContent.querySelectorAll("[data-action]").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            const action = btn.dataset.action;
+            const reportId = btn.dataset.reportId;
+            await handleAdminAction(action, reportId);
+            renderAdmin();
+          });
+        });
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading reports</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render audit logs panel
+    async function renderAdminLogs() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const logs = await apiRequest("/api/admin/moderation/logs?page=1&pageSize=30", { auth: true });
+        const logList = logs?.items || [];
+
+        if (!logList.length) {
+          els.dashboardContent.innerHTML = `
+            <div class="empty-card">
+              <h3>No audit logs</h3>
+              <p>No moderation actions have been recorded yet.</p>
+            </div>
+          `;
+          return;
+        }
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <h3>Audit Logs</h3>
+            <div class="logs-list">
+              ${logList.map(log => `
+                <div class="log-item">
+                  <span class="log-action">${log.action}</span>
+                  <span class="log-target">${log.targetType} #${log.targetId}</span>
+                  <span class="log-moderator">by ${log.moderatorUsername || 'System'}</span>
+                  <span class="log-time">${formatRelativeTime(log.createdAt)}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading logs</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render categories management
+    async function renderAdminCategories() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const categories = await apiRequest("/api/categories/tree", { auth: true });
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <div class="section-header">
+              <h3>Categories</h3>
+              <button class="primary-button small" id="add-category-btn">Add Category</button>
+            </div>
+            <div class="category-tree">
+              ${renderCategoryTree(categories)}
+            </div>
+          </div>
+        `;
+
+        document.querySelector("#add-category-btn")?.addEventListener("click", () => {
+          openCategoryModal();
+        });
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading categories</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render category tree recursively
+    function renderCategoryTree(categories, depth = 0) {
+      if (!categories?.length) return "";
+      return `
+        <ul class="category-list" style="padding-left: ${depth * 20}px;">
+          ${categories.map(cat => `
+            <li class="category-item">
+              <div class="category-row">
+                <span>${cat.name}</span>
+                <div class="category-actions">
+                  <button class="text-button" data-action="edit-category" data-category-id="${cat.id}">Edit</button>
+                  <button class="text-button" data-action="${cat.active ? 'deactivate-category' : 'activate-category'}" data-category-id="${cat.id}">
+                    ${cat.active ? 'Deactivate' : 'Activate'}
+                  </button>
+                </div>
+              </div>
+              ${renderCategoryTree(cat.children, depth + 1)}
+            </li>
+          `).join("")}
+        </ul>
+      `;
+    }
+
+    // Developer A: Admin - Render stores management
+    async function renderAdminStores() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const stores = await apiRequest("/api/stores", { auth: true });
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <div class="section-header">
+              <h3>Stores</h3>
+              <button class="primary-button small" id="add-store-btn">Add Store</button>
+            </div>
+            <div class="stores-grid">
+              ${(stores || []).map(store => `
+                <div class="store-card">
+                  <h4>${store.name}</h4>
+                  <p>${store.address || store.city}</p>
+                  <div class="store-status ${store.status === 'ACTIVE' ? 'active' : 'inactive'}">${store.status}</div>
+                  <div class="store-actions">
+                    <button class="text-button" data-action="edit-store" data-store-id="${store.id}">Edit</button>
+                    <button class="text-button" data-action="change-store-status" data-store-id="${store.id}">
+                      ${store.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading stores</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render tags management
+    async function renderAdminTags() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const tags = await apiRequest("/api/tags", { auth: true });
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <div class="section-header">
+              <h3>Tags</h3>
+              <button class="primary-button small" id="add-tag-btn">Add Tag</button>
+            </div>
+            <div class="tags-container">
+              ${(tags || []).map(tag => `
+                <div class="tag-item">
+                  <span class="tag-pill">${tag.name}</span>
+                  <span class="tag-score">Heat: ${tag.heatScore || 0}</span>
+                  <button class="text-button" data-action="edit-tag" data-tag-id="${tag.id}">Edit</button>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading tags</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Render analytics
+    async function renderAdminAnalytics() {
+      els.dashboardContent.innerHTML = `<div class="loading-spinner"></div>`;
+      try {
+        const overview = await apiRequest("/api/admin/analytics/overview", { auth: true });
+        const trends = await apiRequest("/api/admin/analytics/trends?window=weekly", { auth: true });
+
+        els.dashboardContent.innerHTML = `
+          <div class="admin-section">
+            <h3>Admin Analytics Overview</h3>
+            <div class="detail-metric-grid">
+              <div class="detail-metric"><small>Total Posts</small><strong>${overview?.totalPosts || 0}</strong></div>
+              <div class="detail-metric"><small>Pending Review</small><strong>${overview?.pendingPosts || 0}</strong></div>
+              <div class="detail-metric"><small>Total Users</small><strong>${overview?.totalUsers || 0}</strong></div>
+              <div class="detail-metric"><small>Open Reports</small><strong>${overview?.openReports || 0}</strong></div>
+            </div>
+            <div class="empty-card">
+              <h3>Trend Data</h3>
+              <p>Weekly trends and detailed analytics visualization coming soon.</p>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Error loading analytics</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Developer A: Admin - Handle admin actions
+    async function handleAdminAction(action, id) {
+      try {
+        switch (action) {
+          case "approve-post":
+            await apiRequest(`/api/admin/moderation/posts/${id}/approve`, { method: "POST", auth: true });
+            showToast("Post approved");
+            break;
+          case "reject-post":
+            await apiRequest(`/api/admin/moderation/posts/${id}/reject`, { method: "POST", auth: true, body: { reason: "Content does not meet community guidelines" } });
+            showToast("Post rejected");
+            break;
+          case "hide-post":
+            await apiRequest(`/api/admin/moderation/posts/${id}/hide`, { method: "POST", auth: true, body: { reason: "Content hidden by moderator" } });
+            showToast("Post hidden");
+            break;
+          case "resolve-report":
+            await apiRequest(`/api/admin/moderation/reports/${id}/resolve`, { method: "POST", auth: true });
+            showToast("Report resolved");
+            break;
+          case "reject-report":
+            await apiRequest(`/api/admin/moderation/reports/${id}/reject`, { method: "POST", auth: true });
+            showToast("Report rejected");
+            break;
+          case "edit-category":
+          case "activate-category":
+          case "deactivate-category":
+          case "edit-store":
+          case "change-store-status":
+          case "edit-tag":
+            showToast("Edit functionality coming soon");
+            break;
+        }
+      } catch (error) {
+        showToast(error.message || "Action failed");
+      }
+    }
+
     // Developer A: Filter posts by search query (reusable helper)
     function filterPostsBySearch(posts, query) {
       query = query.trim();
-      
+
       // Check if it's a post link
       const postIdMatch = query.match(/post\/(\d+)/);
       if (postIdMatch) {
@@ -2517,20 +3316,20 @@
         const foundPost = posts.find(p => p.id === postId);
         return foundPost ? [foundPost] : [];
       }
-      
+
       // Check if it's a pure numeric ID
       if (/^\d+$/.test(query)) {
         const postId = parseInt(query);
         const foundPost = posts.find(p => p.id === postId);
         return foundPost ? [foundPost] : [];
       }
-      
+
       // If search starts with #, only search tags
       if (query.startsWith('#')) {
         const tagToSearch = query;
         return posts.filter(p => p.tags.some(tag => tag.toLowerCase() === tagToSearch));
       }
-      
+
       // Otherwise search all fields
       return posts.filter(p => {
         // Check tags (including # prefix)
@@ -2538,33 +3337,33 @@
           const tagLower = tag.toLowerCase();
           return tagLower.includes(query) || tagLower === `#${query}`;
         });
-        
+
         if (hasTagMatch) return true;
-        
+
         // Check title
         if (p.title.toLowerCase().includes(query)) return true;
-        
+
         // Check description
         if (p.description.toLowerCase().includes(query)) return true;
-        
+
         // Check location
         if (p.location && p.location.toLowerCase().includes(query)) return true;
-        
+
         // Check store name
         if (p.storeName && p.storeName.toLowerCase().includes(query)) return true;
-        
+
         // Check category
         if (p.category && p.category.toLowerCase().includes(query)) return true;
-        
+
         // Check author name
         if (p.authorName && p.authorName.toLowerCase().includes(query)) return true;
-        
+
         return false;
       }).sort((a, b) => {
         // Tag matches come first
         const aHasTag = a.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
         const bHasTag = b.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
-        
+
         if (aHasTag && !bHasTag) return -1;
         if (!aHasTag && bHasTag) return 1;
         return 0;
@@ -2576,15 +3375,15 @@
       els.dashboardTitle.textContent = "Bookmarks";
       els.dashboardSubtitle.textContent = "Saved posts for later";
       els.filterBar.innerHTML = "";
-      
+
       // First filter by bookmarked posts
       let posts = state.posts.filter(p => state.bookmarkedPostIds.includes(p.id));
-      
+
       // Then apply search on the filtered results
       if (state.query) {
         posts = filterPostsBySearch(posts, state.query);
       }
-      
+
       if (posts.length === 0) {
         els.dashboardContent.innerHTML = `<div class="empty-card"><h3>No bookmarks found</h3><p>Try adjusting your search query or save more posts.</p></div>`;
         return;
@@ -2601,15 +3400,15 @@
       els.dashboardTitle.textContent = "Shared";
       els.dashboardSubtitle.textContent = "Content you've shared";
       els.filterBar.innerHTML = "";
-      
+
       // First filter by shared posts
       let posts = state.posts.filter(p => state.sharedPostIds.includes(p.id));
-      
+
       // Then apply search on the filtered results
       if (state.query) {
         posts = filterPostsBySearch(posts, state.query);
       }
-      
+
       if (posts.length === 0) {
         els.dashboardContent.innerHTML = `<div class="empty-card"><h3>No shared posts found</h3><p>Try adjusting your search query.</p></div>`;
         return;
@@ -2626,13 +3425,13 @@
       els.dashboardTitle.textContent = "Settings";
       els.dashboardSubtitle.textContent = "Manage your account";
       els.filterBar.innerHTML = "";
-      
+
       // Check if there's a saved avatar
       const hasSavedAvatar = state.user.avatarUrls && state.user.avatarUrls.custom;
-      const avatarPreviewStyle = hasSavedAvatar 
+      const avatarPreviewStyle = hasSavedAvatar
         ? `background: url(${state.user.avatarUrls.custom}); background-size: cover; background-position: center;`
         : "background: linear-gradient(135deg, #493f62, #231e34);";
-      
+
       els.dashboardContent.innerHTML = `
         <div class="detail-info-panel">
           <h3>Profile Picture</h3>
@@ -2676,7 +3475,7 @@
       const avatarPreview = document.querySelector("#avatar-preview");
       const tempPreview = document.querySelector("#avatar-temp-preview");
       const saveAccountBtn = document.querySelector("#save-account-button");
-      
+
       let tempAvatarUrl = null;
 
       selectAvatarBtn?.addEventListener("click", () => {
@@ -2686,7 +3485,7 @@
       avatarInput?.addEventListener("change", (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        
+
         if (!file.type.startsWith("image/")) {
           showToast("Please select an image file");
           return;
@@ -2715,28 +3514,28 @@
           // Save avatar to user state
           if (!state.user.avatarUrls) state.user.avatarUrls = {};
           state.user.avatarUrls.custom = tempAvatarUrl;
-          
+
           // Save to localStorage for persistence
           localStorage.setItem("curator_user_data", JSON.stringify(state.user));
-          
+
           // Update sidebar avatar
           els.sidebarAvatar.style.background = `url(${tempAvatarUrl})`;
           els.sidebarAvatar.style.backgroundSize = "cover";
           els.sidebarAvatar.style.backgroundPosition = "center";
           els.sidebarAvatar.textContent = "";
-          
+
           // Update detail page avatar
           els.detailAvatar.style.background = `url(${tempAvatarUrl})`;
           els.detailAvatar.style.backgroundSize = "cover";
           els.detailAvatar.style.backgroundPosition = "center";
           els.detailAvatar.textContent = "";
-          
+
           // Update comment user avatar
           els.commentUserAvatar.style.background = `url(${tempAvatarUrl})`;
           els.commentUserAvatar.style.backgroundSize = "cover";
           els.commentUserAvatar.style.backgroundPosition = "center";
           els.commentUserAvatar.textContent = "";
-          
+
           showToast("Avatar updated successfully!");
           saveAvatarBtn.disabled = true;
           resetAvatarBtn.disabled = false;
@@ -2748,27 +3547,27 @@
         // Reset to initials
         avatarPreview.style.background = "linear-gradient(135deg, #493f62, #231e34)";
         avatarPreview.textContent = state.user.avatar;
-        
+
         // Reset sidebar avatar
         els.sidebarAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
         els.sidebarAvatar.textContent = state.user.avatar;
-        
+
         // Reset detail page avatar
         els.detailAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
         els.detailAvatar.textContent = state.user.avatar;
-        
+
         // Reset comment user avatar
         els.commentUserAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
         els.commentUserAvatar.textContent = state.user.avatar;
-        
+
         // Remove custom avatar from state
         if (state.user.avatarUrls) {
           delete state.user.avatarUrls.custom;
         }
-        
+
         // Save to localStorage for persistence
         localStorage.setItem("curator_user_data", JSON.stringify(state.user));
-        
+
         saveAvatarBtn.disabled = true;
         resetAvatarBtn.disabled = true;
         tempAvatarUrl = null;
@@ -2781,15 +3580,15 @@
         const username = document.querySelector("#setting-username")?.value;
         const email = document.querySelector("#setting-email")?.value;
         const bio = document.querySelector("#setting-bio")?.value;
-        
+
         if (name) state.user.name = name;
         if (username) state.user.username = username;
         if (email) state.user.email = email;
         if (bio) state.user.bio = bio;
-        
+
         // Save to localStorage for persistence
         localStorage.setItem("curator_user_data", JSON.stringify(state.user));
-        
+
         els.sidebarName.textContent = state.user.name;
         showToast("Account settings updated!");
       });
@@ -2810,17 +3609,105 @@
       if (route === "feed") { els.dashboardTitle.textContent = `Good morning, ${state.user.name.split(" ")[0] || state.user.name}.`; els.dashboardSubtitle.textContent = "Discover what people are finding in stores around you."; renderFeed(); }
       if (route === "explore") renderExplore();
       if (route === "profile") renderProfile();
+      if (route === "user-profile") renderUserProfile();
       if (route === "bookmarks") renderBookmarks();
       if (route === "shared") renderShared();
       if (route === "analytics") renderAnalytics();
+      if (route === "admin") renderAdmin();
       if (route === "settings") renderSettings();
       updateTrendingAndNotifications();
       window.history.pushState({ route }, "", `#${route}`);
     }
 
+    // Developer A: Open public user profile
+    async function openUserProfile(username) {
+      if (!username) return;
+      state.visitedUsername = username;
+      state.visitedUser = null;
+      state.profileTab = "posts";
+
+      showLoading();
+      try {
+        if (backendState.backendAvailable) {
+          // Fetch public profile and posts
+          const [profile, postsPage] = await Promise.all([
+            apiRequest(`/api/users/${username}/profile`),
+            apiRequest(`/api/users/${username}/posts?page=1&pageSize=30`),
+          ]);
+          state.visitedUser = profile;
+          state.posts = normalizePosts(postsPage?.items || []);
+        } else {
+          // Fallback: filter posts by author
+          state.posts = state.posts.filter(p => p.authorName.toLowerCase() === username.toLowerCase());
+        }
+        navigate("user-profile");
+      } catch (error) {
+        showToast(error.message || "Failed to load user profile.");
+        console.warn("Failed to load user profile:", error);
+      } finally {
+        hideLoading();
+      }
+    }
+
     // Developer B: Update trending list and notifications
-    function updateTrendingAndNotifications() {
+    async function updateTrendingAndNotifications() {
       els.trendingList.innerHTML = "";
+
+      // Try to load trending categories from Discovery API
+      if (backendState.backendAvailable) {
+        try {
+          const [trendingCategories, trendingTags, trendingStores] = await Promise.all([
+            apiRequest("/api/discovery/trending/categories?limit=5").catch(() => []),
+            apiRequest("/api/discovery/trending/tags?limit=5").catch(() => []),
+            apiRequest("/api/discovery/trending/stores?limit=5").catch(() => []),
+          ]);
+
+          // Combine trending items
+          const allTrending = [];
+          if (Array.isArray(trendingCategories)) {
+            allTrending.push(...trendingCategories.map(item => ({
+              title: item.name || item.category?.name || "Category",
+              volume: `${item.postCount || item.count || 0} posts`,
+              type: "category",
+              id: item.id || item.category?.id,
+            })));
+          }
+          if (Array.isArray(trendingTags)) {
+            allTrending.push(...trendingTags.map(item => ({
+              title: `#${item.name || item.tag?.name || "Tag"}`,
+              volume: `${item.postCount || item.count || 0} posts`,
+              type: "tag",
+              id: item.id || item.tag?.id,
+            })));
+          }
+          if (Array.isArray(trendingStores)) {
+            allTrending.push(...trendingStores.map(item => ({
+              title: item.name || item.store?.name || "Store",
+              volume: `${item.postCount || item.count || 0} posts`,
+              type: "store",
+              id: item.id || item.store?.id,
+            })));
+          }
+
+          // Sort by post count and take top 3
+          const topTrending = allTrending.sort((a, b) => {
+            const aCount = parseInt(a.volume) || 0;
+            const bCount = parseInt(b.volume) || 0;
+            return bCount - aCount;
+          }).slice(0, 3);
+
+          if (topTrending.length) {
+            topTrending.forEach((item, i) => {
+              els.trendingList.appendChild(renderTrendingItem(i, item));
+            });
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to load trending from Discovery API, using fallback.");
+        }
+      }
+
+      // Fallback: use trending posts
       const trending = (state.trendingPosts?.length ? state.trendingPosts : [...state.posts].sort((a, b) => (b.likes + b.saves + b.shares) - (a.likes + a.saves + a.shares)).slice(0, 3));
       trending.forEach((post, i) => {
         els.trendingList.appendChild(renderTrendingItem(i, { title: post.title, volume: `${post.likes + post.saves + post.shares} interactions` }));
@@ -2890,7 +3777,7 @@
       }
       return count;
     }
-    
+
     // Developer B: Render comments for detail view
     function renderComments() {
       if (!state.detailPost) return;
@@ -2946,6 +3833,19 @@
       if (action === "edit") {
         openCreateModal(post);
       }
+      if (action === "delete") {
+        if (!confirm(`Delete this post "${post.title}"?`)) return;
+        await apiRequest(`/api/posts/${post.id}`, { method: "DELETE", auth: true });
+        showToast("Post deleted");
+        // Remove from state
+        state.posts = state.posts.filter(p => p.id !== post.id);
+        renderFeed();
+        if (state.detailPost) {
+          state.detailPost = null;
+          closeDetail();
+        }
+        return;
+      }
       if (action === "report") {
         openReportModal(post.id, "post");
       }
@@ -2982,7 +3882,7 @@
       }
       if (action === "delete-comment") {
         if (!requireAuth()) return;
-        await apiRequest(`/api/comments/${commentId}`, { method: "DELETE", auth: true }).catch(() => null);
+        await apiRequest(`/api/posts/${state.detailPost.id}/comments/${commentId}`, { method: "DELETE", auth: true }).catch(() => null);
         if (state.detailPost) {
           removeComment(state.detailPost.comments, commentId);
         }
@@ -3002,7 +3902,7 @@
       }
       return null;
     }
-    
+
     // Developer B: Recursively remove comment from comments array
     function removeComment(comments, id) {
       for (let i = 0; i < comments.length; i++) {
@@ -3198,7 +4098,7 @@
         canvas.height = 100;
         ctx.drawImage(img, 0, 0, 100, 100);
         const imageData = ctx.getImageData(0, 0, 100, 100).data;
-        
+
         // 简单的颜色提取：取图像的几个代表性点
         const samplePoints = [
           { x: 50, y: 50 },    // 中心
@@ -3207,12 +4107,12 @@
           { x: 25, y: 75 },    // 左下角
           { x: 75, y: 75 },    // 右下角
         ];
-        
+
         const colors = samplePoints.map(point => {
           const i = (point.y * 100 + point.x) * 4;
           return [imageData[i], imageData[i + 1], imageData[i + 2]];
         });
-        
+
         callback(colors);
       };
       img.onerror = () => {
@@ -3226,26 +4126,26 @@
     function parseGradientColors(gradient) {
       // 提取渐变中的颜色值
       const colors = [];
-      
+
       // 匹配 rgb/rgba 颜色
       const rgbRegex = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/gi;
       let match;
       while ((match = rgbRegex.exec(gradient)) !== null) {
         colors.push({ r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) });
       }
-      
+
       // 如果没有找到 rgb，尝试匹配 hex 颜色
       if (colors.length === 0) {
         const hexRegex = /#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/gi;
         while ((match = hexRegex.exec(gradient)) !== null) {
-          colors.push({ 
-            r: parseInt(match[1], 16), 
-            g: parseInt(match[2], 16), 
-            b: parseInt(match[3], 16) 
+          colors.push({
+            r: parseInt(match[1], 16),
+            g: parseInt(match[2], 16),
+            b: parseInt(match[3], 16)
           });
         }
       }
-      
+
       return colors.length > 0 ? colors : [{ r: 180, g: 180, b: 200 }];
     }
 
@@ -3265,6 +4165,14 @@
         if (!backendState.selectedImageSearchFile) throw new Error("Please choose an image first.");
         const formData = new FormData();
         formData.append("file", backendState.selectedImageSearchFile);
+        // Add optional filter parameters
+        if (state.filterCategory) formData.append("categoryId", state.filterCategory);
+        if (state.filterStore) formData.append("storeId", state.filterStore);
+        if (state.filterTags?.length) {
+          state.filterTags.forEach(tagId => formData.append("tagIds", tagId));
+        }
+        if (state.filterPriceMin) formData.append("priceMin", state.filterPriceMin);
+        if (state.filterPriceMax) formData.append("priceMax", state.filterPriceMax);
         formData.append("page", "1");
         formData.append("pageSize", "12");
         const envelope = await apiRequest("/api/posts/search/image", { method: "POST", auth: Boolean(backendState.token), formData, returnEnvelope: true });
@@ -3334,7 +4242,7 @@
           auth: true,
           body: {
             reasonType: mapReportReason(reason),
-            message: message || null,
+            reasonDetail: message || null,
           },
         });
         showToast("Report submitted. Thank you for helping keep our community safe.");
@@ -3383,19 +4291,19 @@
       await loadBackendData();
       els.sidebarName.textContent = state.user.name;
       els.sidebarRole.textContent = state.user.role;
-      
+
       // Load saved avatar if exists
       if (state.user.avatarUrls && state.user.avatarUrls.custom) {
         els.sidebarAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
         els.sidebarAvatar.style.backgroundSize = "cover";
         els.sidebarAvatar.style.backgroundPosition = "center";
         els.sidebarAvatar.textContent = "";
-        
+
         els.detailAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
         els.detailAvatar.style.backgroundSize = "cover";
         els.detailAvatar.style.backgroundPosition = "center";
         els.detailAvatar.textContent = "";
-        
+
         els.commentUserAvatar.style.background = `url(${state.user.avatarUrls.custom})`;
         els.commentUserAvatar.style.backgroundSize = "cover";
         els.commentUserAvatar.style.backgroundPosition = "center";
@@ -3414,6 +4322,79 @@
         renderFeed();
       }));
 
+      // Initialize search filters
+      if (els.searchFilterBar && els.filterCategorySelect && els.filterStoreSelect && els.filterSortSelect) {
+        // Populate category and store selects
+        if (backendState.categories?.length) {
+          els.filterCategorySelect.innerHTML = `<option value="">All Categories</option>` +
+            backendState.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join("");
+        }
+        if (backendState.stores?.length) {
+          els.filterStoreSelect.innerHTML = `<option value="">All Stores</option>` +
+            backendState.stores.map(store => `<option value="${store.id}">${store.name}</option>`).join("");
+        }
+
+        // Show filter bar when categories/stores are available
+        if (backendState.categories?.length || backendState.stores?.length) {
+          els.searchFilterBar.style.display = "flex";
+        }
+
+        // Category filter change
+        els.filterCategorySelect.addEventListener("change", () => {
+          state.filterCategory = els.filterCategorySelect.value || null;
+          if (state.filterCategory || state.filterStore || state.filterTags?.length || state.query) {
+            els.searchFilterBar.style.display = "flex";
+          }
+          // Trigger search
+          if (els.globalSearch) {
+            els.globalSearch.value = state.query || "";
+            els.globalSearch.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        });
+
+        // Store filter change
+        els.filterStoreSelect.addEventListener("change", () => {
+          state.filterStore = els.filterStoreSelect.value || null;
+          if (state.filterCategory || state.filterStore || state.filterTags?.length || state.query) {
+            els.searchFilterBar.style.display = "flex";
+          }
+          // Trigger search
+          if (els.globalSearch) {
+            els.globalSearch.value = state.query || "";
+            els.globalSearch.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        });
+
+        // Sort order change
+        els.filterSortSelect.addEventListener("change", () => {
+          state.sortOrder = els.filterSortSelect.value || "latest";
+          // Trigger search
+          if (els.globalSearch) {
+            els.globalSearch.value = state.query || "";
+            els.globalSearch.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        });
+
+        // Clear filters
+        els.clearFiltersButton.addEventListener("click", () => {
+          state.filterCategory = null;
+          state.filterStore = null;
+          state.filterTags = [];
+          state.filterPriceMin = null;
+          state.filterPriceMax = null;
+          state.sortOrder = "latest";
+          els.filterCategorySelect.value = "";
+          els.filterStoreSelect.value = "";
+          els.filterSortSelect.value = "latest";
+          els.searchFilterBar.style.display = "none";
+          // Trigger search
+          if (els.globalSearch) {
+            els.globalSearch.value = "";
+            els.globalSearch.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        });
+      }
+
       els.globalSearch.addEventListener("input", (e) => {
         state.query = e.target.value;
         clearTimeout(searchTimer);
@@ -3424,9 +4405,24 @@
           }
           try {
             const keyword = state.query.trim();
-            const path = keyword
-              ? `/api/posts/search?keyword=${encodeURIComponent(keyword)}&page=1&pageSize=30`
+            // Build search query with multiple filters
+            const params = new URLSearchParams();
+            if (keyword) params.append("keyword", keyword);
+            if (state.filterCategory) params.append("categoryId", state.filterCategory);
+            if (state.filterStore) params.append("storeId", state.filterStore);
+            if (state.filterTags?.length) {
+              state.filterTags.forEach(tagId => params.append("tagIds", tagId));
+            }
+            if (state.filterPriceMin) params.append("priceMin", state.filterPriceMin);
+            if (state.filterPriceMax) params.append("priceMax", state.filterPriceMax);
+            if (state.sortOrder) params.append("sort", state.sortOrder);
+            params.append("page", "1");
+            params.append("pageSize", "30");
+
+            const path = keyword || state.filterCategory || state.filterStore || state.filterTags?.length
+              ? `/api/posts/search?${params.toString()}`
               : "/api/posts/published?page=1&pageSize=30";
+
             const pageData = await apiRequest(path, { auth: Boolean(backendState.token) });
             state.posts = normalizePosts(pageData?.items || []);
             renderFeed();
@@ -3475,7 +4471,7 @@
       els.cancelReportButton.addEventListener("click", closeReportModal);
       els.submitReportButton.addEventListener("click", handleReportSubmit);
 
-      if (backendState.token) {
+      if (backendState.token || backendState.isGuest) {
         navigate("feed");
       }
     }
@@ -3487,4 +4483,5 @@
     init();
   </script>
 </body>
+
 </html>

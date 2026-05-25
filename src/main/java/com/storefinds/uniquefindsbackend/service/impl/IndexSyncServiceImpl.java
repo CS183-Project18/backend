@@ -86,11 +86,13 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     }
 
     @EventListener(ApplicationReadyEvent.class)
+    @Async
     public void onApplicationReady() {
         scheduleRebuild("application startup");
     }
 
     @EventListener
+    @Async
     public void onPostStatusChanged(PostStatusChangedEvent event) {
         if (isPublishedStatus(event.oldStatus()) || isPublishedStatus(event.newStatus())) {
             scheduleRebuild("post status changed: postId=" + event.postId());
@@ -98,11 +100,13 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     }
 
     @EventListener
+    @Async
     public void onPostSearchContentChanged(PostSearchContentChangedEvent event) {
         scheduleRebuild("published post search content changed: postId=" + event.postId());
     }
 
     @EventListener
+    @Async
     public void onPostDeleted(PostDeletedEvent event) {
         if (isPublishedStatus(event.previousStatus())) {
             scheduleRebuild("published post deleted: postId=" + event.postId());
