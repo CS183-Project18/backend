@@ -37,6 +37,11 @@ function bindEvents() {
   document.querySelectorAll("[data-oauth]").forEach((button) => {
     button.addEventListener("click", () => showToast(`${button.dataset.oauth} login is not configured for this demo.`));
   });
+
+  // Custom file upload button for create post form
+  document.querySelector("#choose-post-images")?.addEventListener("click", () => {
+    document.querySelector("#post-images")?.click();
+  });
 }
 
 function switchAuthMode(mode) {

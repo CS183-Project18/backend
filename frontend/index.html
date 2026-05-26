@@ -317,8 +317,9 @@
 
         <label class="upload-field">
           <span>Upload Images</span>
-          <input id="post-images" type="file" accept="image/*" multiple />
-          <small>最多 4 张，单张 16MB。图片会上传到 Flask 媒体服务并真实存储在磁盘。</small>
+          <input id="post-images" type="file" accept="image/*" multiple class="hidden-file-input" />
+          <button class="secondary-button upload-trigger" id="choose-post-images" type="button">Choose Files</button>
+          <small>Max 4 images, 16MB each. Images will be uploaded to Flask media service and stored on disk.</small>
         </label>
 
         <div class="preview-grid" id="preview-grid"></div>

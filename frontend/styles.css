@@ -147,11 +147,17 @@ button {
 .filter-chip,
 .trend-tab,
 .send-button,
-.icon-button {
+.icon-button,
+.danger-button,
+.back-button,
+.follow-button {
   min-height: 52px;
   padding: 0 22px;
   border-radius: 16px;
+  border: 0;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -168,14 +174,18 @@ button {
 .filter-chip:hover,
 .trend-tab:hover,
 .icon-button:hover,
-.send-button:hover {
+.send-button:hover,
+.danger-button:hover,
+.back-button:hover,
+.follow-button:hover {
   transform: translateY(-1px);
 }
 
 /* Primary gradient button */
 .primary-button,
 .upgrade-button,
-.send-button {
+.send-button,
+.follow-button {
   color: white;
   background: linear-gradient(135deg, var(--accent), var(--accent-soft));
   box-shadow: 0 14px 34px rgba(99, 91, 255, 0.25);
@@ -193,17 +203,36 @@ button {
   border: 1px solid var(--line);
 }
 
+.secondary-button:hover,
+.outline-button:hover,
+.oauth-button:hover,
+.filter-chip:hover,
+.trend-tab:hover,
+.icon-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.95);
+}
+
 .outline-button.wide {
   width: 100%;
 }
 
 /* Ghost & text transparent button */
 .ghost-icon,
-.text-button {
+.text-button,
+.back-button {
   color: var(--accent);
   background: transparent;
   cursor: pointer;
   font-weight: 600;
+}
+
+/* Danger button for destructive actions */
+.danger-button {
+  color: white;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 14px 34px rgba(239, 68, 68, 0.25);
 }
 
 /* Avatar user head portrait */
@@ -252,7 +281,7 @@ button {
 
 /* ==============================================
             【Chenqian Fu' s part starts】
-   register/login page、sidebar menu、navigation、Feed/Explore/Bookmarks/Analytics/Settings 主页面
+   register/login page, sidebar menu, navigation, Feed/Explore/Bookmarks/Analytics/Settings main page
 ============================================== */
 
 /* Auth screen layout */
@@ -371,6 +400,41 @@ button {
 .auth-panel-inner>p {
   margin: 12px 0 30px;
   color: var(--muted);
+}
+
+/* Auth mode toggle */
+.auth-mode-toggle {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.auth-mode-toggle .mode-chip {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.auth-mode-toggle .mode-chip:hover {
+  color: var(--text-dark);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.auth-mode-toggle .mode-chip.is-active {
+  color: white;
+  background: var(--accent);
+  box-shadow: 0 4px 14px rgba(99, 91, 255, 0.35);
 }
 
 /* Form layout */
@@ -1045,6 +1109,13 @@ button {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.settings-actions button,
+.form-actions button {
+  min-width: 140px;
 }
 
 /* Right sidebar */
@@ -1127,9 +1198,6 @@ button {
 .upgrade-button {
   width: 100%;
   margin-top: 20px;
-  color: var(--accent);
-  background: white;
-  box-shadow: none;
 }
 
 /* ==============================================
@@ -1193,8 +1261,6 @@ button {
 
 .back-button {
   color: var(--text);
-  background: transparent;
-  cursor: pointer;
 }
 
 /* Detail main layout */
@@ -1258,8 +1324,6 @@ button {
   min-height: 42px;
   padding: 0 14px;
   border-radius: 12px;
-  color: white;
-  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
 }
 
 .detail-meta-grid {
@@ -1437,6 +1501,10 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.form-grid .full-width {
+  grid-column: 1 / -1;
 }
 
 /* Image upload zone */
@@ -1621,18 +1689,6 @@ button {
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
-}
-
-.moderation-preview.is-empty {
-  display: grid;
-  place-items: center;
-  background: var(--chip);
-  border: 1px dashed var(--line);
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .moderation-content {
