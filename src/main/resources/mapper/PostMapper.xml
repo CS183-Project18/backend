@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.storefinds.uniquefindsbackend.mapper.PostMapper">
 
-    <resultMap id="PostResultMap" type="com.storefinds.uniquefindsbackend.entity.Post">
+    <resultMap id="BaseResultMap" type="com.storefinds.uniquefindsbackend.entity.Post">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="storeId" column="store_id"/>
@@ -26,6 +26,7 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="authorUsername" column="author_username"/>
+        <result property="coverImage" column="cover_image"/>
     </resultMap>
 
     <sql id="PostSelectColumns">
@@ -46,7 +47,7 @@
         )
     </insert>
 
-    <select id="selectById" resultMap="PostResultMap">
+    <select id="selectById" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -55,7 +56,7 @@
         LIMIT 1
     </select>
 
-    <select id="selectPublishedPosts" resultMap="PostResultMap">
+    <select id="selectPublishedPosts" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -70,7 +71,7 @@
         WHERE status = 'PUBLISHED'
     </select>
 
-    <select id="selectPublishedPostsPage" resultMap="PostResultMap">
+    <select id="selectPublishedPostsPage" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -80,7 +81,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <select id="selectByUserId" resultMap="PostResultMap">
+    <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -97,7 +98,7 @@
           AND status != 'DELETED'
     </select>
 
-    <select id="selectByUserIdPage" resultMap="PostResultMap">
+    <select id="selectByUserIdPage" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -115,7 +116,7 @@
           AND status = 'PUBLISHED'
     </select>
 
-    <select id="selectPublishedByUserIdPage" resultMap="PostResultMap">
+    <select id="selectPublishedByUserIdPage" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -183,7 +184,7 @@
         <include refid="PublishedSearchWhere"/>
     </select>
 
-    <select id="searchPublishedPosts" resultMap="PostResultMap">
+    <select id="searchPublishedPosts" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -217,7 +218,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-    <select id="selectPublishedPostsByIds" resultMap="PostResultMap">
+    <select id="selectPublishedPostsByIds" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -291,7 +292,7 @@
           AND published_at &gt;= #{windowStart}
     </select>
 
-    <select id="selectTrendingPosts" resultMap="PostResultMap">
+    <select id="selectTrendingPosts" resultMap="BaseResultMap">
         SELECT
         <include refid="PostSelectColumns"/>
         FROM posts p
@@ -355,14 +356,16 @@
         WHERE status = 'PENDING_REVIEW'
     </select>
 
-    <select id="selectPendingReviewPosts" resultMap="PostResultMap">
-        SELECT
-        <include refid="PostSelectColumns"/>
+    <select id="selectPendingReviewPosts" resultMap="BaseResultMap">
+        SELECT p.*,
+               u.username AS author_username,
+               pi.image_url AS cover_image
         FROM posts p
-        INNER JOIN users u ON u.id = p.user_id
+                 LEFT JOIN users u ON p.user_id = u.id
+                 LEFT JOIN post_images pi ON p.id = pi.post_id AND pi.is_cover = 1
         WHERE p.status = 'PENDING_REVIEW'
-        ORDER BY p.created_at ASC, p.id ASC
-        LIMIT #{pageSize} OFFSET #{offset}
+        ORDER BY p.created_at DESC
+            LIMIT #{offset}, #{pageSize}
     </select>
 
     <update id="approveById">

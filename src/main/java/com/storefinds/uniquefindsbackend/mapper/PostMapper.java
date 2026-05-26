@@ -338,4 +338,18 @@ public interface PostMapper {
      * Throws: None
      */
     int hideById(@Param("id") Long id, @Param("moderationReason") String moderationReason);
+
+    /**
+     * Author: Enqi Guo
+     * Date: 2026-05-26
+     * Purpose: Query pending review posts with cover image URL for admin moderation page.
+     * Params:
+     * - offset: row offset
+     * - pageSize: target page size
+     * Returns:
+     * - List<Post>: pending post list with cover image populated
+     * Throws: None
+     */
+    List<Post> selectPendingReviewPostsWithCover(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
 }

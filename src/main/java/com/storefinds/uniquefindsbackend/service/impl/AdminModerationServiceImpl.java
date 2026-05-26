@@ -19,10 +19,10 @@ import com.storefinds.uniquefindsbackend.dto.ReportResponse;
 import com.storefinds.uniquefindsbackend.entity.Comment;
 import com.storefinds.uniquefindsbackend.entity.ModerationLog;
 import com.storefinds.uniquefindsbackend.entity.Post;
-import com.storefinds.uniquefindsbackend.entity.PostImage;
 import com.storefinds.uniquefindsbackend.entity.Report;
 import com.storefinds.uniquefindsbackend.event.PostStatusChangedEvent;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
+import com.storefinds.uniquefindsbackend.entity.PostImage;
 import com.storefinds.uniquefindsbackend.mapper.CommentMapper;
 import com.storefinds.uniquefindsbackend.mapper.ModerationLogMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostImageMapper;
@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,13 +151,21 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Override
     public Result<PageResponse<AdminPostModerationResponse>> getPendingPosts(int page, int pageSize) {
         List<Post> posts = postMapper.selectPendingReviewPosts(toOffset(page, pageSize), pageSize);
-        Map<Long, List<PostImageResponse>> imagesByPostId = groupPostImages(posts);
         PageResponse<AdminPostModerationResponse> response = new PageResponse<>();
         response.setTotal(postMapper.countPendingReviewPosts());
         response.setPage(page);
         response.setPageSize(pageSize);
+        
+        if (posts.isEmpty()) {
+            response.setItems(List.of());
+            return Result.success(response);
+        }
+        
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        Map<Long, List<PostImageResponse>> imageMap = buildImageMap(postIds);
+        
         response.setItems(posts.stream()
-                .map(post -> toAdminPostModerationResponse(post, imagesByPostId.getOrDefault(post.getId(), List.of())))
+                .map(post -> toAdminPostModerationResponse(post, imageMap.getOrDefault(post.getId(), List.of())))
                 .toList());
         return Result.success(response);
     }
@@ -495,26 +502,22 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setCategoryId(post.getCategoryId());
         response.setTitle(post.getTitle());
         response.setDescription(post.getDescription());
-        response.setImages(images);
         response.setStatus(post.getStatus());
         response.setModerationReason(post.getModerationReason());
         response.setPublishedAt(post.getPublishedAt());
         response.setCreatedAt(post.getCreatedAt());
         response.setUpdatedAt(post.getUpdatedAt());
+        response.setImages(images);
         return response;
     }
 
-    private Map<Long, List<PostImageResponse>> groupPostImages(List<Post> posts) {
-        if (posts == null || posts.isEmpty()) {
-            return Map.of();
-        }
-        List<Long> postIds = posts.stream().map(Post::getId).toList();
-        Map<Long, List<PostImageResponse>> imagesByPostId = new LinkedHashMap<>();
+    private Map<Long, List<PostImageResponse>> buildImageMap(List<Long> postIds) {
+        Map<Long, List<PostImageResponse>> imageMap = new LinkedHashMap<>();
         for (PostImage image : postImageMapper.selectByPostIds(postIds)) {
-            imagesByPostId.computeIfAbsent(image.getPostId(), ignored -> new ArrayList<>())
+            imageMap.computeIfAbsent(image.getPostId(), key -> new java.util.ArrayList<>())
                     .add(toPostImageResponse(image));
         }
-        return imagesByPostId;
+        return imageMap;
     }
 
     private PostImageResponse toPostImageResponse(PostImage image) {
@@ -522,7 +525,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setId(image.getId());
         response.setImageUrl(image.getImageUrl());
         response.setImageKey(image.getImageKey());
-        response.setThumbnailUrl(image.getThumbnailUrl() == null ? image.getImageUrl() : image.getThumbnailUrl());
+        response.setThumbnailUrl(image.getThumbnailUrl() != null ? image.getThumbnailUrl() : image.getImageUrl());
         response.setWidth(image.getWidth());
         response.setHeight(image.getHeight());
         response.setFileSize(image.getFileSize());

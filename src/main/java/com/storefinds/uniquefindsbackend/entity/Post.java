@@ -17,6 +17,16 @@ public class Post {
     private BigDecimal priceMax;
     private String currency;
     private String locationText;
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
+    }
+
+    private String coverImage;
     private String status;
     private String moderationReason;
     private Long viewCount;
