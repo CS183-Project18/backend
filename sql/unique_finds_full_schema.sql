@@ -686,7 +686,7 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO tags (name)
 VALUES
-  ('复古风'), ('高颜值'), ('平价'), ('送礼'), ('健康'), ('实用'), ('探店推荐')
+  ('vintage'), ('aesthetic'), ('budget-friendly'), ('gift'), ('wellness'), ('everyday-use'), ('local-find')
 ON DUPLICATE KEY UPDATE
   name = VALUES(name);
 
