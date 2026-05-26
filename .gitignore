@@ -3,6 +3,24 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.tmp*
+.tmp_docs/
+*.log
+*.out.log
+*.err.log
+frontend.zip
+*~
+~$*.docx
+**/~$*.docx
+*.pyc
+**/__pycache__/
+**/.idea/
+**/.venv/
+ai-search/cache/
+ai-search/data/
+ai-search/create_demo_images.py
+docs/*
+!docs/v2_backend_acceptance_checklist.md
 
 ### STS ###
 .apt_generated
