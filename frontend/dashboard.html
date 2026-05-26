@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -621,6 +621,23 @@
       cursor: pointer;
     }
 
+    .danger-button {
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--danger), #b94b61);
+      border: 1px solid transparent;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(223, 99, 123, 0.2);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .danger-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(223, 99, 123, 0.26);
+    }
+
     .text-button {
       color: var(--accent);
       background: transparent;
@@ -1062,6 +1079,91 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .settings-actions {
+      margin-top: 18px;
+    }
+
+    .account-access-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .account-access-panel p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .admin-section {
+      display: grid;
+      gap: 18px;
+    }
+
+    .moderation-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .moderation-item {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+      padding: 16px;
+      border-radius: 22px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 34px rgba(88, 67, 167, 0.08);
+    }
+
+    .moderation-preview {
+      min-height: 132px;
+      width: 140px;
+      border-radius: 18px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(103, 88, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .moderation-preview.is-empty {
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .moderation-content {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .moderation-content h4,
+    .moderation-content p {
+      margin: 0;
+    }
+
+    .moderation-meta,
+    .moderation-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .moderation-meta {
+      color: var(--muted);
+      font-size: 0.92rem;
     }
 
     /* Developer B: Toast notifications */
@@ -1492,9 +1594,9 @@
 
         <div class="topbar-actions">
           <label class="search-shell">
-            <span>✦</span>
+            <span>鉁?/span>
             <input id="global-search" type="search" placeholder="Search posts, tags, locations..." />
-            <button class="ghost-button search-camera" id="open-image-search" type="button">📷</button>
+            <button class="ghost-button search-camera" id="open-image-search" type="button">馃摲</button>
             <small>Image search</small>
           </label>
           <button class="icon-pill" id="open-notifications" type="button">
@@ -1537,7 +1639,7 @@
       <section class="panel trending-panel">
         <div class="panel-header">
           <h2>Trending</h2>
-          <span>✦</span>
+          <span>鉁?/span>
         </div>
         <div id="trending-list" class="trending-list"></div>
       </section>
@@ -1582,7 +1684,7 @@
   <section class="detail-overlay hidden" id="detail-overlay">
     <div class="detail-shell">
       <header class="detail-topbar">
-        <button class="back-button" id="close-detail" type="button">← Back to Feed</button>
+        <button class="back-button" id="close-detail" type="button">鈫?Back to Feed</button>
         <div class="detail-topbar-actions">
           <button class="ghost-button" id="detail-open-notifications" type="button">Notifications</button>
           <div class="avatar small" id="detail-avatar">AR</div>
@@ -1612,7 +1714,7 @@
         <form id="comment-form" class="comment-form">
           <div class="avatar small" id="comment-user-avatar">AR</div>
           <input id="comment-input" type="text" placeholder="Add to the conversation..." />
-          <button class="send-button" type="submit">➜</button>
+          <button class="send-button" type="submit">鉃?/button>
         </form>
 
         <div id="comment-thread" class="comment-thread"></div>
@@ -1712,7 +1814,7 @@
         <div class="image-upload-area" id="image-upload-area">
           <input id="image-search-file" type="file" accept="image/*" />
           <div class="upload-hint">
-            <span class="upload-icon">📷</span>
+            <span class="upload-icon">馃摲</span>
             <p>Upload an image to find visually similar posts</p>
             <small>AI powered visual search</small>
           </div>
@@ -1753,35 +1855,35 @@
         <input id="report-target-type" type="hidden" />
         <div class="report-reasons">
           <button class="report-reason" data-reason="spam" type="button">
-            <span class="reason-icon">🚫</span>
+            <span class="reason-icon">馃毇</span>
             <div>
               <strong>Spam or misleading</strong>
               <small>This looks like spam, phishing, or misleading content.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="inappropriate" type="button">
-            <span class="reason-icon">🔞</span>
+            <span class="reason-icon">馃敒</span>
             <div>
               <strong>Inappropriate content</strong>
               <small>This contains nudity, violence, or other inappropriate material.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="harmful" type="button">
-            <span class="reason-icon">⚠️</span>
+            <span class="reason-icon">鈿狅笍</span>
             <div>
               <strong>Harmful or dangerous</strong>
               <small>This promotes harm, self-harm, or dangerous activities.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="copyright" type="button">
-            <span class="reason-icon">©️</span>
+            <span class="reason-icon">漏锔?/span>
             <div>
               <strong>Copyright infringement</strong>
               <small>This violates copyright or intellectual property laws.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="other" type="button">
-            <span class="reason-icon">📝</span>
+            <span class="reason-icon">馃摑</span>
             <div>
               <strong>Other</strong>
               <small>Something else is wrong with this content.</small>
@@ -2040,8 +2142,8 @@
       editingPostId: null,
       profileTab: "posts",
       profileUserId: OFFLINE_DEMO.user.id,
-      visitedUser: null,  // 访问的公开用户资料
-      visitedUsername: null,  // 访问的用户名
+      visitedUser: null,  // 璁块棶鐨勫叕寮€鐢ㄦ埛璧勬枡
+      visitedUsername: null,  // 璁块棶鐨勭敤鎴峰悕
       notificationUnreadOnly: false,
       // Admin state
       isAdmin: false,
@@ -2437,7 +2539,7 @@
     function parsePriceInput(value) {
       const matches = String(value || "").match(/-?\d+(\.\d+)?/g) || [];
       const upper = String(value || "").toUpperCase();
-      const currency = upper.includes("CNY") || upper.includes("RMB") || upper.includes("¥") ? "CNY" : upper.includes("EUR") || upper.includes("€") ? "EUR" : upper.includes("GBP") || upper.includes("£") ? "GBP" : "USD";
+      const currency = upper.includes("CNY") || upper.includes("RMB") || upper.includes("\u00A5") ? "CNY" : upper.includes("EUR") || upper.includes("\u20AC") ? "EUR" : upper.includes("GBP") || upper.includes("\u00A3") ? "GBP" : "USD";
       if (!matches.length) return { priceMin: null, priceMax: null, currency: null };
       if (matches.length === 1) return { priceMin: Number(matches[0]), priceMax: Number(matches[0]), currency };
       return { priceMin: Number(matches[0]), priceMax: Number(matches[1]), currency };
@@ -2489,8 +2591,8 @@
         : `background: ${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
       card.innerHTML = `
         <div class="card-media ${getMediaHeight(post)}" style="${mediaStyle}">
-          ${post.status === "PENDING_REVIEW" ? `<div class="category-pill" style="background: rgba(255, 165, 0, 0.8);">⏳ Pending</div>` : ""}
-          ${post.status === "DRAFT" ? `<div class="category-pill" style="background: rgba(128, 128, 128, 0.8);">📝 Draft</div>` : ""}
+          ${post.status === "PENDING_REVIEW" ? `<div class="category-pill" style="background: rgba(255, 165, 0, 0.8);">Pending</div>` : ""}
+          ${post.status === "DRAFT" ? `<div class="category-pill" style="background: rgba(128, 128, 128, 0.8);">Draft</div>` : ""}
         </div>
         <div class="card-body">
           <div class="meta-author">
@@ -2501,8 +2603,8 @@
             </div>
           </div>
           <div class="card-location">
-            ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
-            ${post.location ? `<span class="location-badge">📍 ${post.location}</span>` : ""}
+            ${post.storeName ? `<span class="store-badge">Store: ${post.storeName}</span>` : ""}
+            ${post.location ? `<span class="location-badge">Location: ${post.location}</span>` : ""}
           </div>
           <h3>${post.title}</h3>
           <p>${post.description.slice(0, 80)}...</p>
@@ -2512,24 +2614,22 @@
           </div>
           <div class="post-stats">
             <button class="${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
-              ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+              ${state.likedPostIds.includes(post.id) ? "Liked" : "Like"} ${post.likes}
             </button>
             <button class="${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
-              ⭐ ${post.saves}
+              ${state.bookmarkedPostIds.includes(post.id) ? "Saved" : "Save"} ${post.saves}
             </button>
-            <button data-action="share">🔗 Share link</button>
-            <button data-action="comment">💬 ${post.commentCount}</button>
+            <button data-action="share">Share link</button>
+            <button data-action="comment">Comment ${post.commentCount}</button>
           </div>
         </div>
       `;
 
-      // Add card click event handlers
       const clickableElements = card.querySelectorAll('.card-media, h3, p');
       clickableElements.forEach(el => {
         el.addEventListener('click', () => openDetail(post));
       });
 
-      // Add button event handlers
       card.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -2542,19 +2642,14 @@
         });
       });
 
-      // Add author click handler
-      card.querySelector('.author-name')?.addEventListener('click', (e) => {
+      const authorNameEl = card.querySelector('.author-name');
+      authorNameEl?.addEventListener('click', (e) => {
         e.stopPropagation();
-        const username = e.target.dataset.username;
-        if (username) {
-          openUserProfile(username);
-        }
+        openUserProfile(authorNameEl.dataset.username);
       });
 
       return card;
     }
-
-    // Developer A: Get media height class for card variation
     function getMediaHeight(post) {
       const heights = ["media-short", "media-medium", "media-tall"];
       return heights[post.id % heights.length];
@@ -2623,14 +2718,14 @@
         <div class="detail-badges">
           ${post.category ? `<button class="detail-badge">${post.category}</button>` : ""}
           ${post.priceRange ? `<button class="detail-badge">${post.priceRange}</button>` : ""}
-          ${post.status === "PENDING_REVIEW" ? `<button class="detail-badge" style="background: rgba(255, 165, 0, 0.2); color: orange;"> Pending Review</button>` : ""}
-          ${post.status === "DRAFT" ? `<button class="detail-badge" style="background: rgba(128, 128, 128, 0.2); color: gray;">📝 Draft</button>` : ""}
+          ${post.status === "PENDING_REVIEW" ? `<button class="detail-badge" style="background: rgba(255, 165, 0, 0.2); color: orange;">Pending Review</button>` : ""}
+          ${post.status === "DRAFT" ? `<button class="detail-badge" style="background: rgba(128, 128, 128, 0.2); color: gray;">Draft</button>` : ""}
         </div>
         <h1>${post.title}</h1>
         <p>${post.description}</p>
         <div class="card-location">
-          ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
-          ${post.storeAddress ? `<span class="location-badge">📍 ${post.storeAddress}</span>` : ""}
+          ${post.storeName ? `<span class="store-badge">Store: ${post.storeName}</span>` : ""}
+          ${post.storeAddress ? `<span class="location-badge">Location: ${post.storeAddress}</span>` : ""}
         </div>
         <div class="detail-tag-row">
           ${post.tags.map(tag => `<button class="tag-pill">${tag}</button>`).join("")}
@@ -2646,13 +2741,13 @@
         </div>
         <div class="detail-action-row">
           <button class="action-pill ${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
-            ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+            ${state.likedPostIds.includes(post.id) ? "Liked" : "Like"} ${post.likes}
           </button>
           <button class="action-pill ${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
-            ⭐ ${post.saves}
+            ${state.bookmarkedPostIds.includes(post.id) ? "Saved" : "Save"} ${post.saves}
           </button>
-          <button class="action-pill" data-action="share">🔗 Share link</button>
-          ${post.editable ? `<button class="action-pill" data-action="edit">✏️ Edit</button>` : ""}
+          <button class="action-pill" data-action="share">Share link</button>
+          ${post.editable ? `<button class="action-pill" data-action="edit">Edit</button>` : ""}
         </div>
         <div class="detail-metric-grid">
           <div class="detail-metric"><small>Views</small><strong>${post.views.toLocaleString()}</strong></div>
@@ -2673,7 +2768,6 @@
         });
       });
 
-      // Add author click handler
       els.detailInfoPanel.querySelector('.author-name')?.addEventListener('click', (e) => {
         e.stopPropagation();
         const username = e.target.dataset.username;
@@ -2682,8 +2776,6 @@
         }
       });
     }
-
-    // Developer B: Recursively render comment with replies
     function renderComment(comment, depth = 0) {
       if (depth > 2) return "";
       if (comment.deleted) return "";
@@ -2696,7 +2788,7 @@
             <div class="comment-actions">
               <button class="text-button" data-action="reply" data-comment-id="${comment.id}">Reply</button>
               <button class="text-button ${comment.liked ? "is-active" : ""}" data-action="like-comment" data-comment-id="${comment.id}">
-                ${comment.liked ? "♥" : "♡"} ${comment.likes}
+                ${comment.liked ? "Liked" : "Like"} ${comment.likes}
               </button>
               ${comment.pinnable ? `<button class="text-button" data-action="pin-comment" data-comment-id="${comment.id}">Pin</button>` : ""}
               ${comment.deletable ? `<button class="text-button danger" data-action="delete-comment" data-comment-id="${comment.id}">Delete</button>` : ""}
@@ -2740,7 +2832,7 @@
     // Developer A: Render profile page
     function renderProfile() {
       els.dashboardTitle.textContent = `${state.user.name}`;
-      els.dashboardSubtitle.textContent = `@${state.user.username} — ${state.user.followers} followers, ${state.user.following} following`;
+      els.dashboardSubtitle.textContent = `@${state.user.username} 鈥?${state.user.followers} followers, ${state.user.following} following`;
       els.filterBar.innerHTML = `
         <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
         <button class="filter-chip ${state.profileTab === "likes" ? "is-active" : ""}" data-profile-tab="likes">Likes</button>
@@ -2776,10 +2868,10 @@
       const username = state.visitedUsername;
 
       els.dashboardTitle.textContent = user?.nickname || username || "User";
-      els.dashboardSubtitle.textContent = `@${username}${user ? ` — ${user.postCount || 0} posts${user.favoriteCount ? `, ${user.favoriteCount} favorites` : ''}` : ''}`;
+      els.dashboardSubtitle.textContent = `@${username}${user ? ` 鈥?${user.postCount || 0} posts${user.favoriteCount ? `, ${user.favoriteCount} favorites` : ''}` : ''}`;
       els.filterBar.innerHTML = `
         <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
-        <button class="filter-chip" id="back-to-my-profile" type="button">← Back to My Profile</button>
+        <button class="filter-chip" id="back-to-my-profile" type="button">鈫?Back to My Profile</button>
       `;
 
       // Back to my profile button
@@ -3460,9 +3552,17 @@
             <label><span>Role</span><input type="text" value="${state.user.role}" disabled /></label>
           </div>
           <label><span>Bio</span><textarea rows="3" id="setting-bio">${state.user.bio}</textarea></label>
-          <div class="form-actions">
-            <button class="secondary-button" id="save-account-button">Save Changes</button>
+          <div class="form-actions settings-actions">
+            <button class="primary-button" id="save-account-button">Save Changes</button>
+            <button class="secondary-button" id="reset-account-form-button" type="button">Reset Form</button>
           </div>
+        </div>
+        <div class="detail-info-panel account-access-panel">
+          <div>
+            <h3>Account Access</h3>
+            <p>Log out safely before switching to another demo or admin account.</p>
+          </div>
+          <button class="danger-button" id="logout-button" type="button">Log out</button>
         </div>
       `;
       attachSettingsEventListeners();
@@ -3477,6 +3577,8 @@
       const avatarPreview = document.querySelector("#avatar-preview");
       const tempPreview = document.querySelector("#avatar-temp-preview");
       const saveAccountBtn = document.querySelector("#save-account-button");
+      const resetAccountFormBtn = document.querySelector("#reset-account-form-button");
+      const logoutBtn = document.querySelector("#logout-button");
 
       let tempAvatarUrl = null;
 
@@ -3593,6 +3695,29 @@
 
         els.sidebarName.textContent = state.user.name;
         showToast("Account settings updated!");
+      });
+
+      resetAccountFormBtn?.addEventListener("click", () => {
+        document.querySelector("#setting-name").value = state.user.name || "";
+        document.querySelector("#setting-username").value = state.user.username || "";
+        document.querySelector("#setting-email").value = state.user.email || "";
+        document.querySelector("#setting-bio").value = state.user.bio || "";
+        showToast("Settings form reset.");
+      });
+
+      logoutBtn?.addEventListener("click", () => {
+        localStorage.removeItem(STORAGE_KEYS.token);
+        localStorage.removeItem(STORAGE_KEYS.auth);
+        localStorage.removeItem(STORAGE_KEYS.isGuest);
+        localStorage.removeItem("curator_user_data");
+        localStorage.removeItem("curator_user");
+        localStorage.removeItem("curator_api_base");
+        backendState.token = "";
+        backendState.auth = null;
+        showToast("Logged out.");
+        setTimeout(() => {
+          location.href = "./index.html";
+        }, 250);
       });
     }
 
@@ -4101,13 +4226,13 @@
         ctx.drawImage(img, 0, 0, 100, 100);
         const imageData = ctx.getImageData(0, 0, 100, 100).data;
 
-        // 简单的颜色提取：取图像的几个代表性点
+        // 绠€鍗曠殑棰滆壊鎻愬彇锛氬彇鍥惧儚鐨勫嚑涓唬琛ㄦ€х偣
         const samplePoints = [
-          { x: 50, y: 50 },    // 中心
-          { x: 25, y: 25 },    // 左上角
-          { x: 75, y: 25 },    // 右上角
-          { x: 25, y: 75 },    // 左下角
-          { x: 75, y: 75 },    // 右下角
+          { x: 50, y: 50 },    // 涓績
+          { x: 25, y: 25 },    // 宸︿笂瑙?
+          { x: 75, y: 25 },    // 鍙充笂瑙?
+          { x: 25, y: 75 },    // 宸︿笅瑙?
+          { x: 75, y: 75 },    // 鍙充笅瑙?
         ];
 
         const colors = samplePoints.map(point => {
@@ -4118,7 +4243,7 @@
         callback(colors);
       };
       img.onerror = () => {
-        // 如果加载失败，返回默认颜色
+        // 濡傛灉鍔犺浇澶辫触锛岃繑鍥為粯璁ら鑹?
         callback([[100, 100, 150], [150, 150, 200], [200, 200, 250]]);
       };
       img.src = imageSrc;
@@ -4126,17 +4251,17 @@
 
     // Developer B: Parse gradient colors from visual styles
     function parseGradientColors(gradient) {
-      // 提取渐变中的颜色值
+      // 鎻愬彇娓愬彉涓殑棰滆壊鍊?
       const colors = [];
 
-      // 匹配 rgb/rgba 颜色
+      // 鍖归厤 rgb/rgba 棰滆壊
       const rgbRegex = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/gi;
       let match;
       while ((match = rgbRegex.exec(gradient)) !== null) {
         colors.push({ r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) });
       }
 
-      // 如果没有找到 rgb，尝试匹配 hex 颜色
+      // 濡傛灉娌℃湁鎵惧埌 rgb锛屽皾璇曞尮閰?hex 棰滆壊
       if (colors.length === 0) {
         const hexRegex = /#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/gi;
         while ((match = hexRegex.exec(gradient)) !== null) {
@@ -4487,3 +4612,5 @@
 </body>
 
 </html>
+
+
