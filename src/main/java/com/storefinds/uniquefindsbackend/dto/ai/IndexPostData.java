@@ -31,4 +31,16 @@ public class IndexPostData {
 
     @JsonProperty("image_urls")
     private List<String> imageUrls;
+
+    @JsonProperty("tags")
+    private List<String> tags;
+
+    @JsonProperty("category_name")
+    private String categoryName;
+
+    @JsonProperty("store_name")
+    private String storeName;
+
+    @JsonProperty("location_text")
+    private String locationText;
 }

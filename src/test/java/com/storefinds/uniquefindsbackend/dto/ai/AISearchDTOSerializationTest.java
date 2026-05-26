@@ -21,15 +21,32 @@ class AISearchDTOSerializationTest {
     }
 
     @Test
-    void buildIndexRequestIncludesImageUrls() throws Exception {
-        IndexPostData post = new IndexPostData(1L, "Test Title", "Test Description", List.of("https://example.com/1.jpg"));
+    void buildIndexRequestIncludesSearchMetadata() throws Exception {
+        IndexPostData post = new IndexPostData(
+                1L,
+                "Test Title",
+                "Test Description",
+                List.of("https://example.com/1.jpg"),
+                List.of("lamp", "vintage"),
+                "Lighting",
+                "Woodland Mercantile",
+                "Portland"
+        );
         BuildIndexRequest request = new BuildIndexRequest(List.of(post));
 
         String json = objectMapper.writeValueAsString(request);
         BuildIndexRequest deserialized = objectMapper.readValue(json, BuildIndexRequest.class);
 
         assertTrue(json.contains("\"image_urls\""));
+        assertTrue(json.contains("\"tags\""));
+        assertTrue(json.contains("\"category_name\""));
+        assertTrue(json.contains("\"store_name\""));
+        assertTrue(json.contains("\"location_text\""));
         assertEquals(List.of("https://example.com/1.jpg"), deserialized.getPosts().get(0).getImageUrls());
+        assertEquals(List.of("lamp", "vintage"), deserialized.getPosts().get(0).getTags());
+        assertEquals("Lighting", deserialized.getPosts().get(0).getCategoryName());
+        assertEquals("Woodland Mercantile", deserialized.getPosts().get(0).getStoreName());
+        assertEquals("Portland", deserialized.getPosts().get(0).getLocationText());
     }
 
     @Test
@@ -45,7 +62,7 @@ class AISearchDTOSerializationTest {
 
     @Test
     void buildIndexResponseDeserializesCoreFields() throws Exception {
-        String json = "{\"code\":200,\"data\":{\"success\":true,\"message\":\"indices rebuilt\",\"count\":3},\"message\":\"success\"}";
+        String json = "{\"code\":200,\"data\":{\"success\":true,\"message\":\"indices rebuilt\",\"count\":3,\"semantic_count\":3,\"image_count\":2,\"failed_image_count\":1},\"message\":\"success\"}";
 
         BuildIndexResponse response = objectMapper.readValue(json, BuildIndexResponse.class);
 
@@ -53,6 +70,9 @@ class AISearchDTOSerializationTest {
         assertEquals(200, response.getCode());
         assertEquals(true, response.getData().getSuccess());
         assertEquals(3, response.getData().getCount());
+        assertEquals(3, response.getData().getSemanticCount());
+        assertEquals(2, response.getData().getImageCount());
+        assertEquals(1, response.getData().getFailedImageCount());
     }
 
     @Test
