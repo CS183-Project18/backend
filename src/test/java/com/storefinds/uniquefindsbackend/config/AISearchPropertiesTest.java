@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @TestPropertySource(properties = {
         "app.ai.base-url=http://test-ai-service:8000",
+        "app.ai.asset-base-url=http://test-backend:8080",
         "app.ai.connection-timeout=3000",
         "app.ai.read-timeout=8000",
         "app.ai.index-build-timeout=25000",
@@ -30,6 +31,7 @@ class AISearchPropertiesTest {
     void testPropertiesAreLoadedCorrectly() {
         // Verify main properties
         assertThat(aiSearchProperties.getBaseUrl()).isEqualTo("http://test-ai-service:8000");
+        assertThat(aiSearchProperties.getAssetBaseUrl()).isEqualTo("http://test-backend:8080");
         assertThat(aiSearchProperties.getConnectionTimeout()).isEqualTo(3000);
         assertThat(aiSearchProperties.getReadTimeout()).isEqualTo(8000);
         assertThat(aiSearchProperties.getIndexBuildTimeout()).isEqualTo(25000);
@@ -47,6 +49,7 @@ class AISearchPropertiesTest {
         AISearchProperties defaultProperties = new AISearchProperties();
 
         assertThat(defaultProperties.getBaseUrl()).isEqualTo("http://localhost:8000");
+        assertThat(defaultProperties.getAssetBaseUrl()).isEqualTo("http://localhost:8080");
         assertThat(defaultProperties.getConnectionTimeout()).isEqualTo(5000);
         assertThat(defaultProperties.getReadTimeout()).isEqualTo(10000);
         assertThat(defaultProperties.getIndexBuildTimeout()).isEqualTo(30000);

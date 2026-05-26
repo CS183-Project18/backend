@@ -73,6 +73,7 @@ app:
     public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   ai:
     base-url: ${AI_SEARCH_BASE_URL:http://localhost:8000}
+    asset-base-url: ${APP_AI_ASSET_BASE_URL:${APP_PUBLIC_BASE_URL:http://localhost:8080}}
     connection-timeout: 5000
     read-timeout: 10000
     index-build-timeout: 120000

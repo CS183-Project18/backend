@@ -26,4 +26,13 @@ public class BuildIndexData {
     
     @JsonProperty("count")
     private Integer count;
+
+    @JsonProperty("semantic_count")
+    private Integer semanticCount;
+
+    @JsonProperty("image_count")
+    private Integer imageCount;
+
+    @JsonProperty("failed_image_count")
+    private Integer failedImageCount;
 }

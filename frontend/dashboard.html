@@ -3646,10 +3646,11 @@
 
     // Developer A: Filter posts by search query (reusable helper)
     function filterPostsBySearch(posts, query) {
-      query = query.trim();
+      const rawQuery = String(query || "").trim();
+      const normalizedQuery = rawQuery.toLowerCase();
 
       // Check if it's a post link
-      const postIdMatch = query.match(/post\/(\d+)/);
+      const postIdMatch = rawQuery.match(/post\/(\d+)/i);
       if (postIdMatch) {
         const postId = parseInt(postIdMatch[1]);
         const foundPost = posts.find(p => p.id === postId);
@@ -3657,15 +3658,15 @@
       }
 
       // Check if it's a pure numeric ID
-      if (/^\d+$/.test(query)) {
-        const postId = parseInt(query);
+      if (/^\d+$/.test(rawQuery)) {
+        const postId = parseInt(rawQuery);
         const foundPost = posts.find(p => p.id === postId);
         return foundPost ? [foundPost] : [];
       }
 
       // If search starts with #, only search tags
-      if (query.startsWith('#')) {
-        const tagToSearch = query;
+      if (normalizedQuery.startsWith('#')) {
+        const tagToSearch = normalizedQuery;
         return posts.filter(p => p.tags.some(tag => tag.toLowerCase() === tagToSearch));
       }
 
@@ -3674,34 +3675,34 @@
         // Check tags (including # prefix)
         const hasTagMatch = p.tags.some(tag => {
           const tagLower = tag.toLowerCase();
-          return tagLower.includes(query) || tagLower === `#${query}`;
+          return tagLower.includes(normalizedQuery) || tagLower === `#${normalizedQuery}`;
         });
 
         if (hasTagMatch) return true;
 
         // Check title
-        if (p.title.toLowerCase().includes(query)) return true;
+        if (p.title.toLowerCase().includes(normalizedQuery)) return true;
 
         // Check description
-        if (p.description.toLowerCase().includes(query)) return true;
+        if (p.description.toLowerCase().includes(normalizedQuery)) return true;
 
         // Check location
-        if (p.location && p.location.toLowerCase().includes(query)) return true;
+        if (p.location && p.location.toLowerCase().includes(normalizedQuery)) return true;
 
         // Check store name
-        if (p.storeName && p.storeName.toLowerCase().includes(query)) return true;
+        if (p.storeName && p.storeName.toLowerCase().includes(normalizedQuery)) return true;
 
         // Check category
-        if (p.category && p.category.toLowerCase().includes(query)) return true;
+        if (p.category && p.category.toLowerCase().includes(normalizedQuery)) return true;
 
         // Check author name
-        if (p.authorName && p.authorName.toLowerCase().includes(query)) return true;
+        if (p.authorName && p.authorName.toLowerCase().includes(normalizedQuery)) return true;
 
         return false;
       }).sort((a, b) => {
         // Tag matches come first
-        const aHasTag = a.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
-        const bHasTag = b.tags.some(tag => tag.toLowerCase().includes(query) || tag.toLowerCase() === `#${query}`);
+        const aHasTag = a.tags.some(tag => tag.toLowerCase().includes(normalizedQuery) || tag.toLowerCase() === `#${normalizedQuery}`);
+        const bHasTag = b.tags.some(tag => tag.toLowerCase().includes(normalizedQuery) || tag.toLowerCase() === `#${normalizedQuery}`);
 
         if (aHasTag && !bHasTag) return -1;
         if (!aHasTag && bHasTag) return 1;

@@ -21,6 +21,13 @@ public class AISearchProperties {
     private String baseUrl = "http://localhost:8000";
 
     /**
+     * Base URL used by ai-search to fetch backend-hosted uploaded images during index building.
+     * This may differ from the browser-facing public base URL in Docker/container environments.
+     */
+    @NotBlank(message = "AI asset base URL must not be blank")
+    private String assetBaseUrl = "http://localhost:8080";
+
+    /**
      * Connection timeout in milliseconds for establishing connection to AI service.
      * Default: 5000ms (5 seconds)
      */
@@ -64,6 +71,14 @@ public class AISearchProperties {
 
     public int getConnectionTimeout() {
         return connectionTimeout;
+    }
+
+    public String getAssetBaseUrl() {
+        return assetBaseUrl;
+    }
+
+    public void setAssetBaseUrl(String assetBaseUrl) {
+        this.assetBaseUrl = assetBaseUrl;
     }
 
     public void setConnectionTimeout(int connectionTimeout) {

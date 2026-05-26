@@ -81,7 +81,16 @@ class AISearchClientTest {
     void testBuildIndexMethodExists() throws AIServiceException {
         AISearchClient mockClient = mock(AISearchClient.class);
         List<IndexPostData> posts = new ArrayList<>();
-        posts.add(new IndexPostData(1L, "Test Post", "Test Description", List.of("https://example.com/test.jpg")));
+        posts.add(new IndexPostData(
+                1L,
+                "Test Post",
+                "Test Description",
+                List.of("https://example.com/test.jpg"),
+                List.of("desk-lamp"),
+                "Lighting",
+                "Studio Market",
+                "Dublin"
+        ));
         
         BuildIndexResponse mockResponse = mock(BuildIndexResponse.class);
         when(mockClient.buildIndex(posts)).thenReturn(mockResponse);
