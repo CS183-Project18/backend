@@ -2966,7 +2966,9 @@
             <div class="moderation-list">
               ${posts.map(post => `
                 <div class="moderation-item">
-                  <div class="moderation-preview" style="background-image:url('${post.imageUrls?.[0] || ''}');"></div>
+                  <div class="moderation-preview ${post.imageUrls?.[0] ? "" : "is-empty"}" style="${post.imageUrls?.[0] ? `background-image:url('${post.imageUrls[0]}');` : ""}">
+                    ${post.imageUrls?.[0] ? "" : "<span>No image</span>"}
+                  </div>
                   <div class="moderation-content">
                     <h4>${post.title}</h4>
                     <p>${post.description.slice(0, 100)}...</p>

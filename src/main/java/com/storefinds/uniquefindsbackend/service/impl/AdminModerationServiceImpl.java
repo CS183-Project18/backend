@@ -14,15 +14,18 @@ import com.storefinds.uniquefindsbackend.dto.AdminPostModerationResponse;
 import com.storefinds.uniquefindsbackend.dto.ModerationActionRequest;
 import com.storefinds.uniquefindsbackend.dto.ModerationLogResponse;
 import com.storefinds.uniquefindsbackend.dto.PageResponse;
+import com.storefinds.uniquefindsbackend.dto.PostImageResponse;
 import com.storefinds.uniquefindsbackend.dto.ReportResponse;
 import com.storefinds.uniquefindsbackend.entity.Comment;
 import com.storefinds.uniquefindsbackend.entity.ModerationLog;
 import com.storefinds.uniquefindsbackend.entity.Post;
+import com.storefinds.uniquefindsbackend.entity.PostImage;
 import com.storefinds.uniquefindsbackend.entity.Report;
 import com.storefinds.uniquefindsbackend.event.PostStatusChangedEvent;
 import com.storefinds.uniquefindsbackend.exception.BusinessException;
 import com.storefinds.uniquefindsbackend.mapper.CommentMapper;
 import com.storefinds.uniquefindsbackend.mapper.ModerationLogMapper;
+import com.storefinds.uniquefindsbackend.mapper.PostImageMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostMapper;
 import com.storefinds.uniquefindsbackend.mapper.ReportMapper;
 import com.storefinds.uniquefindsbackend.service.AdminModerationService;
@@ -35,6 +38,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +58,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
 
     private final ReportMapper reportMapper;
     private final PostMapper postMapper;
+    private final PostImageMapper postImageMapper;
     private final CommentMapper commentMapper;
     private final ModerationLogMapper moderationLogMapper;
     private final NotificationService notificationService;
@@ -61,6 +67,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
 
     public AdminModerationServiceImpl(ReportMapper reportMapper,
                                       PostMapper postMapper,
+                                      PostImageMapper postImageMapper,
                                       CommentMapper commentMapper,
                                       ModerationLogMapper moderationLogMapper,
                                       NotificationService notificationService,
@@ -68,6 +75,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
                                       ApplicationEventPublisher applicationEventPublisher) {
         this.reportMapper = reportMapper;
         this.postMapper = postMapper;
+        this.postImageMapper = postImageMapper;
         this.commentMapper = commentMapper;
         this.moderationLogMapper = moderationLogMapper;
         this.notificationService = notificationService;
@@ -144,11 +152,14 @@ public class AdminModerationServiceImpl implements AdminModerationService {
     @Override
     public Result<PageResponse<AdminPostModerationResponse>> getPendingPosts(int page, int pageSize) {
         List<Post> posts = postMapper.selectPendingReviewPosts(toOffset(page, pageSize), pageSize);
+        Map<Long, List<PostImageResponse>> imagesByPostId = groupPostImages(posts);
         PageResponse<AdminPostModerationResponse> response = new PageResponse<>();
         response.setTotal(postMapper.countPendingReviewPosts());
         response.setPage(page);
         response.setPageSize(pageSize);
-        response.setItems(posts.stream().map(this::toAdminPostModerationResponse).toList());
+        response.setItems(posts.stream()
+                .map(post -> toAdminPostModerationResponse(post, imagesByPostId.getOrDefault(post.getId(), List.of())))
+                .toList());
         return Result.success(response);
     }
 
@@ -475,7 +486,7 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         return response;
     }
 
-    private AdminPostModerationResponse toAdminPostModerationResponse(Post post) {
+    private AdminPostModerationResponse toAdminPostModerationResponse(Post post, List<PostImageResponse> images) {
         AdminPostModerationResponse response = new AdminPostModerationResponse();
         response.setId(post.getId());
         response.setUserId(post.getUserId());
@@ -484,11 +495,40 @@ public class AdminModerationServiceImpl implements AdminModerationService {
         response.setCategoryId(post.getCategoryId());
         response.setTitle(post.getTitle());
         response.setDescription(post.getDescription());
+        response.setImages(images);
         response.setStatus(post.getStatus());
         response.setModerationReason(post.getModerationReason());
         response.setPublishedAt(post.getPublishedAt());
         response.setCreatedAt(post.getCreatedAt());
         response.setUpdatedAt(post.getUpdatedAt());
+        return response;
+    }
+
+    private Map<Long, List<PostImageResponse>> groupPostImages(List<Post> posts) {
+        if (posts == null || posts.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        Map<Long, List<PostImageResponse>> imagesByPostId = new LinkedHashMap<>();
+        for (PostImage image : postImageMapper.selectByPostIds(postIds)) {
+            imagesByPostId.computeIfAbsent(image.getPostId(), ignored -> new ArrayList<>())
+                    .add(toPostImageResponse(image));
+        }
+        return imagesByPostId;
+    }
+
+    private PostImageResponse toPostImageResponse(PostImage image) {
+        PostImageResponse response = new PostImageResponse();
+        response.setId(image.getId());
+        response.setImageUrl(image.getImageUrl());
+        response.setImageKey(image.getImageKey());
+        response.setThumbnailUrl(image.getThumbnailUrl() == null ? image.getImageUrl() : image.getThumbnailUrl());
+        response.setWidth(image.getWidth());
+        response.setHeight(image.getHeight());
+        response.setFileSize(image.getFileSize());
+        response.setMimeType(image.getMimeType());
+        response.setSortOrder(image.getSortOrder());
+        response.setIsCover(image.getIsCover());
         return response;
     }
 

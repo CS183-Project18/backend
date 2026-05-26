@@ -1623,6 +1623,18 @@ button {
   flex-shrink: 0;
 }
 
+.moderation-preview.is-empty {
+  display: grid;
+  place-items: center;
+  background: var(--chip);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .moderation-content {
   flex: 1;
   display: flex;
