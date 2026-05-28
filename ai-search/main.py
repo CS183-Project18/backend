@@ -1,10 +1,15 @@
+"""Author: Shuying Liang
+Date: 2026-05-27
+Purpose: FastAPI entrypoint for internal semantic and image search services.
+"""
+
 import logging
 import os
 import tempfile
 from datetime import datetime
 from functools import lru_cache
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -184,13 +189,22 @@ def api_semantic_search(q: str, top_k: int = 5):
 
 
 @app.post("/image_search")
-async def api_image_search(file: UploadFile = File(...), top_k: int = 5):
+async def api_image_search(request: Request, file: UploadFile = File(...), top_k: int | None = Form(None)):
     if SEARCH_RUNTIME_ERROR is not None:
         return error_response(503, f"image backend is not ready: {SEARCH_RUNTIME_ERROR}")
-    if not validate_top_k(top_k):
-        return error_response(400, "top_k must be between 1 and 100")
     if not file.filename:
         return error_response(400, "image file name is required")
+
+    # Prefer multipart form-data top_k from the Java client, but keep query-param fallback for compatibility.
+    query_top_k = request.query_params.get("top_k")
+    if top_k is None and query_top_k is not None:
+        try:
+            top_k = int(query_top_k)
+        except ValueError:
+            return error_response(400, "top_k must be an integer")
+    resolved_top_k = top_k if top_k is not None else 5
+    if not validate_top_k(resolved_top_k):
+        return error_response(400, "top_k must be between 1 and 100")
 
     extension = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if extension not in ALLOWED_EXTENSIONS:
@@ -205,7 +219,7 @@ async def api_image_search(file: UploadFile = File(...), top_k: int = 5):
         with tempfile.NamedTemporaryFile(suffix=f".{extension}", delete=False) as temp_file:
             temp_file.write(content)
             temp_path = temp_file.name
-        post_ids = [result["post_id"] for result in image_search(temp_path, top_k=top_k)]
+        post_ids = [result["post_id"] for result in image_search(temp_path, top_k=resolved_top_k)]
         return success_response({"post_ids": post_ids})
     except RuntimeError as exc:
         return error_response(500, str(exc))

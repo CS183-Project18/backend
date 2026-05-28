@@ -1,3 +1,8 @@
+"""Author: Shuying Liang
+Date: 2026-05-27
+Purpose: Shared cache and index persistence helpers for the AI search service.
+"""
+
 import json
 import logging
 import os
@@ -5,6 +10,7 @@ import urllib.request
 from io import BytesIO
 
 import faiss
+import numpy as np
 from PIL import Image
 
 
@@ -43,6 +49,19 @@ def delete_cache_file(file_name: str) -> None:
     path = os.path.join(CACHE_DIR, file_name)
     if os.path.exists(path):
         os.remove(path)
+
+
+def save_numpy_array(array: np.ndarray, file_name: str) -> None:
+    """Persist dense embedding arrays that need to stay aligned with FAISS row order."""
+    np.save(os.path.join(CACHE_DIR, file_name), array)
+
+
+def load_numpy_array(file_name: str):
+    """Load one persisted embedding array from the cache directory if it exists."""
+    path = os.path.join(CACHE_DIR, file_name)
+    if not os.path.exists(path):
+        return None
+    return np.load(path)
 
 
 def fetch_image_from_url(image_url: str, timeout: int = 10):

@@ -20,6 +20,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Verify discovery facade orchestration across content flows.
+ */
 @ExtendWith(MockitoExtension.class)
 class DefaultDiscoveryFacadeTest {
 
@@ -84,5 +89,27 @@ class DefaultDiscoveryFacadeTest {
         DefaultDiscoveryFacade facade = new DefaultDiscoveryFacade(sqlPostSearchService, aiSearchClient, postMapper);
 
         assertThrows(AIServiceUnavailableException.class, () -> facade.searchPublishedPostsByImage(query, file));
+    }
+
+    @Test
+    void imageSearchPreservesAiCandidateOrderWhenAvailable() {
+        MockMultipartFile file = new MockMultipartFile("file", "lamp.jpg", "image/jpeg", new byte[]{1, 2, 3});
+        PostSearchQuery query = new PostSearchQuery(null, null, null, null, List.of(), null, null, "latest", false, 1, 20, 0);
+        Post first = new Post();
+        first.setId(9L);
+        Post second = new Post();
+        second.setId(3L);
+
+        when(aiSearchClient.isHealthy()).thenReturn(true);
+        when(aiSearchClient.imageSearch(file, 100)).thenReturn(List.of(9L, 3L));
+        when(postMapper.selectPublishedPostsByIds(List.of(9L, 3L), null, null, List.of(), null, null, "latest", true))
+                .thenReturn(List.of(first, second));
+
+        DefaultDiscoveryFacade facade = new DefaultDiscoveryFacade(sqlPostSearchService, aiSearchClient, postMapper);
+        PageResponse<Post> result = facade.searchPublishedPostsByImage(query, file);
+
+        assertEquals(List.of(9L, 3L), result.getItems().stream().map(Post::getId).toList());
+        assertEquals("IMAGE_SEARCH", result.getMetadata().get("searchSource"));
+        verify(sqlPostSearchService, never()).searchPublishedPosts(query);
     }
 }
