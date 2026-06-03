@@ -32,3 +32,6 @@ EXPOSE 8000
 
 # Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Author: Shuying Liang
+# Date: 2026-05-27
+# Purpose: Container image definition for the internal AI search service.

@@ -1,3 +1,8 @@
+"""Author: Shuying Liang
+Date: 2026-05-27
+Purpose: Build and query the semantic text search index for AI retrieval.
+"""
+
 import logging
 from typing import Any
 

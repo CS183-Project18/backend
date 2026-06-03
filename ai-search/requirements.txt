@@ -9,3 +9,6 @@ transformers==4.48.3
 pillow==11.0.0
 numpy==1.26.4
 python-multipart==0.0.20
+# Author: Shuying Liang
+# Date: 2026-05-27
+# Purpose: Python dependencies required by the internal AI search service.
