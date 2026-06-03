@@ -1,15 +1,9 @@
 package com.storefinds.uniquefindsbackend.exception;
 
 /**
- * Exception thrown when a request to AI Search Service exceeds the configured timeout.
- * 
- * This can occur during:
- * - Connection timeout: unable to establish connection within timeout period
- * - Read timeout: connection established but response not received within timeout period
- * 
- * Timeout durations are configured per operation type:
- * - Search operations: typically 10 seconds
- * - Index build operations: typically 30 seconds
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Represent AI search requests that exceed the configured timeout window.
  */
 public class AIServiceTimeoutException extends AIServiceException {
 

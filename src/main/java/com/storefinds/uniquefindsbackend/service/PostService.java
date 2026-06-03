@@ -13,6 +13,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Define the main post-management contract for creating, updating, listing, and deleting posts.
+ */
 public interface PostService {
 
     Result<PostResponse> createPost(Long userId, CreatePostRequest request);

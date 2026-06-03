@@ -2,6 +2,11 @@ package com.storefinds.uniquefindsbackend.dto;
 
 import lombok.Data;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Return normalized post-image metadata for feed, detail, and moderation views.
+ */
 @Data
 public class PostImageResponse {
     private Long id;

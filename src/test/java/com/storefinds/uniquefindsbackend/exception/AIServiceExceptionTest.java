@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Validate AI service exception hierarchy behavior.
+ *
  * Unit tests for AI Service exception hierarchy.
  * Tests verify that exceptions are properly constructed with status codes,
  * messages, and causes, and that the inheritance hierarchy is correct.

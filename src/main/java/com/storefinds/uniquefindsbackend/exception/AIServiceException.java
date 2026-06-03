@@ -1,11 +1,9 @@
 package com.storefinds.uniquefindsbackend.exception;
 
 /**
- * Base exception for AI Search Service related errors.
- * Extends RuntimeException to allow unchecked exception handling.
- * 
- * This exception hierarchy is used by AISearchClient to represent
- * various failure modes when communicating with the AI Search Service.
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Represent the base unchecked exception for AI service communication failures.
  */
 public class AIServiceException extends RuntimeException {
 

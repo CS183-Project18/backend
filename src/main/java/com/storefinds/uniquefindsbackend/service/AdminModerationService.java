@@ -9,6 +9,11 @@ import com.storefinds.uniquefindsbackend.dto.ReportResponse;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Define the admin moderation contract for report review, post review, and audit-log queries.
+ */
 public interface AdminModerationService {
 
     Result<PageResponse<ReportResponse>> getReports(String targetType, String status, int page, int pageSize);

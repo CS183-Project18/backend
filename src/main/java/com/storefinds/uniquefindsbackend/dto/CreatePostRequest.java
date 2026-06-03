@@ -9,6 +9,11 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Capture the payload for creating a new post in the post publishing module.
+ */
 @Data
 public class CreatePostRequest {
 

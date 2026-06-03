@@ -34,6 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Rebuild and synchronize AI-search indices whenever published search content changes.
+ */
 @Service
 public class IndexSyncServiceImpl implements IndexSyncService {
 

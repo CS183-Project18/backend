@@ -4,6 +4,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Return normalized report details for reporter confirmation and admin moderation review.
+ */
 @Data
 public class ReportResponse {
     private Long id;

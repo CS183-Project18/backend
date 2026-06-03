@@ -11,6 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Verify AI search DTO serialization and deserialization.
+ */
 class AISearchDTOSerializationTest {
 
     private ObjectMapper objectMapper;

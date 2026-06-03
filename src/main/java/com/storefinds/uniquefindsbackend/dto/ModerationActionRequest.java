@@ -3,6 +3,11 @@ package com.storefinds.uniquefindsbackend.dto;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Capture moderator notes or reasons used when approving, rejecting, hiding, or deleting content.
+ */
 @Data
 public class ModerationActionRequest {
 

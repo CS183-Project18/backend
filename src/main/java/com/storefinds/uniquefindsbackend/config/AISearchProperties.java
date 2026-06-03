@@ -6,8 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Configuration properties for AI Search Service integration.
- * Maps to application.yml properties under the "app.ai" prefix.
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Define backend-side configuration values used by the AI search integration module.
  */
 @ConfigurationProperties(prefix = "app.ai")
 @Validated

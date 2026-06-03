@@ -1,18 +1,9 @@
 package com.storefinds.uniquefindsbackend.exception;
 
 /**
- * Exception thrown when AI Search Service is not reachable or unavailable.
- * 
- * This can occur when:
- * - Service is not running or has crashed
- * - Network connectivity issues prevent reaching the service
- * - Service returns 503 Service Unavailable status
- * - DNS resolution fails for the service hostname
- * 
- * When this exception is thrown:
- * - Text search operations should fall back to SQL-based search
- * - Image search operations should return empty results with descriptive message
- * - Index rebuild operations should log failure without blocking
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Represent connectivity or availability failures when the backend cannot reach ai-search.
  */
 public class AIServiceUnavailableException extends AIServiceException {
 

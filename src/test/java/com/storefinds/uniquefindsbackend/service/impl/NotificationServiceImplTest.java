@@ -20,6 +20,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Validate notification generation and read-state flows.
+ */
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 

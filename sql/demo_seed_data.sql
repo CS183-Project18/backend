@@ -1,3 +1,7 @@
+-- Author: Kaijie Zhu
+-- Date: 2026-05-27
+-- Purpose: Demo seed dataset for users, posts, interactions, and moderation scenarios.
+
 SET NAMES utf8mb4;
 USE unique_finds;
 

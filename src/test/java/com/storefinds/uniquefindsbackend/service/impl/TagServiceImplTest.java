@@ -16,6 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Verify tag management behavior used in discovery and search flows.
+ */
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTest {
 

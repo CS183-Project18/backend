@@ -1,3 +1,9 @@
+<!--
+Author: Kaijie Zhu
+Date: 2026-05-27
+Purpose: Explain database setup, import order, and migration expectations.
+-->
+
 # Database Setup Guide
 
 This project uses MySQL 8+. The schema and demo scripts are separated so you can choose whether to load only structure or a full demo dataset.

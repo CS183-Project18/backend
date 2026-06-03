@@ -1,3 +1,7 @@
+-- Author: Enqi Guo
+-- Date: 2026-05-27
+-- Purpose: Governance patch for moderation and report-related database updates.
+
 SET NAMES utf8mb4;
 
 CREATE DATABASE IF NOT EXISTS unique_finds

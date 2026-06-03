@@ -4,6 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Hold configurable local image upload and public file access settings for the media module.
+ */
 @ConfigurationProperties(prefix = "app.storage")
 public class FileStorageProperties {
 

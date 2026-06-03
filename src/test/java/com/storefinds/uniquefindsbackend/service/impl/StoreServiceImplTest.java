@@ -14,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Verify store management behavior used in structured discovery flows.
+ */
 @ExtendWith(MockitoExtension.class)
 class StoreServiceImplTest {
 

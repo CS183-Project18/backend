@@ -17,6 +17,11 @@ import com.storefinds.uniquefindsbackend.service.UserProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Assemble profile, activity, and public-user statistics for the user profile module.
+ */
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
 

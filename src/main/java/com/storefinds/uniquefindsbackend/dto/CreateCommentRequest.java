@@ -3,6 +3,11 @@ package com.storefinds.uniquefindsbackend.dto;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Capture the payload for creating a visible comment or reply under a post.
+ */
 @Data
 public class CreateCommentRequest {
     private Long parentId;

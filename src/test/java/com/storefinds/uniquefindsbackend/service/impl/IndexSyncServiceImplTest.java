@@ -28,6 +28,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Validate AI search index synchronization behavior.
+ */
 @ExtendWith(MockitoExtension.class)
 class IndexSyncServiceImplTest {
 

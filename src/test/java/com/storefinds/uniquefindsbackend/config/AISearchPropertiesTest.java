@@ -8,6 +8,10 @@ import org.springframework.test.context.TestPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Validate AI search configuration binding behavior.
+ *
  * Unit tests for AISearchProperties configuration class.
  * Validates that configuration properties are correctly loaded from application.yml.
  */

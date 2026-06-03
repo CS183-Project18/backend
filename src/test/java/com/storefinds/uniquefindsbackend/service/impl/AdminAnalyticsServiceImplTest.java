@@ -12,6 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Validate admin analytics overview aggregation behavior.
+ */
 @ExtendWith(MockitoExtension.class)
 class AdminAnalyticsServiceImplTest {
 

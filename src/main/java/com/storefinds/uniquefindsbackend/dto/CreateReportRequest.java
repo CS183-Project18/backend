@@ -4,6 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Capture the reporter's reason payload for post and comment abuse reports.
+ */
 @Data
 public class CreateReportRequest {
 

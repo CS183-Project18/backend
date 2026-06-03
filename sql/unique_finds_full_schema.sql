@@ -5,6 +5,10 @@
    ============================================================ */
 
 -- 可按需开启严格模式
+-- Author: Kaijie Zhu
+-- Date: 2026-05-27
+-- Purpose: Full schema definition for the Unique Finds backend database.
+
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 

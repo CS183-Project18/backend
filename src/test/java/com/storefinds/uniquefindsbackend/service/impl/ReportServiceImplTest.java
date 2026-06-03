@@ -21,6 +21,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Validate report submission and moderation workflow behavior.
+ */
 @ExtendWith(MockitoExtension.class)
 class ReportServiceImplTest {
 

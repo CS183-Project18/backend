@@ -10,6 +10,8 @@ target/
 *.err.log
 frontend.zip
 frontend/package-lock.json
+mobile/package-lock*.json
+report-drafts/
 *~
 ~$*.docx
 **/~$*.docx
@@ -63,4 +65,5 @@ uploads/
 *.sql
 !sql/unique_finds_full_schema.sql
 !sql/**/*.sql
+!src/main/resources/db/migration/*.sql
 sql/*dump*.sql

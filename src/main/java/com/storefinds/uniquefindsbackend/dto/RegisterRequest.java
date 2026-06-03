@@ -5,6 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Author: Kaijie Zhu
+ * Date: 2026-05-27
+ * Purpose: Capture the initial registration payload for new user account creation.
+ */
 @Data
 public class RegisterRequest {
 

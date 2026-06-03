@@ -5,6 +5,11 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Represent the core post aggregate stored and searched by the backend content module.
+ */
 @Data
 public class Post {
     private Long id;

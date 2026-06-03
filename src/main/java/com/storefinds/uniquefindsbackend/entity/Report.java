@@ -4,6 +4,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: Enqi Guo
+ * Date: 2026-05-27
+ * Purpose: Represent one stored abuse report handled by the moderation and governance module.
+ */
 @Data
 public class Report {
     private Long id;

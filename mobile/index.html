@@ -2,7 +2,7 @@
 <html lang="en">
 <!--
   Owners: Chenqian Fu, Xuehan Wang
-  Purpose: V2 authentication and social discovery frontend entry page.
+  Purpose: V2 mobile frontend entry page for authentication and social discovery flows.
 -->
 
 <head>
@@ -109,7 +109,7 @@
       <div class="brand">The Curator</div>
       <div class="demo-mode-badge" id="demo-mode-badge">Offline demo mode</div>
 
-      <div class="profile-card">
+      <div class="profile-card" data-route="profile" role="button" tabindex="0" aria-label="Open profile">
         <div class="avatar" id="sidebar-avatar">AR</div>
         <div>
           <strong id="sidebar-name">Alex Rivera</strong>
@@ -119,17 +119,35 @@
 
       <!-- Chenqian Fu: Navigation buttons -->
       <nav class="sidebar-nav">
-        <button class="nav-item is-active" data-route="feed" type="button">Feed</button>
-        <button class="nav-item" data-route="explore" type="button">Explore</button>
-        <button class="nav-item" data-route="profile" type="button">Profile</button>
-        <button class="nav-item" data-route="bookmarks" type="button">Bookmarks</button>
-        <button class="nav-item" data-route="shared" type="button">Shared</button>
-        <button class="nav-item" data-route="analytics" type="button">Analytics</button>
-        <button class="nav-item" data-route="settings" type="button">Settings</button>
+        <button class="nav-item is-active" data-route="feed" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5.5 14 10l4.5 2-4.5 2-2 4.5-2-4.5-4.5-2 4.5-2 2-4.5Z" />
+          </svg>
+          <span>For You</span>
+        </button>
+        <button class="nav-item" data-route="explore" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" />
+            <path d="m14.8 9.2-1.7 3.9-3.9 1.7 1.7-3.9 3.9-1.7Z" />
+          </svg>
+          <span>Explore</span>
+        </button>
+        <button class="nav-item" data-route="settings" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z" />
+            <path d="M18.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.4-1.4L13.3 3h-4l-.4 2.3a8 8 0 0 0-2.4 1.4l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 4 12c0 .5 0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.4 1.4l.4 2.3h4l.4-2.3a8 8 0 0 0 2.4-1.4l2.4 1 2-3.4-2.1-1.5Z" />
+          </svg>
+          <span>Settings</span>
+        </button>
       </nav>
 
       <!-- Xuehan Wang: Create Post button (opens modal) -->
-      <button class="primary-button wide" id="open-create-post" type="button">Create Post</button>
+      <button class="primary-button wide" id="open-create-post" type="button" aria-label="Create Post" title="Create Post">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span>Create Post</span>
+      </button>
     </aside>
 
     <!-- Chenqian Fu: Main content area -->
@@ -144,25 +162,27 @@
       <!-- Chenqian Fu: Dashboard header with title and search -->
       <header class="dashboard-topbar">
         <div>
-          <h1 id="dashboard-title">Good morning, Alex.</h1>
-          <p id="dashboard-subtitle">Discover what people are finding in stores around you.</p>
+          <h1 id="dashboard-title">Good afternoon</h1>
+          <p id="dashboard-subtitle"></p>
         </div>
 
         <div class="topbar-actions">
           <label class="search-shell">
             <span>✦</span>
-            <input id="global-search" type="search" placeholder="Search posts, tags, locations..." />
-            <button class="search-camera-btn" id="open-image-search" type="button">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                <circle cx="12" cy="13" r="4"/>
+            <input id="global-search" type="search" placeholder="semantic & multi-modal search..." />
+            <button class="ghost-button search-camera" id="open-image-search" type="button" aria-label="Image search"
+              title="Image search">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.2-1.6A1 1 0 0 1 10.3 4h3.4a1 1 0 0 1 .8.4L15.7 6h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" />
+                <circle cx="12" cy="12.5" r="3.4" />
               </svg>
             </button>
           </label>
-          <button class="icon-pill" id="open-notifications" type="button">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          <button class="icon-pill" id="open-notifications" type="button" aria-label="Notifications"
+            title="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 9.8a6 6 0 0 0-12 0c0 7-2.4 6.5-2.4 8.2h16.8c0-1.7-2.4-1.2-2.4-8.2Z" />
+              <path d="M9.5 20a2.6 2.6 0 0 0 5 0" />
             </svg>
             <strong id="notification-badge">0</strong>
           </button>

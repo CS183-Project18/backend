@@ -4,6 +4,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Author: Kaijie Zhu
+ * Date: 2026-05-27
+ * Purpose: Represent the persisted user account used by authentication and profile flows.
+ */
 @Data
 public class User {
     private Long id;

@@ -1,3 +1,7 @@
+-- Author: Shuying Liang
+-- Date: 2026-05-27
+-- Purpose: Validation queries for structured discovery, ranking, and search-related data.
+
 USE unique_finds;
 
 SELECT 'active category tree roots' AS check_name, id, parent_id, name, level, is_active

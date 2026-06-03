@@ -36,6 +36,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Verify post creation, editing, search, and image-related service behavior.
+ */
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
 

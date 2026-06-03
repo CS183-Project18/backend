@@ -11,6 +11,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Verify structured search query parsing behavior.
+ */
 class SearchQueryParserTest {
 
     private final SearchQueryParser searchQueryParser = new SearchQueryParser();

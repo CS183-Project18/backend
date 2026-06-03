@@ -9,6 +9,11 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Author: Shuying Liang
+ * Date: 2026-05-27
+ * Purpose: Capture editable fields for updating one post in the publishing module.
+ */
 @Data
 public class UpdatePostRequest {
 
