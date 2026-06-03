@@ -218,3 +218,10 @@ Notification items include `message`, `targetSummary`, and `metadata` so the fro
 - `POST /build_index` rebuilds both semantic and image indices from backend-provided published post data.
 - `GET /semantic_search` returns AI-ranked post ids for text queries.
 - `POST /image_search` returns AI-ranked post ids for uploaded images.
+
+### First-run dependency and model downloads
+
+- The AI search container installs large Python packages, including `torch`, `transformers`, `sentence-transformers`, and `faiss-cpu`.
+- On first startup, the semantic and image search modules may also download pretrained models from Hugging Face, including `sentence-transformers/all-MiniLM-L6-v2` and `openai/clip-vit-base-patch32`.
+- If the network cannot reach PyPI or Hugging Face, the AI search service may take a long time to build/start or may be unavailable.
+- The Java backend is designed to degrade gracefully: keyword search falls back to SQL search, and image search returns an empty successful response with a readable message when the AI service is unavailable.
