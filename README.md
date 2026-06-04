@@ -16,7 +16,7 @@ Unique Finds is a discovery and sharing platform for interesting products found 
 - Lightweight interaction event ledger for post/comment/report/share/search activity
 - Report audit fields for moderation outcome tracking
 - Swagger / OpenAPI export for Apifox
-- Docker Compose startup for MySQL, backend, and internal AI search service
+- Docker Compose startup for MySQL, backend, internal AI search service, frontend, and mobile UI
 
 ## Project Structure
 
@@ -24,6 +24,7 @@ Unique Finds is a discovery and sharing platform for interesting products found 
 - `sql/`: schema, patch, and demo seed scripts
 - `ai-search/`: Python AI search service for semantic text search and image search
 - `frontend/`: static frontend files
+- `mobile/`: static mobile UI files
 - `docker-compose.yml`: local multi-service startup file
 
 ## Local Run
@@ -96,6 +97,17 @@ This will start:
 - MySQL
 - Java backend
 - AI search service
+- Static frontend UI
+- Static mobile UI
+
+After startup, open:
+
+- Frontend UI: `http://localhost:5500`
+- Mobile UI: `http://localhost:5501`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+The frontend and mobile pages call the backend at `http://localhost:8080` by default. The MySQL container uses port `3306` inside Docker only and is not exposed on the host, which avoids conflicts with a local MySQL installation.
 
 ## AI Search Architecture
 
