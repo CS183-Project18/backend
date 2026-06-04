@@ -1,10 +1,10 @@
 /* ============================================================
    Unique Finds - Full Database Schema (MySQL 8.0+)
-   目标：用户鉴权 + 帖子CRUD + 社区互动 + 热榜 + AI搜索预留
-   作者建议：直接作为 V1 基线库
+   Scope: user account, post CRUD, social interaction, trending, and AI search support.
+   Usage: baseline schema for local database initialization and review.
    ============================================================ */
 
--- 可按需开启严格模式
+-- Enable strict mode manually if required by the local MySQL environment.
 -- Author: Kaijie Zhu
 -- Date: 2026-05-27
 -- Purpose: Full schema definition for the Unique Finds backend database.
@@ -19,15 +19,15 @@ CREATE DATABASE IF NOT EXISTS unique_finds
 USE unique_finds;
 
 /* ============================================================
-   0) 通用说明
-   - 所有时间使用 DATETIME（UTC）
-   - 业务删除优先软删（status），极端场景再物理删除
-   - 互动表使用唯一约束防重复点赞/收藏
+   0) General conventions.
+   - Store timestamps as DATETIME values in UTC.
+   - Prefer status-based soft deletion for business records.
+   - Use unique constraints on interaction tables to prevent duplicate likes and favorites.
    ============================================================ */
 
 
 /* ============================================================
-   1) 用户与鉴权模块
+   1) User account and authentication tables.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS users (
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS auth_audit_logs (
 
 
 /* ============================================================
-   2) 店铺、分类、标签、帖子（核心内容）
+   2) Stores, categories, tags, posts, and post images.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS stores (
@@ -194,7 +194,7 @@ CREATE TABLE IF NOT EXISTS posts (
   status ENUM('PENDING_REVIEW','PUBLISHED','HIDDEN','REJECTED','DELETED') NOT NULL DEFAULT 'PENDING_REVIEW' COMMENT '帖子状态',
   moderation_reason VARCHAR(255) DEFAULT NULL COMMENT '审核拒绝/屏蔽原因',
 
-  -- 冗余计数，提升读性能
+  -- Denormalized counters for read performance.
   view_count BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '浏览数',
   like_count BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '点赞数',
   favorite_count BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '收藏数',
@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS post_tags (
 
 
 /* ============================================================
-   3) 社区互动（点赞/收藏/评论/浏览）
+   3) Social interaction tables: likes, favorites, comments, and views.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS post_likes (
@@ -370,7 +370,7 @@ CREATE TABLE IF NOT EXISTS post_views (
 
 
 /* ============================================================
-   4) 内容审核与举报
+   4) Content moderation, reports, and notifications.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS moderation_logs (
@@ -440,7 +440,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 
 /* ============================================================
-   5) 热度与排行榜
+   5) Interaction events, heat scores, and ranking support.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS interaction_events (
@@ -502,7 +502,7 @@ CREATE TABLE IF NOT EXISTS trending_snapshots (
 
 
 /* ============================================================
-   6) 搜索与AI模块预留
+   6) Search and AI module support tables.
    ============================================================ */
 
 CREATE TABLE IF NOT EXISTS search_queries (
@@ -556,13 +556,13 @@ CREATE TABLE IF NOT EXISTS image_search_tasks (
 
 
 /* ============================================================
-   7) 触发器（自动维护计数，减少业务漏更新）
-   注意：上线前请在测试环境验证触发器性能与并发行为
+   7) Triggers for automatic counter maintenance.
+   Review trigger behavior in a local test environment before production use.
    ============================================================ */
 
 DELIMITER $$
 
--- 为了支持重复执行脚本，先删除已有触发器
+-- Drop existing triggers before recreating them.
 DROP TRIGGER IF EXISTS trg_comments_after_insert$$
 DROP TRIGGER IF EXISTS trg_comments_after_update$$
 DROP TRIGGER IF EXISTS trg_comments_after_delete$$
@@ -573,7 +573,7 @@ DROP TRIGGER IF EXISTS trg_post_favorites_after_delete$$
 DROP TRIGGER IF EXISTS trg_comment_likes_after_insert$$
 DROP TRIGGER IF EXISTS trg_comment_likes_after_delete$$
 
--- 评论新增 -> posts.comment_count +1
+-- Comment insert trigger: increment comment_count for visible comments.
 CREATE TRIGGER trg_comments_after_insert
 AFTER INSERT ON comments
 FOR EACH ROW
@@ -585,7 +585,7 @@ BEGIN
   END IF;
 END$$
 
--- 评论从可见变为删除/隐藏 -> comment_count -1
+-- Comment status update trigger: maintain comment_count when visibility changes.
 CREATE TRIGGER trg_comments_after_update
 AFTER UPDATE ON comments
 FOR EACH ROW
@@ -601,7 +601,7 @@ BEGIN
   END IF;
 END$$
 
--- 评论被物理删除且原本可见 -> comment_count -1
+-- Comment delete trigger: decrement comment_count when a visible comment is removed.
 CREATE TRIGGER trg_comments_after_delete
 AFTER DELETE ON comments
 FOR EACH ROW
@@ -613,7 +613,7 @@ BEGIN
   END IF;
 END$$
 
--- 点赞新增 -> like_count +1
+-- Post like insert trigger: increment like_count.
 CREATE TRIGGER trg_post_likes_after_insert
 AFTER INSERT ON post_likes
 FOR EACH ROW
@@ -623,7 +623,7 @@ BEGIN
    WHERE id = NEW.post_id;
 END$$
 
--- 点赞取消 -> like_count -1
+-- Post like delete trigger: decrement like_count.
 CREATE TRIGGER trg_post_likes_after_delete
 AFTER DELETE ON post_likes
 FOR EACH ROW
@@ -633,7 +633,7 @@ BEGIN
    WHERE id = OLD.post_id;
 END$$
 
--- 收藏新增 -> favorite_count +1
+-- Favorite insert trigger: increment favorite_count.
 CREATE TRIGGER trg_post_favorites_after_insert
 AFTER INSERT ON post_favorites
 FOR EACH ROW
@@ -643,7 +643,7 @@ BEGIN
    WHERE id = NEW.post_id;
 END$$
 
--- 收藏取消 -> favorite_count -1
+-- Favorite delete trigger: decrement favorite_count.
 CREATE TRIGGER trg_post_favorites_after_delete
 AFTER DELETE ON post_favorites
 FOR EACH ROW
@@ -675,7 +675,7 @@ DELIMITER ;
 
 
 /* ============================================================
-   8) 初始化基础数据（可选）
+   8) Optional seed data for local demonstration.
    ============================================================ */
 
 INSERT INTO categories (parent_id, name, level, sort_order, is_active)

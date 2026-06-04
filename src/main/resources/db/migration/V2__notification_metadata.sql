@@ -1,3 +1,4 @@
+-- Owner: Enqi Guo. Purpose: Notification metadata schema migration.
 SET @add_notifications_metadata = (
   SELECT IF(
     EXISTS(

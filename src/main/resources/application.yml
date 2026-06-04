@@ -1,3 +1,4 @@
+# Owner: Kaijie Zhu. Purpose: Shared Spring Boot application configuration.
 server:
   port: 8080
   servlet:

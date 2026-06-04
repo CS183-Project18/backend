@@ -1,3 +1,4 @@
+-- Owner: Enqi Guo. Purpose: Moderation audit and interaction event schema migration.
 SET @sql = IF(
     EXISTS(
         SELECT 1

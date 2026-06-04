@@ -1,3 +1,4 @@
+-- Owner: Enqi Guo. Purpose: Social interaction and reporting schema migration.
 SET @add_comments_is_pinned = (
   SELECT IF(
     EXISTS(

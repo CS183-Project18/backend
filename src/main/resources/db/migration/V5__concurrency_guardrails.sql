@@ -1,3 +1,4 @@
+-- Owner: Kaijie Zhu. Purpose: Data consistency guardrails for concurrent backend operations.
 SET @schema_name = DATABASE();
 
 SET @sql = (

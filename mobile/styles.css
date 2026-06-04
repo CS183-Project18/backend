@@ -3,7 +3,7 @@
 
 /* ================================
    Global Root Variables
-   CSS variables：colors、radius、shadow、shell width management
+   CSS variables: colors, radius, shadow, and shell width management
 ================================ */
 :root {
   --bg: #f7f3ff;
@@ -303,7 +303,7 @@ button {
 }
 
 /* ==============================================
-            【Chenqian Fu' s part starts】
+            Chenqian Fu section starts
    register/login page, sidebar menu, navigation, Feed/Explore/Bookmarks/Analytics/Settings main page
 ============================================== */
 
@@ -1271,11 +1271,11 @@ button {
 }
 
 /* ==============================================
-            【Chenqian Fu' s part ends】
+            Chenqian Fu section ends
 ============================================== */
 
 /* ==============================================
-            【Xuehan Wang' s part starts】
+            Xuehan Wang section starts
               detail screen layout
 ============================================== */
 
@@ -1619,7 +1619,7 @@ button {
 }
 
 /* ==============================================
-            【Xuehan Wang' s part ends】
+            Xuehan Wang section ends
 ============================================== */
 
 /* ================================

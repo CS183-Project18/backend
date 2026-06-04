@@ -27,40 +27,84 @@ Unique Finds is a discovery and sharing platform for interesting products found 
 - `mobile/`: static mobile UI files
 - `docker-compose.yml`: local multi-service startup file
 
-## Local Run
+## Docker Run
 
-### 1. Prepare database
+Docker Compose is the recommended way to review the full V2 project because it starts the database, backend, AI search service, web frontend, and mobile UI together.
 
-For a brand-new database, import the full schema first:
+### 1. Prepare env file
 
-```bash
-mysql -u <username> -p < sql/unique_finds_full_schema.sql
-```
+Copy `.env.example` to `.env` and update values if needed. The default values are enough for a local review environment.
 
-Then start the backend once so Flyway can register and validate incremental migrations from `src/main/resources/db/migration`.
-After Flyway finishes, import the demo seed data:
+### 2. Start all services
 
 ```bash
-mysql -u <username> -p unique_finds < sql/demo_seed_data.sql
+docker compose up --build
 ```
 
-The current backend also expects Flyway to apply the latest governance/event migration so that:
+This starts:
 
-- `reports` includes `resolutionAction` and `resolutionNote`
-- `interaction_events` can store search, report-close, and share-link events with structured metadata
+- MySQL
+- Java Spring Boot backend
+- Internal Python AI search service
+- Static web frontend
+- Static mobile UI
 
-For an existing database that already has the base schema, keep the data in place and let Flyway baseline it on startup. If the environment is still missing the community interaction objects, you can apply the reference patch once before the first startup:
+The backend runs Flyway automatically on startup. A brand-new empty MySQL container will be initialized from the migration files in `src/main/resources/db/migration`; no manual schema import is required for the Docker flow.
+
+After startup, open:
+
+- Frontend UI: `http://localhost:5500`
+- Mobile UI: `http://localhost:5501`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+The frontend and mobile pages call the backend at `http://localhost:8080` by default. The MySQL container uses port `3306` inside Docker only and is not exposed on the host, which avoids conflicts with a local MySQL installation.
+
+### 3. Check service status
 
 ```bash
-mysql -u <username> -p unique_finds < sql/community_interaction_patch.sql
-mysql -u <username> -p unique_finds < sql/community_interaction_validation.sql
+docker compose ps
 ```
 
-### 2. Configure local secrets
+The backend and AI search service may take longer on first startup because dependencies and AI models can be downloaded during image build/startup.
 
-Create `src/main/resources/application-dev.yml` based on your own local environment. The repository ignores this file by default.
+## Local Run Without Docker
 
-### 3. Start backend
+Use this flow only when Docker is not available. The local machine must provide MySQL, Java, Maven wrapper support, Python, and a static file server.
+
+### 1. Prepare an empty MySQL database
+
+Create the database first:
+
+```sql
+CREATE DATABASE unique_finds CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+```
+
+Do not import `sql/unique_finds_full_schema.sql` for the normal local startup flow. The Spring Boot backend uses Flyway and will automatically apply the migrations from:
+
+```text
+src/main/resources/db/migration
+```
+
+`sql/unique_finds_full_schema.sql` is kept as a readable database-design reference and manual fallback.
+
+### 2. Configure local database credentials
+
+Create `src/main/resources/application-dev.yml` for the local machine if the default database connection in `application.yml` does not match the local MySQL username, password, host, or port. This file is ignored by Git.
+
+Example:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/unique_finds?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    username: <local_mysql_user>
+    password: <local_mysql_password>
+```
+
+### 3. Start the backend
+
+On macOS/Linux:
 
 ```bash
 ./mvnw spring-boot:run
@@ -72,42 +116,50 @@ On Windows PowerShell:
 .\mvnw.cmd spring-boot:run
 ```
 
-### 4. Verify services
+When the backend starts successfully, Flyway creates or updates the database schema automatically.
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Actuator health: `http://localhost:8080/actuator/health`
-- Actuator info: `http://localhost:8080/actuator/info`
-- Uploaded images: `http://localhost:8080/uploads/images/<fileName>`
+### 4. Start the AI search service
 
-## Docker Run
-
-### 1. Prepare env file
-
-Copy `.env.example` to `.env` and update values if needed.
-
-### 2. Start all services
-
-```bash
-docker compose up --build
+```powershell
+cd ai-search
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
 ```
 
-This will start:
+The AI search service defaults to `http://localhost:8000`. If it is unavailable, the Java backend degrades gracefully: keyword search falls back to SQL search, and image search returns a successful empty result with a readable message.
 
-- MySQL
-- Java backend
-- AI search service
-- Static frontend UI
-- Static mobile UI
+### 5. Start the web frontend
 
-After startup, open:
+```powershell
+python -m http.server 5500 --directory frontend
+```
 
-- Frontend UI: `http://localhost:5500`
-- Mobile UI: `http://localhost:5501`
+Open `http://localhost:5500`.
+
+### 6. Start the mobile UI
+
+```powershell
+python -m http.server 5501 --directory mobile
+```
+
+Open `http://localhost:5501`. To view the mobile layout on a desktop browser, use Chrome or Edge DevTools device emulation.
+
+### 7. Optional demo data
+
+After the backend has started once and Flyway has created the schema, demo data can be imported manually:
+
+```bash
+mysql -u <username> -p unique_finds < sql/demo_seed_data.sql
+```
+
+### 8. Verify services
+
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-The frontend and mobile pages call the backend at `http://localhost:8080` by default. The MySQL container uses port `3306` inside Docker only and is not exposed on the host, which avoids conflicts with a local MySQL installation.
+- Actuator health: `http://localhost:8080/actuator/health`
+- Uploaded images: `http://localhost:8080/uploads/images/<fileName>`
 
 ## AI Search Architecture
 
