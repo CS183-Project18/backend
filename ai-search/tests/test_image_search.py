@@ -1,3 +1,4 @@
+# Author: Shuying Liang. Purpose: Unit tests for image-search feature extraction and fallback behavior.
 import asyncio
 import tempfile
 import unittest
