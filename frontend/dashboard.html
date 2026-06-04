@@ -2,7 +2,7 @@
 <html lang="en">
 <!--
   Owners: Chenqian Fu, Xuehan Wang
-  Purpose: V2 dashboard prototype with feed, navigation, admin, analytics, post detail, and create-post flows.
+  Purpose: V2 web dashboard with feed, navigation, admin, analytics, post detail, and create-post flows.
 -->
 
 <head>
@@ -135,6 +135,31 @@
       transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
     }
 
+    .nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-item svg,
+    #open-create-post svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    #open-create-post {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
     .nav-item,
     .filter-chip,
     .secondary-button {
@@ -173,6 +198,24 @@
       background: rgba(245, 240, 255, 0.8);
     }
 
+    .profile-card[data-route] {
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .profile-card[data-route]:hover,
+    .profile-card[data-route]:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(0, 122, 255, 0.28);
+      box-shadow: 0 18px 42px rgba(20, 28, 45, 0.1);
+      outline: none;
+    }
+
+    .profile-card.is-active {
+      border-color: rgba(0, 122, 255, 0.34);
+      box-shadow: 0 16px 38px rgba(0, 122, 255, 0.12);
+    }
+
     .avatar {
       display: grid;
       place-items: center;
@@ -181,14 +224,14 @@
       border-radius: 16px;
       color: white;
       font-weight: 700;
-      background: linear-gradient(135deg, #493f62, #231e34);
+      background: linear-gradient(135deg, #4d4267, #262138);
     }
 
     .avatar.small {
       width: 34px;
       height: 34px;
       border-radius: 12px;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
     }
 
     .profile-card strong,
@@ -251,15 +294,17 @@
       justify-content: space-between;
       gap: 18px;
       align-items: start;
+      flex-wrap: wrap;
       margin-bottom: 0;
     }
 
     .dashboard-topbar h1 {
       margin: 0;
-      font-size: clamp(2.6rem, 4vw, 4rem);
-      line-height: 0.94;
+      font-size: clamp(1.3rem, 2vw, 2rem);
+      line-height: 1.05;
       letter-spacing: -0.06em;
       color: var(--text-strong);
+      white-space: nowrap;
     }
 
     .dashboard-topbar p {
@@ -268,41 +313,29 @@
       font-size: 1.08rem;
     }
 
+    .dashboard-topbar p:empty {
+      display: none;
+    }
+
     .topbar-actions {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: 12px;
-      align-items: center;
+      align-items: flex-end;
     }
 
     .search-shell {
+      position: relative;
+      z-index: 100;
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
-      gap: 16px;
-      min-height: 56px;
-      padding: 0 16px;
-      border-radius: 999px;
+      gap: 12px;
+      min-height: 72px;
+      padding: 0 18px;
+      border-radius: 24px;
       background: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-
-    .search-shell input {
-      min-height: 52px;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--text-dark);
-      box-shadow: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-    }
-
-    .search-shell input:focus {
-      border: none;
-      box-shadow: none;
-      outline: none;
+      box-shadow: 0 14px 36px rgba(103, 88, 255, 0.08);
     }
 
     .search-shell span {
@@ -317,59 +350,32 @@
       letter-spacing: 0.12em;
     }
 
-    .search-camera-btn {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      color: var(--accent);
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      box-shadow: none;
-      transition: transform 180ms ease;
-    }
-
-    .search-camera-btn:hover {
-      transform: scale(1.1);
+    .search-camera {
+      font-size: 1.2rem;
+      padding: 0 8px;
     }
 
     .icon-pill {
-      position: relative;
-      min-width: 96px;
-      height: 48px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 14px;
-      border-radius: 999px;
-      color: var(--accent);
-      background: white;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 16px;
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.82);
       border: 1px solid var(--line);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      cursor: pointer;
-      transition: transform 180ms ease, box-shadow 180ms ease;
-    }
-
-    .icon-pill:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .icon-pill strong {
       display: inline-grid;
       place-items: center;
-      min-width: 28px;
+      width: 28px;
       height: 28px;
-      padding: 0 8px;
-      border-radius: 50%;
+      border-radius: 999px;
       color: white;
       background: linear-gradient(135deg, var(--accent), var(--accent-soft));
       font-size: 0.8rem;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(99, 91, 255, 0.3);
     }
 
     /* Chenqian Fu: Filter bar with consistent button widths */
@@ -1122,7 +1128,9 @@
     }
 
     .create-form input:focus,
-    .create-form textarea:focus {
+    .create-form textarea:focus,
+    .settings-form input:focus,
+    .settings-form textarea:focus {
       border-color: rgba(103, 88, 255, 0.3);
       box-shadow: 0 0 0 4px rgba(103, 88, 255, 0.08);
     }
@@ -1133,75 +1141,67 @@
       gap: 14px;
     }
 
-    .settings-form-grid label {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .settings-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
     }
 
-    .settings-form-grid label span {
-      font-size: 0.82rem;
+    .settings-form label {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .settings-form .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .settings-form span {
+      font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       color: var(--muted);
     }
 
-    .settings-form-grid label input:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .settings-form-grid input,
-    .settings-form-grid textarea {
+    .settings-form input,
+    .settings-form textarea {
       width: 100%;
       min-height: 54px;
       padding: 0 18px;
       border-radius: 16px;
-      border: 1px solid var(--line);
+      border: 1px solid transparent;
       outline: none;
       color: var(--text-strong);
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      background: rgba(241, 236, 255, 0.66);
     }
 
-    .settings-form-grid textarea {
-      min-height: 100px;
-      padding: 14px 18px;
+    .settings-form textarea {
+      min-height: 112px;
+      padding: 16px 18px;
       resize: vertical;
     }
 
-    .settings-form-grid input:hover,
-    .settings-form-grid textarea:hover {
-      border-color: var(--line-strong);
-      background: rgba(255, 255, 255, 1);
-    }
-
-    .settings-form-grid input:focus,
-    .settings-form-grid textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(103, 88, 255, 0.12);
-      background: rgba(255, 255, 255, 1);
-    }
-
-    .settings-form-grid input::placeholder,
-    .settings-form-grid textarea::placeholder {
+    .settings-form input:disabled {
       color: var(--muted);
-      opacity: 0.7;
+      cursor: not-allowed;
+      opacity: 0.72;
     }
 
     .settings-actions {
       display: flex;
-      gap: 12px;
-      margin-top: 20px;
+      gap: 10px;
       flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .avatar-upload-actions {
+      justify-content: center;
     }
 
     .settings-reset {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
+      margin-top: 14px;
     }
 
     .upload-field {
@@ -1733,6 +1733,7 @@
       }
 
       .form-grid,
+      .settings-form,
       .detail-metric-grid {
         grid-template-columns: 1fr;
       }
@@ -1747,7 +1748,7 @@
       }
 
       .dashboard-topbar h1 {
-        font-size: 2.2rem;
+        font-size: 1.35rem;
       }
 
       .masonry-grid {
@@ -1760,6 +1761,934 @@
 
       .detail-topbar {
         flex-wrap: wrap;
+      }
+    }
+
+    /* Apple-inspired UI refresh: visual-only overrides. */
+    :root {
+      --bg: #f5f5f7;
+      --bg-2: #ececf1;
+      --panel: rgba(255, 255, 255, 0.76);
+      --panel-strong: rgba(255, 255, 255, 0.88);
+      --line: rgba(10, 20, 38, 0.09);
+      --line-strong: rgba(10, 20, 38, 0.15);
+      --text: #30333a;
+      --text-strong: #111318;
+      --muted: #747985;
+      --accent: #007aff;
+      --accent-soft: #5ac8fa;
+      --accent-deep: #0057d9;
+      --danger: #ff3b30;
+      --shadow: 0 22px 60px rgba(20, 28, 45, 0.1);
+      --radius-xl: 22px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+    }
+
+    body {
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      background:
+        radial-gradient(circle at 10% 4%, rgba(90, 200, 250, 0.2), transparent 24%),
+        radial-gradient(circle at 84% 8%, rgba(255, 204, 0, 0.12), transparent 20%),
+        radial-gradient(circle at 88% 90%, rgba(52, 199, 89, 0.1), transparent 24%),
+        linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 50%, #ececf1 100%);
+    }
+
+    .ambient {
+      opacity: 0.16;
+      filter: blur(110px);
+    }
+
+    .ambient-a {
+      background: rgba(0, 122, 255, 0.28);
+    }
+
+    .ambient-b {
+      background: rgba(52, 199, 89, 0.22);
+    }
+
+    .dashboard-screen,
+    .detail-shell {
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 30px 80px rgba(20, 28, 45, 0.12);
+      backdrop-filter: blur(28px) saturate(180%);
+    }
+
+    .sidebar {
+      padding: 10px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.44);
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(24px) saturate(180%);
+    }
+
+    .brand {
+      padding: 2px 4px;
+      color: var(--text-strong);
+      letter-spacing: 0;
+    }
+
+    .demo-mode-badge,
+    .micro-label,
+    .card-pill,
+    .store-badge,
+    .location-badge,
+    .detail-badge,
+    .tag-pill,
+    .report-type,
+    .report-target-label {
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.66);
+      box-shadow: none;
+      backdrop-filter: blur(14px) saturate(160%);
+    }
+
+    .profile-card,
+    .search-shell,
+    .panel,
+    .masonry-card,
+    .detail-info-panel,
+    .comment-content,
+    .modal-panel,
+    .drawer-panel,
+    .trend-item,
+    .notification-item,
+    .empty-card,
+    .moderation-item,
+    .report-item,
+    .report-target-card,
+    .avatar-upload-container {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 18px 45px rgba(20, 28, 45, 0.08);
+      backdrop-filter: blur(22px) saturate(180%);
+    }
+
+    .dashboard-topbar h1,
+    .card-body h3,
+    .panel-header h2,
+    .upgrade-card h3,
+    .detail-metric strong,
+    .modal-header h2,
+    .drawer-header h2 {
+      color: var(--text-strong);
+      letter-spacing: 0;
+    }
+
+    .dashboard-topbar p,
+    .card-body p,
+    .notification-item span,
+    .detail-metric small,
+    .comment-content p,
+    .upload-field small,
+    .report-reason small,
+    .report-target-body p {
+      color: var(--muted);
+    }
+
+    .nav-item,
+    .filter-chip,
+    .secondary-button,
+    .icon-pill,
+    .ghost-button,
+    .text-button,
+    .action-pill {
+      border-radius: 999px;
+      color: var(--text-strong);
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .nav-item {
+      justify-content: flex-start;
+      text-align: left;
+      min-height: 46px;
+    }
+
+    .nav-item.is-active,
+    .filter-chip.is-active,
+    .action-pill.is-active,
+    .post-stats button.is-active {
+      color: #fff;
+      background: #111318;
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(17, 19, 24, 0.18);
+    }
+
+    .primary-button,
+    .send-button,
+    .follow-button {
+      color: #fff;
+      background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+      box-shadow: 0 14px 30px rgba(0, 122, 255, 0.22);
+    }
+
+    .primary-button:disabled,
+    .secondary-button:disabled,
+    .send-button:disabled,
+    .follow-button:disabled {
+      color: rgba(17, 19, 24, 0.38);
+      background: rgba(118, 118, 128, 0.16);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary-button:hover,
+    .filter-chip:hover,
+    .nav-item:hover,
+    .icon-pill:hover,
+    .ghost-button:hover,
+    .text-button:hover,
+    .action-pill:hover {
+      color: var(--accent);
+      border-color: rgba(0, 122, 255, 0.28);
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .search-shell {
+      min-height: 58px;
+      padding: 0 7px 0 18px;
+      border-radius: 999px;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
+      width: clamp(320px, 28vw, 520px);
+    }
+
+    .topbar-actions {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .search-shell span,
+    .search-shell small,
+    .ghost-button,
+    .text-button,
+    .back-button {
+      color: var(--accent);
+    }
+
+    .modal-header .ghost-button,
+    .drawer-header-actions .ghost-button,
+    .detail-topbar-actions .ghost-button {
+      min-height: 40px;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(10, 20, 38, 0.08);
+    }
+
+    .search-shell input,
+    .comment-form input,
+    .report-custom-reason textarea {
+      width: 100%;
+      border: 0;
+      outline: none;
+      color: var(--text-strong);
+      background: transparent;
+    }
+
+    .search-shell input[type="search"] {
+      appearance: none;
+      min-width: 0;
+    }
+
+    .search-camera {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      min-height: 44px;
+      justify-self: end;
+      padding: 0;
+      border-radius: 999px;
+    }
+
+    .search-camera svg,
+    .icon-pill svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .icon-pill {
+      min-width: 76px;
+      min-height: 58px;
+      padding: 0 12px;
+      border-radius: 999px;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .icon-pill strong {
+      width: 26px;
+      height: 26px;
+      font-size: 0.78rem;
+    }
+
+    .avatar,
+    .avatar.small,
+    .avatar-preview-large {
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.46), transparent 24%),
+        linear-gradient(145deg, #111827, #475569);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+    }
+
+    .masonry-grid {
+      gap: 20px;
+    }
+
+    .masonry-card {
+      border-radius: 22px;
+    }
+
+    .card-media,
+    .detail-hero,
+    .thumbnail,
+    .moderation-preview,
+    .report-target-preview,
+    .preview-image,
+    .similar-post-card {
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+    }
+
+    .post-stats button,
+    .detail-metric,
+    .detail-author-card,
+    .comment-form,
+    .create-form input,
+    .create-form textarea,
+    .upload-field,
+    .image-upload-area,
+    .report-reasons .report-reason,
+    .report-custom-reason textarea {
+      background: rgba(118, 118, 128, 0.1);
+      border-color: transparent;
+    }
+
+    .create-form input:focus,
+    .create-form textarea:focus,
+    .comment-form input:focus {
+      border-color: rgba(0, 122, 255, 0.32);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+    }
+
+    .upgrade-card {
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.22), transparent 20%),
+        linear-gradient(145deg, #111318 0%, #1f2937 58%, #0a84ff 130%);
+      box-shadow: 0 28px 70px rgba(17, 24, 39, 0.22);
+    }
+
+    .upgrade-card h3 {
+      color: #fff;
+    }
+
+    .secondary-inverse {
+      color: #111318;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .detail-overlay {
+      background: rgba(245, 245, 247, 0.8);
+      backdrop-filter: blur(22px) saturate(180%);
+    }
+
+    .modal-mask,
+    .drawer-mask {
+      background: rgba(15, 23, 42, 0.28);
+      backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    .toast {
+      color: #fff;
+      background: rgba(17, 19, 24, 0.86);
+      backdrop-filter: blur(18px) saturate(180%);
+    }
+
+    .connection-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .connection-dialog-mask {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.28);
+      backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    .connection-dialog-panel {
+      position: relative;
+      width: min(420px, 100%);
+      display: grid;
+      gap: 14px;
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 28px 70px rgba(20, 28, 45, 0.18);
+      backdrop-filter: blur(28px) saturate(180%);
+    }
+
+    .connection-dialog-panel h2,
+    .connection-dialog-panel p {
+      margin: 0;
+    }
+
+    .report-reasons .report-reason {
+      display: flex;
+      min-height: auto;
+      padding: 16px;
+      border-radius: 18px;
+      color: var(--text-strong);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .report-reasons .report-reason.is-selected {
+      border-color: rgba(0, 122, 255, 0.34);
+      background: rgba(0, 122, 255, 0.1);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+
+      .masonry-card,
+      .panel,
+      .trend-item,
+      .notification-item,
+      .primary-button,
+      .secondary-button,
+      .filter-chip,
+      .nav-item {
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease,
+          background 180ms ease,
+          color 180ms ease;
+      }
+
+      .masonry-card:hover,
+      .panel:hover,
+      .trend-item:hover,
+      .notification-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 58px rgba(20, 28, 45, 0.12);
+      }
+    }
+
+    @media (max-width: 980px) {
+
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
+      .dashboard-screen,
+      .detail-shell {
+        width: min(100%, calc(100vw - 12px));
+        min-height: auto;
+        margin: 6px auto;
+        padding: 12px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+        border-radius: 24px;
+      }
+
+      .sidebar {
+        gap: 14px;
+        padding: 12px;
+      }
+
+      .brand {
+        font-size: 1.6rem;
+      }
+
+      .profile-card {
+        padding: 12px;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x proximity;
+      }
+
+      .sidebar-nav::-webkit-scrollbar,
+      .filter-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        flex: 0 0 auto;
+        min-width: 108px;
+        min-height: 42px;
+        justify-content: center;
+        scroll-snap-align: start;
+      }
+
+      .dashboard-topbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .topbar-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        justify-content: stretch;
+      }
+
+      .search-shell {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .icon-pill {
+        min-width: 68px;
+      }
+
+      .filter-bar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .filter-chip {
+        flex: 0 0 auto;
+        max-width: none;
+        white-space: nowrap;
+      }
+
+      .masonry-grid,
+      .masonry-grid.two-cards,
+      .similar-posts-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .card-media,
+      .card-media.media-short,
+      .card-media.media-medium,
+      .card-media.media-tall {
+        height: clamp(210px, 62vw, 320px);
+      }
+
+      .post-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .detail-topbar,
+      .modal-header,
+      .drawer-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .detail-topbar-actions,
+      .drawer-header-actions {
+        flex-wrap: wrap;
+      }
+
+      .detail-layout,
+      .detail-metric-grid,
+      .form-grid,
+      .settings-form,
+      .report-target-card,
+      .moderation-item {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .detail-hero {
+        min-height: clamp(280px, 76vw, 520px);
+      }
+
+      .detail-info-panel,
+      .comments-panel {
+        max-width: 100%;
+      }
+
+      .comment-form {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .modal-panel,
+      .drawer-panel {
+        width: min(100%, calc(100vw - 16px));
+        max-height: calc(100dvh - 16px);
+        padding: 16px;
+        border-radius: 22px;
+      }
+
+      .form-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .form-actions button {
+        width: 100%;
+      }
+
+      .report-target-preview,
+      .moderation-preview {
+        width: 100%;
+        min-height: 180px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding-bottom: 88px;
+      }
+
+      .dashboard-screen,
+      .detail-shell {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 18px 16px 8px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      .brand {
+        font-size: 1.45rem;
+        line-height: 1;
+      }
+
+      .demo-mode-badge {
+        display: none;
+      }
+
+      .profile-card {
+        justify-self: end;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: 999px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .profile-card>div:not(.avatar) {
+        display: none;
+      }
+
+      .profile-card .avatar {
+        width: 48px;
+        height: 48px;
+      }
+
+      .dashboard-topbar h1,
+      #dashboard-title {
+        display: none;
+      }
+
+      .dashboard-main {
+        gap: 10px;
+      }
+
+      .sidebar-nav {
+        position: fixed;
+        left: 12px;
+        right: 84px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        z-index: 60;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        padding: 6px;
+        overflow: visible;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        box-shadow: 0 18px 48px rgba(20, 28, 45, 0.18);
+        backdrop-filter: blur(28px) saturate(180%);
+      }
+
+      .nav-item {
+        min-width: 0;
+        min-height: 50px;
+        padding: 0 8px;
+        border-radius: 999px;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 0.72rem;
+        background: transparent;
+        border-color: transparent;
+      }
+
+      .nav-item svg {
+        width: 21px;
+        height: 21px;
+      }
+
+      #open-create-post {
+        position: fixed;
+        right: 16px;
+        bottom: max(14px, calc(env(safe-area-inset-bottom) + 2px));
+        z-index: 61;
+        width: 60px;
+        height: 60px;
+        min-height: 60px;
+        padding: 0;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+        box-shadow: 0 18px 36px rgba(0, 122, 255, 0.34);
+      }
+
+      #open-create-post span {
+        display: none;
+      }
+
+      #open-create-post svg {
+        width: 26px;
+        height: 26px;
+        stroke-width: 2.2;
+      }
+
+      .topbar-actions {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .search-shell {
+        min-height: 52px;
+        padding: 0 6px 0 12px;
+        gap: 8px;
+      }
+
+      .search-shell span {
+        display: none;
+      }
+
+      .search-camera {
+        width: 40px;
+        min-height: 40px;
+      }
+
+      .icon-pill {
+        min-width: 62px;
+        min-height: 52px;
+        padding: 0 8px;
+      }
+
+      .icon-pill svg,
+      .search-camera svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .icon-pill strong {
+        width: 24px;
+        height: 24px;
+      }
+
+      .filter-chip,
+      .nav-item {
+        min-height: 40px;
+        padding: 0 14px;
+      }
+
+      .modal-panel,
+      .drawer-panel {
+        width: 100%;
+        max-height: 100dvh;
+        border-radius: 0;
+      }
+
+      .comment-form {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .comment-form .avatar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 980px) {
+      body {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom));
+      }
+
+      .dashboard-screen {
+        width: 100%;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 10px 14px calc(104px + env(safe-area-inset-bottom));
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: max-content;
+        align-content: start;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .dashboard-screen>.sidebar {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        align-self: start;
+        gap: 12px;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      .dashboard-screen>.sidebar .brand {
+        min-width: 0;
+        font-size: clamp(1.85rem, 7vw, 2.75rem);
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      .dashboard-screen>.sidebar .demo-mode-badge {
+        display: none !important;
+      }
+
+      .dashboard-screen>.sidebar .profile-card {
+        justify-self: end;
+        width: 54px;
+        height: 54px;
+        min-height: 54px;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .dashboard-screen>.sidebar .profile-card>div:not(.avatar) {
+        display: none !important;
+      }
+
+      .dashboard-screen>.sidebar .profile-card .avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 999px;
+        font-size: 1rem;
+      }
+
+      .dashboard-screen>.sidebar .sidebar-nav {
+        position: fixed !important;
+        left: 12px;
+        right: 86px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 1000;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        margin: 0;
+        padding: 6px;
+        overflow: visible;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.58);
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        box-shadow: 0 20px 54px rgba(18, 24, 38, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+      }
+
+      .dashboard-screen>.sidebar .nav-item {
+        min-width: 0;
+        min-height: 50px;
+        padding: 0 8px;
+        border-radius: 999px;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 0.72rem;
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        scroll-snap-align: unset;
+      }
+
+      .dashboard-screen>.sidebar .nav-item.is-active {
+        color: white;
+        background: rgba(17, 20, 26, 0.96);
+        box-shadow: 0 10px 24px rgba(18, 24, 38, 0.16);
+      }
+
+      .dashboard-screen>.sidebar .nav-item svg {
+        width: 21px;
+        height: 21px;
+      }
+
+      .dashboard-screen>.sidebar #open-create-post {
+        position: fixed !important;
+        right: 16px;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+        z-index: 1001;
+        width: 58px;
+        height: 58px;
+        min-height: 58px;
+        padding: 0;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #0a84ff 0%, #0071e3 100%);
+        box-shadow: 0 18px 38px rgba(0, 122, 255, 0.36);
+      }
+
+      .dashboard-screen>.sidebar #open-create-post span {
+        display: none !important;
+      }
+
+      .dashboard-screen>.sidebar #open-create-post svg {
+        width: 27px;
+        height: 27px;
+        stroke-width: 2.25;
+      }
+
+      .dashboard-topbar {
+        margin-top: 0;
+      }
+
+      .dashboard-topbar>div:first-child,
+      .dashboard-topbar h1,
+      #dashboard-title,
+      #dashboard-subtitle {
+        display: none !important;
       }
     }
   </style>
@@ -1776,7 +2705,7 @@
       <div class="brand">The Curator</div>
       <div class="demo-mode-badge" id="demo-mode-badge">Offline demo mode</div>
 
-      <div class="profile-card">
+      <div class="profile-card" data-route="profile" role="button" tabindex="0" aria-label="Open profile">
         <div class="avatar" id="sidebar-avatar">AR</div>
         <div>
           <strong id="sidebar-name">Alex Rivera</strong>
@@ -1786,18 +2715,37 @@
 
       <!-- Chenqian Fu: Navigation buttons -->
       <nav class="sidebar-nav">
-        <button class="nav-item is-active" data-route="feed" type="button">Feed</button>
-        <button class="nav-item" data-route="explore" type="button">Explore</button>
-        <button class="nav-item" data-route="profile" type="button">Profile</button>
-        <button class="nav-item" data-route="bookmarks" type="button">Bookmarks</button>
-        <button class="nav-item" data-route="shared" type="button">Shared</button>
-        <button class="nav-item" data-route="analytics" type="button">Analytics</button>
-        <button class="nav-item" data-route="admin" type="button">Admin</button>
-        <button class="nav-item" data-route="settings" type="button">Settings</button>
+        <button class="nav-item is-active" data-route="feed" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5.5 14 10l4.5 2-4.5 2-2 4.5-2-4.5-4.5-2 4.5-2 2-4.5Z" />
+          </svg>
+          <span>For You</span>
+        </button>
+        <button class="nav-item" data-route="explore" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" />
+            <path d="m14.8 9.2-1.7 3.9-3.9 1.7 1.7-3.9 3.9-1.7Z" />
+          </svg>
+          <span>Explore</span>
+        </button>
+        <button class="nav-item" data-route="settings" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z" />
+            <path
+              d="M18.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.4-1.4L13.3 3h-4l-.4 2.3a8 8 0 0 0-2.4 1.4l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 4 12c0 .5 0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.4 1.4l.4 2.3h4l.4-2.3a8 8 0 0 0 2.4-1.4l2.4 1 2-3.4-2.1-1.5Z" />
+          </svg>
+          <span>Settings</span>
+        </button>
       </nav>
 
       <!-- Xuehan Wang: Create Post button (opens modal) -->
-      <button class="primary-button wide" id="open-create-post" type="button">Create Post</button>
+      <button class="primary-button wide" id="open-create-post" type="button" aria-label="Create Post"
+        title="Create Post">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span>Create Post</span>
+      </button>
     </aside>
 
     <!-- Chenqian Fu: Main content area -->
@@ -1812,27 +2760,28 @@
       <!-- Chenqian Fu: Dashboard header with title and search -->
       <header class="dashboard-topbar">
         <div>
-          <h1 id="dashboard-title">Good morning, Alex.</h1>
-          <p id="dashboard-subtitle">Discover what people are finding in stores around you.</p>
+          <h1 id="dashboard-title">Good afternoon</h1>
+          <p id="dashboard-subtitle"></p>
         </div>
 
         <div class="topbar-actions">
           <label class="search-shell">
-            <span>✦</span>
+            <span>Search</span>
             <input id="global-search" type="search" placeholder="Search posts, tags, locations..." />
-            <button class="search-camera-btn" id="open-image-search" type="button">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
+            <button class="ghost-button search-camera" id="open-image-search" type="button" aria-label="Image search"
+              title="Image search">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.2-1.6A1 1 0 0 1 10.3 4h3.4a1 1 0 0 1 .8.4L15.7 6h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z" />
+                <circle cx="12" cy="12.5" r="3.4" />
               </svg>
             </button>
           </label>
-          <button class="icon-pill" id="open-notifications" type="button">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          <button class="icon-pill" id="open-notifications" type="button" aria-label="Notifications"
+            title="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 9.8a6 6 0 0 0-12 0c0 7-2.4 6.5-2.4 8.2h16.8c0-1.7-2.4-1.2-2.4-8.2Z" />
+              <path d="M9.5 20a2.6 2.6 0 0 0 5 0" />
             </svg>
             <strong id="notification-badge">0</strong>
           </button>
@@ -1872,7 +2821,7 @@
       <section class="panel trending-panel">
         <div class="panel-header">
           <h2>Trending</h2>
-          <span>✦</span>
+          <span>Search</span>
         </div>
         <div id="trending-list" class="trending-list"></div>
       </section>
@@ -1917,7 +2866,7 @@
   <section class="detail-overlay hidden" id="detail-overlay">
     <div class="detail-shell">
       <header class="detail-topbar">
-        <button class="back-button" id="close-detail" type="button">← Back to Feed</button>
+        <button class="back-button" id="close-detail" type="button">Back to Feed</button>
         <div class="detail-topbar-actions">
           <button class="ghost-button" id="detail-open-notifications" type="button">Notifications</button>
           <div class="avatar small" id="detail-avatar">AR</div>
@@ -1947,7 +2896,7 @@
         <form id="comment-form" class="comment-form">
           <div class="avatar small" id="comment-user-avatar">AR</div>
           <input id="comment-input" type="text" placeholder="Add to the conversation..." />
-          <button class="send-button" type="submit">➜</button>
+          <button class="send-button" type="submit">Send</button>
         </form>
 
         <div id="comment-thread" class="comment-thread"></div>
@@ -2051,7 +3000,7 @@
         <div class="image-upload-area" id="image-upload-area">
           <input id="image-search-file" type="file" accept="image/*" />
           <div class="upload-hint">
-            <span class="upload-icon">📷</span>
+            <span class="upload-icon">Upload</span>
             <p>Upload an image to find visually similar posts</p>
             <small>AI powered visual search</small>
           </div>
@@ -2092,35 +3041,35 @@
         <input id="report-target-type" type="hidden" />
         <div class="report-reasons">
           <button class="report-reason" data-reason="spam" type="button">
-            <span class="reason-icon">🚫</span>
+            <span class="reason-icon">Spam</span>
             <div>
               <strong>Spam or misleading</strong>
               <small>This looks like spam, phishing, or misleading content.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="inappropriate" type="button">
-            <span class="reason-icon">🔞</span>
+            <span class="reason-icon">Wrong</span>
             <div>
               <strong>Inappropriate content</strong>
               <small>This contains nudity, violence, or other inappropriate material.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="harmful" type="button">
-            <span class="reason-icon">⚠️</span>
+            <span class="reason-icon">Safety</span>
             <div>
               <strong>Harmful or dangerous</strong>
               <small>This promotes harm, self-harm, or dangerous activities.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="copyright" type="button">
-            <span class="reason-icon">©️</span>
+            <span class="reason-icon">濠曞繘鏁?/span>
             <div>
               <strong>Copyright infringement</strong>
               <small>This violates copyright or intellectual property laws.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="other" type="button">
-            <span class="reason-icon">📝</span>
+            <span class="reason-icon">Other</span>
             <div>
               <strong>Other</strong>
               <small>Something else is wrong with this content.</small>
@@ -2621,7 +3570,8 @@
           state.trendingPosts = normalizePosts(trendingPage?.items || []);
           state.notifications = normalizeNotifications(notificationsPage?.items || []);
           state.analytics = buildAnalytics(state.posts);
-          updateNotificationBadge(Number(unreadCount?.unreadCount ?? unreadCount?.count ?? unreadCount ?? state.notifications.filter(n => !n.read).length));
+          els.notificationBadge.textContent = String(Number(unreadCount?.unreadCount ?? unreadCount?.count ?? unreadCount ?? state.notifications.filter(n => !n.read).length));
+          els.demoModeBadge.classList.remove("hidden");
           els.demoModeBadge.textContent = "Backend connected";
           backendState.backendAvailable = true;
         } else if (backendState.isGuest) {
@@ -2637,8 +3587,7 @@
           backendState.stores = Array.isArray(stores) ? stores : [];
           state.posts = normalizePosts(postsPage?.items || []);
           state.trendingPosts = normalizePosts(trendingPage?.items || []);
-          state.notifications = [];
-          updateNotificationBadge(0);
+          els.demoModeBadge.classList.remove("hidden");
           els.demoModeBadge.textContent = "Guest mode";
           backendState.backendAvailable = true;
         }
@@ -2655,9 +3604,10 @@
           showToast("Login expired. Please log in again.");
           window.setTimeout(() => { window.location.href = "./index.html"; }, 900);
         } else {
-          els.demoModeBadge.textContent = "Backend connection failed";
-          els.dashboardContent.innerHTML = `<div class="empty-card"><h3>Backend connection failed</h3><p>The dashboard could not load backend data. Please confirm Spring Boot is running on ${API_BASE} and refresh this page.</p></div>`;
-          showToast(error.message || "Backend connection failed.");
+          els.demoModeBadge.textContent = "";
+          els.demoModeBadge.classList.add("hidden");
+          els.dashboardContent.innerHTML = "";
+          showConnectionDialog(`Please confirm the local service is running on ${API_BASE}, then refresh this page.`);
         }
         backendState.backendAvailable = false;
       } finally {
@@ -2666,6 +3616,7 @@
     }
 
     function showLoggedOutState() {
+      els.demoModeBadge.classList.remove("hidden");
       els.demoModeBadge.textContent = "Not logged in";
       els.dashboardContent.innerHTML = `<div class="empty-card"><h3>Please log in first</h3><p>This final dashboard uses backend data. Return to the authentication page to continue.</p><button class="primary-button" id="return-login" type="button">Back to login</button></div>`;
       document.querySelector("#return-login")?.addEventListener("click", () => { window.location.href = "./index.html"; });
@@ -2825,7 +3776,7 @@
     function parsePriceInput(value) {
       const matches = String(value || "").match(/-?\d+(\.\d+)?/g) || [];
       const upper = String(value || "").toUpperCase();
-      const currency = upper.includes("CNY") || upper.includes("RMB") || upper.includes("¥") ? "CNY" : upper.includes("EUR") || upper.includes("€") ? "EUR" : upper.includes("GBP") || upper.includes("£") ? "GBP" : "USD";
+      const currency = upper.includes("CNY") || upper.includes("RMB") ? "CNY" : upper.includes("EUR") ? "EUR" : upper.includes("GBP") ? "GBP" : "USD";
       if (!matches.length) return { priceMin: null, priceMax: null, currency: null };
       if (matches.length === 1) return { priceMin: Number(matches[0]), priceMax: Number(matches[0]), currency };
       return { priceMin: Number(matches[0]), priceMax: Number(matches[1]), currency };
@@ -2849,11 +3800,31 @@
         .filter(Boolean);
     }
 
-  // Chenqian Fu/Xuehan Wang: Toast notification utility
+    // Chenqian Fu/Xuehan Wang: Toast notification utility
     function showToast(message) {
       els.toast.textContent = message;
       els.toast.classList.remove("hidden");
       setTimeout(() => els.toast.classList.add("hidden"), 3000);
+    }
+
+    function showConnectionDialog(message = "The service is temporarily unavailable. Please check the local service and refresh this page.") {
+      document.querySelector("#connection-dialog")?.remove();
+      const dialog = document.createElement("section");
+      dialog.className = "connection-dialog";
+      dialog.id = "connection-dialog";
+      dialog.innerHTML = `
+        <div class="connection-dialog-mask" data-close-connection-dialog></div>
+        <div class="connection-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="connection-dialog-title">
+          <span class="micro-label">Notice</span>
+          <h2 id="connection-dialog-title">Unable to load data</h2>
+          <p>${message}</p>
+          <button class="primary-button" type="button" data-close-connection-dialog>OK</button>
+        </div>
+      `;
+      dialog.querySelectorAll("[data-close-connection-dialog]").forEach(node => {
+        node.addEventListener("click", () => dialog.remove());
+      });
+      document.body.appendChild(dialog);
     }
 
     function showLoading() { els.loadingOverlay.classList.remove("hidden"); }
@@ -2877,8 +3848,8 @@
         : `background: ${visualStyles[post.visualStyle] || visualStyles["art-copper"]}`;
       card.innerHTML = `
         <div class="card-media ${getMediaHeight(post)}" style="${mediaStyle}">
-          ${post.status === "PENDING_REVIEW" ? `<div class="category-pill" style="background: rgba(255, 165, 0, 0.8);">⏳ Pending</div>` : ""}
-          ${post.status === "DRAFT" ? `<div class="category-pill" style="background: rgba(128, 128, 128, 0.8);">📝 Draft</div>` : ""}
+          ${post.status === "PENDING_REVIEW" ? `<div class="category-pill" style="background: rgba(255, 165, 0, 0.8);">Pending</div>` : ""}
+          ${post.status === "DRAFT" ? `<div class="category-pill" style="background: rgba(128, 128, 128, 0.8);">Draft</div>` : ""}
         </div>
         <div class="card-body">
           <div class="meta-author">
@@ -2889,8 +3860,8 @@
             </div>
           </div>
           <div class="card-location">
-            ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
-            ${post.location ? `<span class="location-badge">📍 ${post.location}</span>` : ""}
+            ${post.storeName ? `<span class="store-badge">Store ${post.storeName}</span>` : ""}
+            ${post.location ? `<span class="location-badge">Location ${post.location}</span>` : ""}
           </div>
           <h3>${post.title}</h3>
           <p>${post.description.slice(0, 80)}...</p>
@@ -2900,13 +3871,13 @@
           </div>
           <div class="post-stats">
             <button class="${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
-              ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+              Like ${post.likes}
             </button>
             <button class="${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
-              ⭐ ${post.saves}
+              Save ${post.saves}
             </button>
-            <button data-action="share">🔗 Share link</button>
-            <button data-action="comment">💬 ${post.commentCount}</button>
+            <button data-action="share">Share link</button>
+            <button data-action="comment">Comments ${post.commentCount}</button>
           </div>
         </div>
       `;
@@ -2985,19 +3956,13 @@
         : "<div class=\"empty-card\"><h3>No notifications</h3><p>You're all caught up!</p></div>";
     }
 
-    // Xuehan Wang: Update notification badge with count
-    function updateNotificationBadge(count) {
-      els.notificationBadge.textContent = String(count);
-      els.notificationBadge.style.display = "inline-grid";
-    }
-
     // Xuehan Wang: Mark all notifications as read
     async function markAllNotificationsRead() {
       if (!requireAuth("Please log in to update notifications.")) return;
       try {
         await apiRequest("/api/notifications/read-all", { method: "POST", auth: true });
         state.notifications.forEach(n => n.read = true);
-        updateNotificationBadge(0);
+        els.notificationBadge.textContent = "0";
         renderNotificationList();
         renderNotifications();
         showToast("All notifications marked as read");
@@ -3018,13 +3983,13 @@
           ${post.category ? `<button class="detail-badge">${post.category}</button>` : ""}
           ${post.priceRange ? `<button class="detail-badge">${post.priceRange}</button>` : ""}
           ${post.status === "PENDING_REVIEW" ? `<button class="detail-badge" style="background: rgba(255, 165, 0, 0.2); color: orange;"> Pending Review</button>` : ""}
-          ${post.status === "DRAFT" ? `<button class="detail-badge" style="background: rgba(128, 128, 128, 0.2); color: gray;">📝 Draft</button>` : ""}
+          ${post.status === "DRAFT" ? `<button class="detail-badge" style="background: rgba(128, 128, 128, 0.2); color: gray;">Draft</button>` : ""}
         </div>
         <h1>${post.title}</h1>
         <p>${post.description}</p>
         <div class="card-location">
-          ${post.storeName ? `<span class="store-badge">🏪 ${post.storeName}</span>` : ""}
-          ${post.storeAddress ? `<span class="location-badge">📍 ${post.storeAddress}</span>` : ""}
+          ${post.storeName ? `<span class="store-badge">Store ${post.storeName}</span>` : ""}
+          ${post.storeAddress ? `<span class="location-badge">Location ${post.storeAddress}</span>` : ""}
         </div>
         <div class="detail-tag-row">
           ${post.tags.map(tag => `<button class="tag-pill">${tag}</button>`).join("")}
@@ -3040,13 +4005,13 @@
         </div>
         <div class="detail-action-row">
           <button class="action-pill ${state.likedPostIds.includes(post.id) ? "is-active" : ""}" data-action="like">
-            ${state.likedPostIds.includes(post.id) ? "♥" : "♡"} ${post.likes}
+            Like ${post.likes}
           </button>
           <button class="action-pill ${state.bookmarkedPostIds.includes(post.id) ? "is-active" : ""}" data-action="bookmark">
-            ⭐ ${post.saves}
+            Save ${post.saves}
           </button>
-          <button class="action-pill" data-action="share">🔗 Share link</button>
-          ${post.editable ? `<button class="action-pill" data-action="edit">✏️ Edit</button>` : ""}
+          <button class="action-pill" data-action="share">Share link</button>
+          ${post.editable ? `<button class="action-pill" data-action="edit">Edit</button>` : ""}
         </div>
         <div class="detail-metric-grid">
           <div class="detail-metric"><small>Views</small><strong>${post.views.toLocaleString()}</strong></div>
@@ -3090,7 +4055,7 @@
             <div class="comment-actions">
               <button class="text-button" data-action="reply" data-comment-id="${comment.id}">Reply</button>
               <button class="text-button ${comment.liked ? "is-active" : ""}" data-action="like-comment" data-comment-id="${comment.id}">
-                ${comment.liked ? "♥" : "♡"} ${comment.likes}
+                Like ${comment.likes}
               </button>
               ${comment.pinnable ? `<button class="text-button" data-action="pin-comment" data-comment-id="${comment.id}">Pin</button>` : ""}
               ${comment.deletable ? `<button class="text-button danger" data-action="delete-comment" data-comment-id="${comment.id}">Delete</button>` : ""}
@@ -3134,11 +4099,14 @@
     // Chenqian Fu: Render profile page
     function renderProfile() {
       els.dashboardTitle.textContent = `${state.user.name}`;
-      els.dashboardSubtitle.textContent = `@${state.user.username} — ${state.user.followers} followers, ${state.user.following} following`;
+      els.dashboardSubtitle.textContent = `@${state.user.username} -${state.user.followers} followers, ${state.user.following} following`;
       els.filterBar.innerHTML = `
         <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
         <button class="filter-chip ${state.profileTab === "likes" ? "is-active" : ""}" data-profile-tab="likes">Likes</button>
-        <button class="filter-chip ${state.profileTab === "bookmarks" ? "is-active" : ""}" data-profile-tab="bookmarks">Bookmarks</button>
+        <button class="filter-chip ${state.profileTab === "bookmarks" ? "is-active" : ""}" data-profile-tab="bookmarks" type="button">Bookmarks</button>
+        <button class="filter-chip ${state.profileTab === "shared" ? "is-active" : ""}" data-profile-tab="shared" type="button">Shared</button>
+        <button class="filter-chip ${state.profileTab === "analytics" ? "is-active" : ""}" data-profile-tab="analytics" type="button">Analytics</button>
+        <button class="filter-chip ${state.profileTab === "admin" ? "is-active" : ""}" data-profile-tab="admin" type="button">Admin</button>
       `;
       els.filterBar.querySelectorAll("[data-profile-tab]").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -3147,9 +4115,20 @@
         });
       });
 
+      if (state.profileTab === "analytics") {
+        renderProfileAnalytics();
+        return;
+      }
+
+      if (state.profileTab === "admin") {
+        renderProfileAdmin();
+        return;
+      }
+
       // First filter by profile tab
       let posts = [...state.posts];
       if (state.profileTab === "bookmarks") posts = posts.filter(p => state.bookmarkedPostIds.includes(p.id));
+      if (state.profileTab === "shared") posts = posts.filter(p => state.sharedPostIds.includes(p.id));
       if (state.profileTab === "likes") posts = posts.filter(p => state.likedPostIds.includes(p.id));
 
       // Then apply search on the filtered results
@@ -3161,7 +4140,113 @@
       grid.className = `masonry-grid ${posts.length === 2 ? "two-cards" : ""}`;
       posts.forEach(post => grid.appendChild(renderMasonryCard(post)));
       els.dashboardContent.innerHTML = "";
-      els.dashboardContent.appendChild(grid);
+      if (posts.length) {
+        els.dashboardContent.appendChild(grid);
+      } else {
+        const emptyTitle = state.profileTab === "bookmarks" ? "No bookmarks found" : state.profileTab === "shared" ? "No shared posts found" : `No ${state.profileTab} posts found`;
+        els.dashboardContent.innerHTML = `<div class="empty-card"><h3>${emptyTitle}</h3><p>Try adjusting your search query.</p></div>`;
+      }
+    }
+
+    function renderProfileAnalytics() {
+      if (state.user.role === "Guest") {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Analytics unavailable</h3>
+            <p>Analytics are only available for registered users. Log in or create an account to view your content performance.</p>
+          </div>
+        `;
+        return;
+      }
+
+      els.dashboardContent.innerHTML = `
+        <div class="detail-metric-grid">
+          <div class="detail-metric"><small>Total Views</small><strong>${state.analytics.totalViews.toLocaleString()}</strong></div>
+          <div class="detail-metric"><small>Total Likes</small><strong>${state.analytics.totalLikes}</strong></div>
+          <div class="detail-metric"><small>Total Comments</small><strong>${state.analytics.totalComments}</strong></div>
+          <div class="detail-metric"><small>Total Shares</small><strong>${state.analytics.totalShares}</strong></div>
+        </div>
+        <div class="empty-card"><h3>Content Insights</h3><p>Detailed analytics coming soon.</p></div>
+      `;
+    }
+
+    async function renderProfileAdmin() {
+      if (!backendState.token) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Access Denied</h3>
+            <p>You need to be logged in as an administrator to access this page.</p>
+            <button class="primary-button" onclick="window.location.href='./index.html'">Go to Login</button>
+          </div>
+        `;
+        return;
+      }
+
+      const isAdmin = await checkAdminStatus();
+      if (!isAdmin) {
+        els.dashboardContent.innerHTML = `
+          <div class="empty-card">
+            <h3>Access Denied</h3>
+            <p>Your account does not have administrator privileges.</p>
+            <p>Please use an admin account (demo_admin / Password123)</p>
+            <button class="primary-button" onclick="window.location.href='./index.html'">Go to Login</button>
+          </div>
+        `;
+        return;
+      }
+
+      els.dashboardContent.innerHTML = `
+        <div class="admin-section">
+          <div class="filter-bar admin-tabs">
+            <button class="filter-chip ${state.adminActiveTab === "moderation" ? "is-active" : ""}" data-admin-tab="moderation">Moderation</button>
+            <button class="filter-chip ${state.adminActiveTab === "reports" ? "is-active" : ""}" data-admin-tab="reports">Reports</button>
+            <button class="filter-chip ${state.adminActiveTab === "logs" ? "is-active" : ""}" data-admin-tab="logs">Logs</button>
+            <button class="filter-chip ${state.adminActiveTab === "categories" ? "is-active" : ""}" data-admin-tab="categories">Categories</button>
+            <button class="filter-chip ${state.adminActiveTab === "stores" ? "is-active" : ""}" data-admin-tab="stores">Stores</button>
+            <button class="filter-chip ${state.adminActiveTab === "tags" ? "is-active" : ""}" data-admin-tab="tags">Tags</button>
+            <button class="filter-chip ${state.adminActiveTab === "analytics" ? "is-active" : ""}" data-admin-tab="analytics">Analytics</button>
+          </div>
+          <div id="profile-admin-content"></div>
+        </div>
+      `;
+
+      els.dashboardContent.querySelectorAll("[data-admin-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.adminActiveTab = btn.dataset.adminTab;
+          renderProfileAdmin();
+        });
+      });
+
+      const originalContent = els.dashboardContent;
+      const adminContent = document.querySelector("#profile-admin-content");
+      els.dashboardContent = adminContent;
+      try {
+        switch (state.adminActiveTab) {
+          case "moderation":
+            await renderAdminModeration();
+            break;
+          case "reports":
+            await renderAdminReports();
+            break;
+          case "logs":
+            await renderAdminLogs();
+            break;
+          case "categories":
+            await renderAdminCategories();
+            break;
+          case "stores":
+            await renderAdminStores();
+            break;
+          case "tags":
+            await renderAdminTags();
+            break;
+          case "analytics":
+            await renderAdminAnalytics();
+            break;
+        }
+      } finally {
+        els.dashboardContent = originalContent;
+      }
     }
 
     // Chenqian Fu: Render public user profile page
@@ -3170,10 +4255,10 @@
       const username = state.visitedUsername;
 
       els.dashboardTitle.textContent = user?.nickname || username || "User";
-      els.dashboardSubtitle.textContent = `@${username}${user ? ` — ${user.postCount || 0} posts${user.favoriteCount ? `, ${user.favoriteCount} favorites` : ''}` : ''}`;
+      els.dashboardSubtitle.textContent = `@${username}${user ? ` -${user.postCount || 0} posts${user.favoriteCount ? `, ${user.favoriteCount} favorites` : ''}` : ''}`;
       els.filterBar.innerHTML = `
         <button class="filter-chip ${state.profileTab === "posts" ? "is-active" : ""}" data-profile-tab="posts">Posts</button>
-        <button class="filter-chip" id="back-to-my-profile" type="button">← Back to My Profile</button>
+        <button class="filter-chip" id="back-to-my-profile" type="button">Back to My Profile</button>
       `;
 
       // Back to my profile button
@@ -3480,7 +4565,7 @@
             : "background: linear-gradient(145deg, #cdbdff, #8370ea 58%, #4a43b8);";
           const description = target.description ? `${target.description.slice(0, 120)}${target.description.length > 120 ? "..." : ""}` : "No description provided.";
 
-          // 展示理由标签
+          // 閻忕偞娲滈妵姘舵偠閸℃瑦鏆犻柡宥呮川椤?
           const reasonLabel = report.reasonType || report.reason || "-";
 
           return `
@@ -3907,7 +4992,7 @@
       const hasSavedAvatar = state.user.avatarUrls && state.user.avatarUrls.custom;
       const avatarPreviewStyle = hasSavedAvatar
         ? `background: url(${state.user.avatarUrls.custom}); background-size: cover; background-position: center;`
-        : "background: linear-gradient(135deg, #493f62, #231e34);";
+        : "background: linear-gradient(135deg, #4d4267, #262138);";
 
       els.dashboardContent.innerHTML = `
         <div class="detail-info-panel">
@@ -3919,6 +5004,7 @@
             <div class="avatar-upload-actions">
               <input type="file" id="avatar-upload-input" accept="image/*" class="hidden" />
               <button class="secondary-button" id="select-avatar-button">Choose New Avatar</button>
+              <button class="secondary-button" id="reset-avatar-button" disabled>Reset Avatar</button>
             </div>
             <p class="avatar-hint">Upload a square image (minimum 200x200px). PNG, JPG, or GIF.</p>
             <div class="image-preview-container hidden" id="avatar-temp-preview"></div>
@@ -3926,12 +5012,12 @@
         </div>
         <div class="detail-info-panel">
           <h3>Account Settings</h3>
-          <div class="form-grid settings-form-grid">
-            <label><span>Name</span><input type="text" id="setting-name" class="create-form" value="${state.user.name}" /></label>
-            <label><span>Username</span><input type="text" id="setting-username" class="create-form" value="${state.user.username}" /></label>
-            <label><span>Email</span><input type="email" id="setting-email" class="create-form" value="${state.user.email}" /></label>
-            <label><span>Role</span><input type="text" class="create-form" value="${state.user.role}" disabled /></label>
-            <label class="full-width"><span>Bio</span><textarea rows="3" id="setting-bio" class="create-form">${state.user.bio}</textarea></label>
+          <div class="settings-form">
+            <label><span>Name</span><input type="text" id="setting-name" value="${state.user.name}" /></label>
+            <label><span>Username</span><input type="text" id="setting-username" value="${state.user.username}" /></label>
+            <label><span>Email</span><input type="email" id="setting-email" value="${state.user.email}" /></label>
+            <label><span>Role</span><input type="text" value="${state.user.role}" disabled /></label>
+            <label class="full-width"><span>Bio</span><textarea rows="3" id="setting-bio">${state.user.bio}</textarea></label>
           </div>
           <div class="settings-actions">
             <button class="primary-button" id="save-account-button">Save Changes</button>
@@ -3988,19 +5074,19 @@
 
       resetAvatarBtn?.addEventListener("click", () => {
         // Reset to initials
-        avatarPreview.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        avatarPreview.style.background = "linear-gradient(135deg, #4d4267, #262138)";
         avatarPreview.textContent = state.user.avatar;
 
         // Reset sidebar avatar
-        els.sidebarAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.sidebarAvatar.style.background = "linear-gradient(135deg, #4d4267, #262138)";
         els.sidebarAvatar.textContent = state.user.avatar;
 
         // Reset detail page avatar
-        els.detailAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.detailAvatar.style.background = "linear-gradient(135deg, #4d4267, #262138)";
         els.detailAvatar.textContent = state.user.avatar;
 
         // Reset comment user avatar
-        els.commentUserAvatar.style.background = "linear-gradient(135deg, #493f62, #231e34)";
+        els.commentUserAvatar.style.background = "linear-gradient(135deg, #4d4267, #262138)";
         els.commentUserAvatar.textContent = state.user.avatar;
 
         // Remove custom avatar from state
@@ -4076,12 +5162,19 @@
       renderFeed();
     }
 
+    function getTimeGreeting(date = new Date()) {
+      const hour = date.getHours();
+      if (hour < 12) return "Good morning";
+      if (hour < 18) return "Good afternoon";
+      return "Good evening";
+    }
+
     // Chenqian Fu: Navigate between routes
     async function navigate(route) {
       state.route = route;
       els.routeButtons.forEach(btn => btn.classList.toggle("is-active", btn.dataset.route === route));
       document.body.classList.toggle("detail-mode", route === "detail");
-      if (route === "feed") { els.dashboardTitle.textContent = `Good morning, ${state.user.name.split(" ")[0] || state.user.name}.`; els.dashboardSubtitle.textContent = "Discover what people are finding in stores around you."; renderFeed(); }
+      if (route === "feed") { els.dashboardTitle.textContent = getTimeGreeting(); els.dashboardSubtitle.textContent = ""; renderFeed(); }
       if (route === "explore") renderExplore();
       if (route === "profile") renderProfile();
       if (route === "user-profile") renderUserProfile();
@@ -4190,7 +5283,7 @@
 
       els.notificationPreview.innerHTML = "";
       state.notifications.slice(0, 3).forEach(n => els.notificationPreview.appendChild(renderNotification(n)));
-      updateNotificationBadge(state.notifications.filter(n => !n.read).length);
+      els.notificationBadge.textContent = state.notifications.filter(n => !n.read).length;
     }
 
     // Xuehan Wang: Open post detail view
@@ -4761,7 +5854,7 @@
       }
     }
 
-  // Chenqian Fu/Xuehan Wang: Initialize application
+    // Chenqian Fu/Xuehan Wang: Initialize application
     async function init() {
       await loadBackendData();
       els.sidebarName.textContent = state.user.name;
@@ -4789,7 +5882,14 @@
         els.commentUserAvatar.textContent = state.user.avatar;
       }
 
-      els.routeButtons.forEach(btn => btn.addEventListener("click", () => navigate(btn.dataset.route)));
+      els.routeButtons.forEach(btn => {
+        btn.addEventListener("click", () => navigate(btn.dataset.route));
+        btn.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          navigate(btn.dataset.route);
+        });
+      });
       els.filterButtons.forEach(btn => btn.addEventListener("click", () => {
         els.filterButtons.forEach(b => b.classList.remove("is-active"));
         btn.classList.add("is-active");

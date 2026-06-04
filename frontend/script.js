@@ -1,11 +1,7 @@
-/* Owners: Chenqian Fu, Xuehan Wang
-   Purpose: V2 frontend authentication, API integration, session handling, and interaction helpers. */
+// Owners: Chenqian Fu, Xuehan Wang
+// Purpose: V2 web authentication, API integration, session handling, and upload helpers.
 
-/* ==============================================
-            【 Chenqian Fu's part 】
-   Core: Authentication, API Integration, Session Management
-============================================== */
-
+// Chenqian Fu: API configuration and storage constants
 const API_BASE = window.CURATOR_API_BASE || "http://localhost:8080";
 const STORAGE_KEYS = {
   token: "curator_token_v1",
@@ -13,10 +9,12 @@ const STORAGE_KEYS = {
   isGuest: "curator_guest_v1",
 };
 
+// Chenqian Fu: Authentication state management
 const state = {
   authMode: "register",
 };
 
+// Chenqian Fu: DOM element references for authentication
 const authForm = document.querySelector("#auth-form");
 const authTitle = document.querySelector("#auth-title");
 const authSubtitle = document.querySelector("#auth-subtitle");
@@ -30,11 +28,13 @@ const toast = document.querySelector("#toast");
 
 initialize();
 
+// Chenqian Fu: Initialize authentication module
 function initialize() {
   bindEvents();
   switchAuthMode("register");
 }
 
+// Chenqian Fu: Bind authentication form events
 function bindEvents() {
   authForm?.addEventListener("submit", handleAuthSubmit);
   authModeButtons.forEach((button) => {
@@ -46,12 +46,13 @@ function bindEvents() {
     button.addEventListener("click", () => showToast(`${button.dataset.oauth} login is not configured for this demo.`));
   });
 
-  // Custom file upload button for create post form
+  // Xuehan Wang: Custom file upload button for create post form
   document.querySelector("#choose-post-images")?.addEventListener("click", () => {
     document.querySelector("#post-images")?.click();
   });
 }
 
+// Chenqian Fu: Switch between login and register mode
 function switchAuthMode(mode) {
   state.authMode = mode === "login" ? "login" : "register";
   authModeButtons.forEach((button) => {
@@ -63,6 +64,7 @@ function switchAuthMode(mode) {
   if (authSubmit) authSubmit.textContent = state.authMode === "login" ? "Log In" : "Create Account";
 }
 
+// Chenqian Fu: Handle authentication form submission
 async function handleAuthSubmit(event) {
   event.preventDefault();
   try {
@@ -74,6 +76,7 @@ async function handleAuthSubmit(event) {
   }
 }
 
+// Chenqian Fu: User registration function
 async function register() {
   const username = document.querySelector("#auth-username")?.value.trim();
   const email = document.querySelector("#auth-email")?.value.trim();
@@ -97,6 +100,7 @@ async function register() {
   return loginResponse;
 }
 
+// Chenqian Fu: User login function
 async function login() {
   const account = document.querySelector("#auth-username")?.value.trim() || document.querySelector("#auth-email")?.value.trim();
   const password = passwordInput?.value || "";
@@ -107,13 +111,15 @@ async function login() {
   });
 }
 
+// Chenqian Fu: Guest login function
 function handleGuestLogin() {
   localStorage.removeItem(STORAGE_KEYS.token);
   localStorage.removeItem(STORAGE_KEYS.auth);
   localStorage.setItem(STORAGE_KEYS.isGuest, "true");
-  window.location.href = `./dashboardV2.html?v=${Date.now()}#feed`;
+  window.location.href = `./dashboard.html?v=${Date.now()}#feed`;
 }
 
+// Chenqian Fu: Save user session to localStorage
 function saveSession(loginResponse) {
   if (!loginResponse?.token) throw new Error("Login response did not include a token.");
   const auth = {
@@ -127,6 +133,7 @@ function saveSession(loginResponse) {
   localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify(auth));
 }
 
+// Chenqian Fu: Toggle password visibility
 function togglePasswordVisibility() {
   if (!passwordInput) return;
   const shouldShow = passwordInput.type === "password";
@@ -134,6 +141,7 @@ function togglePasswordVisibility() {
   if (togglePassword) togglePassword.textContent = shouldShow ? "Hide" : "Show";
 }
 
+// Chenqian Fu: Generic API request helper function
 async function apiRequest(path, options = {}) {
   const headers = {};
   if (options.auth) {
@@ -157,6 +165,7 @@ async function apiRequest(path, options = {}) {
   return payload?.data;
 }
 
+// Xuehan Wang: Toast notification utility
 function showToast(message) {
   if (!toast) {
     console.log(message);
