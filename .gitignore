@@ -67,3 +67,5 @@ uploads/
 !sql/**/*.sql
 !src/main/resources/db/migration/*.sql
 sql/*dump*.sql
+# Video files are uploaded through the submission form, not GitHub.
+project-video/videos/*.mp4

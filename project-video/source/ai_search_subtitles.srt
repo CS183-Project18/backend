@@ -1,0 +1,39 @@
+1
+00:00:02,000 --> 00:00:06,000
+Version 1 did not provide semantic search.
+
+2
+00:00:06,000 --> 00:00:10,000
+In Version 2, the user's query first reaches
+the Spring Boot Search API.
+
+3
+00:00:10,000 --> 00:00:14,000
+The query is encoded by a Sentence Transformer.
+
+4
+00:00:14,000 --> 00:00:18,000
+This creates a dense query embedding.
+
+5
+00:00:18,000 --> 00:00:24,000
+FAISS compares the query vector with indexed post vectors
+and returns the most similar post IDs.
+
+6
+00:00:24,000 --> 00:00:28,000
+The backend retrieves the complete post details from MySQL.
+
+7
+00:00:28,000 --> 00:00:32,000
+It then returns ranked results to the user.
+
+8
+00:00:32,000 --> 00:00:38,000
+If the AI service is unavailable, the backend automatically
+falls back to SQL keyword search.
+
+9
+00:00:38,000 --> 00:00:43,000
+This gives Version 2 semantic retrieval
+with a reliable fallback path.

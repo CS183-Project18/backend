@@ -1,0 +1,42 @@
+AI Semantic Search Clip - Narration and Timing
+
+00:00-00:02
+Title only.
+
+00:02-00:06
+Version 1 did not provide semantic search.
+
+00:06-00:10
+In Version 2, the user's query first reaches the Spring Boot Search API.
+
+00:10-00:14
+The query is encoded by a Sentence Transformer.
+
+00:14-00:18
+This creates a dense query embedding.
+
+00:18-00:24
+FAISS compares the query vector with indexed post vectors and returns the most
+similar post IDs.
+
+00:24-00:28
+The backend retrieves the complete post details from MySQL.
+
+00:28-00:32
+It then returns ranked results to the user.
+
+00:32-00:38
+If the AI service is unavailable, the backend automatically falls back to SQL
+keyword search.
+
+00:38-00:43
+This gives Version 2 semantic retrieval with a reliable fallback path.
+
+00:43-00:46
+Final frame.
+
+Pronunciation:
+- FAISS: "face"
+- MySQL: "My Sequel"
+- SQL: "S-Q-L"
+- API: "A-P-I"

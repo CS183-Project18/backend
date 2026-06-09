@@ -1,0 +1,9 @@
+Metric,Version 1,Version 2,Method
+Git tag commit,771481e432f269a8cd17b7393a9c84faff8ada97,334cdc3c7fb27d3be56e86039756e4d7dbf95b93,git rev-parse
+Tracked repository files,76,261,git ls-tree -r --name-only
+Mapped HTTP endpoints,22,72,controller mapping annotation count
+Automated test source files,1,22,Java and Python test file count
+Frontend/backend integration,Separate prototype and API,Integrated through backend API,Repository and demo review
+AI search,None,Semantic and image search with fallback,Repository and demo review
+Mobile UI,None,Included,Repository and demo review
+Moderation and analytics,None,Included,Repository and demo review
