@@ -79,6 +79,8 @@ app:
     read-timeout: 10000
     index-build-timeout: 120000
     max-retries: 2
+    index-startup-retry-attempts: 90
+    index-startup-retry-delay: 10000
     circuit-breaker:
       failure-threshold: 5
       wait-duration: 60000

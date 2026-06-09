@@ -86,7 +86,23 @@ public class IndexSyncServiceImpl implements IndexSyncService {
     @EventListener(ApplicationReadyEvent.class)
     @Async
     public void onApplicationReady() {
-        scheduleRebuild("application startup");
+        int attempts = aiSearchProperties.getIndexStartupRetryAttempts();
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            if (rebuildPublishedPostIndex("application startup")) {
+                return;
+            }
+            if (attempt == attempts) {
+                log.warn("giving up ai index startup rebuild after {} attempts", attempts);
+                return;
+            }
+            try {
+                Thread.sleep(aiSearchProperties.getIndexStartupRetryDelay());
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                log.info("ai index startup rebuild retry interrupted");
+                return;
+            }
+        }
     }
 
     @EventListener
@@ -111,7 +127,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
         }
     }
 
-    private void rebuildPublishedPostIndex(String reason) {
+    private boolean rebuildPublishedPostIndex(String reason) {
         List<Post> publishedPosts = postMapper.selectPublishedPosts();
         List<Long> postIds = publishedPosts.stream().map(Post::getId).toList();
         Map<Long, List<String>> imageUrlsByPostId = groupImageUrlsByPostId(postIds);
@@ -134,7 +150,7 @@ public class IndexSyncServiceImpl implements IndexSyncService {
             BuildIndexResponse response = aiSearchClient.buildIndex(payload);
             if (response.getData() == null) {
                 log.info("rebuilt ai search index successfully: reason={}, postCount={}", reason, payload.size());
-                return;
+                return true;
             }
             log.info(
                     "rebuilt ai search index successfully: reason={}, postCount={}, semanticCount={}, imageCount={}, failedImageCount={}",
@@ -144,8 +160,11 @@ public class IndexSyncServiceImpl implements IndexSyncService {
                     response.getData().getImageCount(),
                     response.getData().getFailedImageCount()
             );
+            return true;
         } catch (AIServiceException ex) {
-            log.warn("failed to rebuild ai search index: reason={}", reason, ex);
+            log.warn("failed to rebuild ai search index: reason={}, message={}", reason, ex.getMessage());
+            log.debug("ai search index rebuild failure details", ex);
+            return false;
         }
     }
 

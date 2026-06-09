@@ -38,7 +38,7 @@ Copy `.env.example` to `.env` and update values if needed. The default values ar
 ### 2. Start all services
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 This starts:
@@ -49,7 +49,13 @@ This starts:
 - Static web frontend
 - Static mobile UI
 
-The backend runs Flyway automatically on startup. A brand-new empty MySQL container will be initialized from the migration files in `src/main/resources/db/migration`; no manual schema import is required for the Docker flow.
+On the first run, MySQL initializes the baseline schema and demo data from `sql/unique_finds_full_schema.sql` and `sql/demo_seed_data.sql`. The backend then runs Flyway migrations from `src/main/resources/db/migration`; no manual schema import is required for the Docker flow.
+
+For later starts, when no Dockerfile or dependency changes need rebuilding, use:
+
+```bash
+docker compose up -d
+```
 
 After startup, open:
 
@@ -66,7 +72,7 @@ The frontend and mobile pages call the backend at `http://localhost:8080` by def
 docker compose ps
 ```
 
-The backend and AI search service may take longer on first startup because dependencies and AI models can be downloaded during image build/startup.
+The AI search service may take longer on first startup because dependencies and AI models can be downloaded during image build/startup. The backend starts independently once MySQL is healthy, so login and other non-AI features remain available while the AI models are loading. If the first index build happens before AI search is ready, the backend retries it automatically.
 
 ## Local Run Without Docker
 

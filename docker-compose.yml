@@ -42,7 +42,7 @@ services:
       mysql:
         condition: service_healthy
       ai-search:
-        condition: service_healthy
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       FUZHOU_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver

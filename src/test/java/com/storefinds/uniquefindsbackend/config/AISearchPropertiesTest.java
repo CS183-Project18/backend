@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "app.ai.read-timeout=8000",
         "app.ai.index-build-timeout=25000",
         "app.ai.max-retries=3",
+        "app.ai.index-startup-retry-attempts=4",
+        "app.ai.index-startup-retry-delay=25",
         "app.ai.circuit-breaker.failure-threshold=10",
         "app.ai.circuit-breaker.wait-duration=30000"
 })
@@ -40,6 +42,8 @@ class AISearchPropertiesTest {
         assertThat(aiSearchProperties.getReadTimeout()).isEqualTo(8000);
         assertThat(aiSearchProperties.getIndexBuildTimeout()).isEqualTo(25000);
         assertThat(aiSearchProperties.getMaxRetries()).isEqualTo(3);
+        assertThat(aiSearchProperties.getIndexStartupRetryAttempts()).isEqualTo(4);
+        assertThat(aiSearchProperties.getIndexStartupRetryDelay()).isEqualTo(25);
 
         // Verify circuit breaker properties
         assertThat(aiSearchProperties.getCircuitBreaker()).isNotNull();
@@ -58,6 +62,8 @@ class AISearchPropertiesTest {
         assertThat(defaultProperties.getReadTimeout()).isEqualTo(10000);
         assertThat(defaultProperties.getIndexBuildTimeout()).isEqualTo(30000);
         assertThat(defaultProperties.getMaxRetries()).isEqualTo(2);
+        assertThat(defaultProperties.getIndexStartupRetryAttempts()).isEqualTo(90);
+        assertThat(defaultProperties.getIndexStartupRetryDelay()).isEqualTo(10000);
 
         assertThat(defaultProperties.getCircuitBreaker()).isNotNull();
         assertThat(defaultProperties.getCircuitBreaker().getFailureThreshold()).isEqualTo(5);

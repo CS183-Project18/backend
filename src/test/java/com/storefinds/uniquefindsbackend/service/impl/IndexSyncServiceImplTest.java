@@ -10,6 +10,7 @@ import com.storefinds.uniquefindsbackend.entity.PostImage;
 import com.storefinds.uniquefindsbackend.entity.Store;
 import com.storefinds.uniquefindsbackend.entity.Tag;
 import com.storefinds.uniquefindsbackend.event.PostStatusChangedEvent;
+import com.storefinds.uniquefindsbackend.exception.AIServiceUnavailableException;
 import com.storefinds.uniquefindsbackend.mapper.CategoryMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostImageMapper;
 import com.storefinds.uniquefindsbackend.mapper.PostMapper;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -132,5 +134,31 @@ class IndexSyncServiceImplTest {
         service.onPostStatusChanged(new PostStatusChangedEvent(5L, "PENDING_REVIEW", "REJECTED"));
 
         verify(aiSearchClient, never()).buildIndex(org.mockito.ArgumentMatchers.anyList());
+    }
+
+    @Test
+    void applicationReadyRetriesIndexBuildAfterTemporaryFailure() throws Exception {
+        AISearchProperties properties = new AISearchProperties();
+        properties.setIndexStartupRetryAttempts(2);
+        properties.setIndexStartupRetryDelay(1);
+
+        when(postMapper.selectPublishedPosts()).thenReturn(List.of());
+        when(aiSearchClient.buildIndex(List.of()))
+                .thenThrow(new AIServiceUnavailableException(503, "not ready"))
+                .thenReturn(new BuildIndexResponse(200, new BuildIndexData(true, "ok", 0, 0, 0, 0), "success"));
+
+        IndexSyncServiceImpl service = new IndexSyncServiceImpl(
+                postMapper,
+                postImageMapper,
+                postTagMapper,
+                categoryMapper,
+                storeMapper,
+                aiSearchClient,
+                properties
+        );
+
+        service.onApplicationReady();
+
+        verify(aiSearchClient, times(2)).buildIndex(List.of());
     }
 }

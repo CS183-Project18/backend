@@ -3041,35 +3041,35 @@
         <input id="report-target-type" type="hidden" />
         <div class="report-reasons">
           <button class="report-reason" data-reason="spam" type="button">
-            <span class="reason-icon">🚫</span>
+            <span class="reason-icon">Spam</span>
             <div>
               <strong>Spam or misleading</strong>
               <small>This looks like spam, phishing, or misleading content.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="inappropriate" type="button">
-            <span class="reason-icon">🔞</span>
+            <span class="reason-icon">Wrong</span>
             <div>
               <strong>Inappropriate content</strong>
               <small>This contains nudity, violence, or other inappropriate material.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="harmful" type="button">
-            <span class="reason-icon">⚠️</span>
+            <span class="reason-icon">Safety</span>
             <div>
               <strong>Harmful or dangerous</strong>
               <small>This promotes harm, self-harm, or dangerous activities.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="copyright" type="button">
-            <span class="reason-icon">©️</span>
+            <span class="reason-icon">Copyright</span>
             <div>
               <strong>Copyright infringement</strong>
               <small>This violates copyright or intellectual property laws.</small>
             </div>
           </button>
           <button class="report-reason" data-reason="other" type="button">
-            <span class="reason-icon">📝</span>
+            <span class="reason-icon">Other</span>
             <div>
               <strong>Other</strong>
               <small>Something else is wrong with this content.</small>
@@ -4565,7 +4565,7 @@
             : "background: linear-gradient(145deg, #cdbdff, #8370ea 58%, #4a43b8);";
           const description = target.description ? `${target.description.slice(0, 120)}${target.description.length > 120 ? "..." : ""}` : "No description provided.";
 
-          // 展示理由标签
+          // Display the report reason returned by the backend.
           const reasonLabel = report.reasonType || report.reason || "-";
 
           return `

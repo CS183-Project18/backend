@@ -57,6 +57,12 @@ public class AISearchProperties {
     @Min(value = 0, message = "Max retries must be at least 0")
     private int maxRetries = 2;
 
+    @Min(value = 1, message = "Index startup retry attempts must be at least 1")
+    private int indexStartupRetryAttempts = 90;
+
+    @Min(value = 1, message = "Index startup retry delay must be at least 1ms")
+    private long indexStartupRetryDelay = 10000;
+
     /**
      * Circuit breaker configuration properties.
      */
@@ -108,6 +114,22 @@ public class AISearchProperties {
 
     public void setMaxRetries(int maxRetries) {
         this.maxRetries = maxRetries;
+    }
+
+    public int getIndexStartupRetryAttempts() {
+        return indexStartupRetryAttempts;
+    }
+
+    public void setIndexStartupRetryAttempts(int indexStartupRetryAttempts) {
+        this.indexStartupRetryAttempts = indexStartupRetryAttempts;
+    }
+
+    public long getIndexStartupRetryDelay() {
+        return indexStartupRetryDelay;
+    }
+
+    public void setIndexStartupRetryDelay(long indexStartupRetryDelay) {
+        this.indexStartupRetryDelay = indexStartupRetryDelay;
     }
 
     public CircuitBreaker getCircuitBreaker() {
