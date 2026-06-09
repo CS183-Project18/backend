@@ -3,7 +3,7 @@
 The comparison uses the repository tags below:
 
 - V1 commit: `771481e432f269a8cd17b7393a9c84faff8ada97`
-- V2 commit: `334cdc3c7fb27d3be56e86039756e4d7dbf95b93`
+- V2 reference: the published `v2` tag in the project repository
 
 ## Counting Rules
 
